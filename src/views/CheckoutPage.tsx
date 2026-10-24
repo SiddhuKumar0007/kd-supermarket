@@ -191,21 +191,21 @@ export const CheckoutPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="border-b border-gray-200 pb-3">
-        <h1 className="font-heading font-extrabold text-2xl md:text-3xl text-charcoal">
+      <div className="border-b border-gray-200 pb-2.5 sm:pb-3">
+        <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-charcoal">
           Supermarket Checkout
         </h1>
-        <p className="text-xs text-charcoal-muted mt-1">
+        <p className="text-[11px] sm:text-xs text-charcoal-muted mt-0.5 sm:mt-1">
           Review items, enter your Madhubani delivery address, and choose your payment method.
         </p>
       </div>
 
       <form onSubmit={handleSubmitOrder}>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
           {/* Left Column: Delivery Details & Payment */}
-          <div className="lg:col-span-7 space-y-6">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
             {/* 1. Contact & Customer Details */}
-            <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-200 shadow-card space-y-4">
+            <div className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-card space-y-3 sm:space-y-4">
               <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">1</span>
                 <span>Customer Contact Information</span>

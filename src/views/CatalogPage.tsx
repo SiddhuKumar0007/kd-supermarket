@@ -94,12 +94,12 @@ export const CatalogPage: React.FC = () => {
           )}
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="font-heading font-extrabold text-2xl md:text-3xl text-charcoal">
+            <h1 className="font-heading font-extrabold text-lg sm:text-2xl md:text-3xl text-charcoal">
               {selectedCategory ? selectedCategory : searchQuery ? `Search Results for "${searchQuery}"` : 'All Supermarket Groceries'}
             </h1>
-            <p className="text-xs text-charcoal-muted mt-0.5">
+            <p className="text-[11px] sm:text-xs text-charcoal-muted mt-0.5">
               Showing {filteredProducts.length} verified products available at KD Supermarket Madhubani
             </p>
           </div>
@@ -289,10 +289,10 @@ export const CatalogPage: React.FC = () => {
 
           {/* Grid or Empty State */}
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3.5">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl p-4 space-y-3 border border-gray-100 shadow-sm animate-pulse">
-                  <div className="pt-[80%] bg-gray-200 rounded-xl" />
+                <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 space-y-2 sm:space-y-3 border border-gray-100 shadow-sm animate-pulse">
+                  <div className="pt-[80%] bg-gray-200 rounded-lg sm:rounded-xl" />
                   <div className="h-3 bg-gray-200 rounded w-1/3" />
                   <div className="h-4 bg-gray-200 rounded w-3/4" />
                   <div className="h-6 bg-gray-200 rounded w-1/2" />
@@ -300,7 +300,7 @@ export const CatalogPage: React.FC = () => {
               ))}
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3.5">
               {filteredProducts.map((prod) => (
                 <ProductCard key={prod.id} product={prod} />
               ))}
