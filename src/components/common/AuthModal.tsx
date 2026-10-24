@@ -40,7 +40,7 @@ export const AuthModal: React.FC = () => {
   const [manualEmail, setManualEmail] = useState('');
   const [manualName, setManualName] = useState('');
 
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
 
   // Render Google Official Button when modal opens
   useEffect(() => {
