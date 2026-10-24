@@ -208,8 +208,25 @@ export const AuthModal: React.FC = () => {
                 )}
               </div>
 
-              {/* Benefits Checklist */}
+              {/* One-Click Quick Admin Sign-In (Direct Access for Authorized Admins) */}
               <div className="pt-2 border-t border-gray-100 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setShowManualGoogle(true)}
+                  className="w-full py-2.5 px-3 bg-forest/5 hover:bg-forest/10 border border-forest/20 text-forest rounded-2xl text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.99]"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-forest" />
+                    <span>Store Admin One-Click Login</span>
+                  </span>
+                  <span className="text-[10px] text-forest/70 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                    Siddhu / Vyapaar <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </button>
+              </div>
+
+              {/* Benefits Checklist */}
+              <div className="pt-1 border-t border-gray-100 space-y-2">
                 <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
                   <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
                   <span>No passwords to remember</span>
