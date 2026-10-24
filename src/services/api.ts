@@ -2,22 +2,33 @@ import { Product, Category, Order, StoreSettings, User, PromoCode } from '../typ
 
 const API_BASE = '/api';
 
-function decodeGoogleJwt(credential: string): { email?: string; name?: string; picture?: string; sub?: string } | null {
+function parseGoogleJwt(credential: string): { email?: string; name?: string; picture?: string; sub?: string } | null {
   try {
     const parts = credential.split('.');
     if (parts.length < 2) return null;
     const base64Url = parts[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (e) {
-    console.warn('Failed to decode Google JWT client-side', e);
-    return null;
+    const pad = base64.length % 4;
+    const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+    const binaryStr = atob(padded);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    const decoded = new TextDecoder('utf-8').decode(bytes);
+    return JSON.parse(decoded);
+  } catch (err) {
+    try {
+      const parts = credential.split('.');
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = base64.length % 4;
+      const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+      return JSON.parse(atob(padded));
+    } catch (e) {
+      console.warn('Google JWT parse error:', e);
+      return null;
+    }
   }
 }
 
@@ -353,40 +364,22 @@ export const api = {
   },
 
   async loginWithGoogle(payload: { email?: string; name?: string; avatar?: string; googleId?: string; credential?: string }): Promise<{ token: string; user: User }> {
-    // 1. Attempt serverless/backend endpoint
-    try {
-      const res = await fetch(`${API_BASE}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (res.ok) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          if (data && data.user) return data;
-        }
-      }
-    } catch (err) {
-      console.warn('Google auth API call failed, using client-side resilient decode:', err);
-    }
-
-    // 2. Client-side resilient fallback (guarantees login works on Vercel/CDN/offline)
     let email = payload.email;
     let name = payload.name;
     let avatar = payload.avatar;
 
-    if (payload.credential && !email) {
-      const decoded = decodeGoogleJwt(payload.credential);
+    // 1. Direct Google JWT Decode from official Google Identity Services
+    if (payload.credential) {
+      const decoded = parseGoogleJwt(payload.credential);
       if (decoded) {
-        email = decoded.email;
-        name = decoded.name;
-        avatar = decoded.picture;
+        if (!email && decoded.email) email = decoded.email;
+        if (!name && decoded.name) name = decoded.name;
+        if (!avatar && decoded.picture) avatar = decoded.picture;
       }
     }
 
     if (!email) {
-      throw new Error('Google email account verification failed');
+      throw new Error('Google email address could not be verified');
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -406,6 +399,16 @@ export const api = {
     };
 
     const token = `token-${user.id}-${Date.now()}`;
+
+    // Async sync to server if running on localhost dev server
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      fetch(`${API_BASE}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    }
+
     return { token, user };
   },
 
