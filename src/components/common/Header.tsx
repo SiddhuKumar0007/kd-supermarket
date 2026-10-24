@@ -105,17 +105,17 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-soft transition-all">
+    <header className="sticky top-0 z-40 bg-white shadow-soft transition-all w-full max-w-full overflow-hidden">
       {/* Top Announcement Bar */}
-      <div className="bg-forest text-white text-xs py-2 px-4 border-b border-forest-light">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2 font-medium tracking-wide">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-warmYellow text-charcoal">
-              LOCAL STORE
+      <div className="bg-forest text-white text-[11px] sm:text-xs py-1.5 px-3 sm:px-4 border-b border-forest-light overflow-hidden">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 font-medium tracking-wide truncate">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-black bg-warmYellow text-charcoal flex-shrink-0">
+              FREE DELIVERY
             </span>
-            <span>{settings.announcementText}</span>
+            <span className="truncate">{settings.announcementText}</span>
           </div>
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] text-ivory-100">
+          <div className="hidden sm:flex flex-wrap items-center gap-3 sm:gap-4 text-[11px] text-ivory-100 flex-shrink-0">
             {/* UI Theme Selector */}
             <div className="flex items-center gap-1.5 bg-black/20 hover:bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full border border-white/15 transition-colors">
               <Palette className="w-3.5 h-3.5 text-warmYellow" />
@@ -151,39 +151,39 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Main Header */}
-      <div className="max-w-7xl mx-auto px-4 py-3 md:py-4">
-        <div className="flex items-center justify-between gap-3 md:gap-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3.5">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Mobile Menu Button & Brand Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-charcoal hover:text-forest rounded-lg focus:outline-none focus:ring-2 focus:ring-forest/20"
+              className="md:hidden p-1.5 text-charcoal hover:text-forest rounded-lg focus:outline-none flex-shrink-0"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
             {/* Logo */}
             <div 
               onClick={() => setCurrentView('home')} 
-              className="flex items-center gap-2.5 cursor-pointer group select-none"
+              className="flex items-center gap-2 cursor-pointer group select-none min-w-0"
             >
-              <div className="relative w-11 h-11 md:w-12 md:h-12 rounded-xl bg-forest flex items-center justify-center shadow-md group-hover:scale-105 transition-transform duration-200">
+              <div className="relative w-8 h-8 sm:w-11 sm:h-11 md:w-12 md:h-12 rounded-lg sm:rounded-xl bg-forest flex items-center justify-center shadow-md flex-shrink-0">
                 {/* Custom Grocery Basket & Leaf Logo Icon */}
-                <svg className="w-7 h-7 text-white" viewBox="0 0 48 48" fill="none">
+                <svg className="w-5 h-5 sm:w-7 sm:h-7 text-white" viewBox="0 0 48 48" fill="none">
                   <path d="M10 20h28l-3.5 20h-21z" fill="#FFC857" />
                   <path d="M18 20v-5a6 6 0 0 1 12 0v5" stroke="#FFFFFF" strokeWidth="3.5" strokeLinecap="round" />
                   <circle cx="24" cy="30" r="3.5" fill="#176B45" />
                   <path d="M31 11c2-3 6-3 6-3s0 4-3 6" stroke="#48C269" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <div className="flex flex-col">
-                <span className="font-heading font-extrabold text-xl md:text-2xl tracking-tight text-forest flex items-center gap-1">
+              <div className="flex flex-col min-w-0">
+                <span className="font-heading font-extrabold text-sm sm:text-xl md:text-2xl tracking-tight text-forest flex items-center gap-1 truncate">
                   KD <span className="text-charcoal font-bold">SUPERMARKET</span>
                 </span>
-                <span className="text-[10px] md:text-xs font-medium text-charcoal-muted tracking-wide flex items-center gap-1">
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-fresh"></span>
-                  State Bank More, Madhubani
+                <span className="text-[9px] sm:text-xs font-medium text-charcoal-muted tracking-wide flex items-center gap-1 truncate">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-fresh flex-shrink-0"></span>
+                  <span className="truncate">State Bank More, Madhubani</span>
                 </span>
               </div>
             </div>
@@ -293,19 +293,7 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Right Header Actions */}
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* WhatsApp Store Direct Contact */}
-            <a
-              href={`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=Hello%20KD%20SUPERMARKET,%20I%20want%20to%20order%20groceries.`}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 bg-fresh/10 text-fresh-dark hover:bg-fresh/20 rounded-lg text-xs font-semibold transition-colors"
-              title="Chat with store on WhatsApp"
-            >
-              <MessageCircle className="w-4 h-4 fill-fresh text-white" />
-              <span className="hidden xl:inline">WhatsApp</span>
-            </a>
-
+          <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
             {/* Wishlist */}
             <button
               onClick={() => {
@@ -316,34 +304,34 @@ export const Header: React.FC = () => {
                   setCurrentView('account', 'wishlist');
                 }
               }}
-              className="relative p-2.5 text-charcoal hover:text-forest rounded-xl hover:bg-ivory transition-colors"
+              className="relative p-1.5 sm:p-2.5 text-charcoal hover:text-forest rounded-lg sm:rounded-xl hover:bg-ivory transition-colors flex-shrink-0"
               title="Wishlist"
               aria-label="Wishlist"
             >
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
               {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-warmYellow text-charcoal text-[10px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-warmYellow text-charcoal text-[9px] font-black rounded-full flex items-center justify-center">
                   {wishlist.length}
                 </span>
               )}
             </button>
 
-            {/* User Account Dropdown */}
-            <div ref={userMenuRef} className="relative">
+            {/* User Account / Google Sign-In */}
+            <div ref={userMenuRef} className="relative flex-shrink-0">
               {user ? (
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-ivory border border-transparent hover:border-gray-200 transition-colors text-xs font-semibold text-charcoal"
+                  className="flex items-center gap-1.5 p-1 sm:px-2.5 sm:py-1.5 rounded-lg sm:rounded-xl hover:bg-ivory border border-gray-200 transition-colors text-xs font-semibold text-charcoal"
                 >
                   {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover border border-forest/30" />
+                    <img src={user.avatar} alt={user.name} className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-forest/30 flex-shrink-0" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-forest text-white flex items-center justify-center text-xs font-bold">
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-forest text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <span className="hidden md:inline max-w-[100px] truncate">{user.name}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-charcoal-muted" />
+                  <span className="hidden md:inline max-w-[90px] truncate">{user.name}</span>
+                  <ChevronDown className="w-3 h-3 text-charcoal-muted hidden sm:inline" />
                 </button>
               ) : (
                 <button
@@ -351,7 +339,8 @@ export const Header: React.FC = () => {
                     setAuthModalMode('login');
                     setIsAuthModalOpen(true);
                   }}
-                  className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-ivory border border-gray-200 text-charcoal rounded-xl text-xs font-bold transition-all shadow-xs hover:shadow-sm"
+                  className="flex items-center gap-1.5 p-1.5 sm:px-3 sm:py-2 bg-white hover:bg-ivory border border-gray-200 text-charcoal rounded-lg sm:rounded-xl text-xs font-bold transition-all shadow-xs"
+                  title="Google Login"
                 >
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -365,19 +354,19 @@ export const Header: React.FC = () => {
 
               {/* User Dropdown Menu */}
               {userDropdownOpen && user && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-card border border-gray-100 py-2 z-50 animate-in fade-in duration-150">
-                  <div className="px-4 py-2 border-b border-gray-100">
+                <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white rounded-xl shadow-card border border-gray-100 py-2 z-50 animate-in fade-in duration-150">
+                  <div className="px-3.5 py-2 border-b border-gray-100">
                     <p className="text-xs font-bold text-charcoal truncate">{user.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <p className="text-[11px] text-charcoal-muted truncate max-w-[150px]">{user.email}</p>
+                      <p className="text-[10px] text-charcoal-muted truncate max-w-[140px]">{user.email}</p>
                       {user.provider === 'google' && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-600 border border-blue-200">
+                        <span className="px-1 py-0.2 rounded text-[8px] font-bold bg-blue-50 text-blue-600 border border-blue-200">
                           Google
                         </span>
                       )}
                     </div>
                     {isStoreAdmin(user) && (
-                      <span className="inline-block mt-1 px-2 py-0.5 rounded bg-forest/10 text-forest text-[10px] font-bold">
+                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-forest/10 text-forest text-[9px] font-bold">
                         Store Administrator
                       </span>
                     )}
@@ -387,7 +376,7 @@ export const Header: React.FC = () => {
                       setCurrentView('account', 'profile');
                       setUserDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
+                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
                   >
                     <UserIcon className="w-3.5 h-3.5 text-forest" />
                     My Profile & Addresses
@@ -397,7 +386,7 @@ export const Header: React.FC = () => {
                       setCurrentView('account', 'orders');
                       setUserDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
+                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
                   >
                     <Package className="w-3.5 h-3.5 text-forest" />
                     My Orders
@@ -407,7 +396,7 @@ export const Header: React.FC = () => {
                       setCurrentView('track-order');
                       setUserDropdownOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
+                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
                   >
                     <MapPin className="w-3.5 h-3.5 text-forest" />
                     Track My Order
@@ -419,7 +408,7 @@ export const Header: React.FC = () => {
                         setCurrentView('admin');
                         setUserDropdownOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-forest font-bold bg-forest/5 hover:bg-forest/10 flex items-center gap-2"
+                      className="w-full text-left px-3.5 py-2 text-xs text-forest font-bold bg-forest/5 hover:bg-forest/10 flex items-center gap-2"
                     >
                       <ShieldCheck className="w-3.5 h-3.5 text-forest" />
                       Admin Control Panel
@@ -432,7 +421,7 @@ export const Header: React.FC = () => {
                         logout();
                         setUserDropdownOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      className="w-full text-left px-3.5 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
                     >
                       <LogOut className="w-3.5 h-3.5" />
                       Log Out
@@ -445,18 +434,18 @@ export const Header: React.FC = () => {
             {/* Shopping Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-fresh text-white hover:bg-fresh-dark rounded-xl text-xs font-bold transition-all shadow-sm hover:scale-[1.02]"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-fresh text-white hover:bg-fresh-dark rounded-lg sm:rounded-xl text-xs font-bold transition-all shadow-xs flex-shrink-0"
               aria-label="View Shopping Basket"
             >
               <div className="relative">
                 <ShoppingCart className="w-4 h-4" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-warmYellow text-charcoal text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow">
+                  <span className="absolute -top-2 -right-2 bg-warmYellow text-charcoal text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center shadow">
                     {cartCount}
                   </span>
                 )}
               </div>
-              <span className="hidden md:inline font-semibold">
+              <span className="hidden sm:inline font-semibold">
                 {subtotal > 0 ? `₹${subtotal}` : 'Basket'}
               </span>
             </button>
@@ -464,32 +453,32 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Mobile Full-Width Search Input (md:hidden) */}
-        <div className="md:hidden mt-2.5 relative">
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+        <div className="md:hidden mt-2 relative w-full">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center w-full">
             <input
               type="text"
               placeholder="Search atta, dal, oil, ghee, biscuits, snacks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              className="w-full pl-9 pr-10 py-2.5 bg-ivory-50 border border-gray-200 rounded-full text-xs text-charcoal placeholder-charcoal-light focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/20 focus:bg-white transition-all shadow-xs"
+              className="w-full pl-8 pr-8 py-1.5 bg-ivory-50 border border-gray-200 rounded-full text-xs text-charcoal placeholder-charcoal-light focus:outline-none focus:border-forest focus:ring-1 focus:ring-forest/20 focus:bg-white transition-all shadow-xs"
             />
-            <Search className="w-4 h-4 text-charcoal-light absolute left-3 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-charcoal-light absolute left-2.5 pointer-events-none" />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-9 text-charcoal-light hover:text-charcoal p-1"
+                className="absolute right-7 text-charcoal-light hover:text-charcoal p-1"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3 h-3" />
               </button>
             )}
             <button
               type="submit"
-              className="absolute right-1.5 bg-forest hover:bg-forest-dark text-white p-1.5 rounded-full transition-colors"
+              className="absolute right-1 bg-forest hover:bg-forest-dark text-white p-1 rounded-full transition-colors"
               aria-label="Submit search"
             >
-              <Search className="w-3.5 h-3.5" />
+              <Search className="w-3 h-3" />
             </button>
           </form>
         </div>

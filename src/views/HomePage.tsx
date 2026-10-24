@@ -115,9 +115,9 @@ export const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-8 sm:space-y-12 md:space-y-16 pb-8 sm:pb-12">
+    <div className="space-y-6 sm:space-y-12 md:space-y-16 pb-8 sm:pb-12 w-full max-w-full overflow-hidden">
       {/* 1. Hero Banner */}
-      <section className="relative bg-gradient-to-br from-forest-dark via-forest to-[#074D32] text-white overflow-hidden py-8 sm:py-14 md:py-20 shadow-md">
+      <section className="relative bg-gradient-to-br from-forest-dark via-forest to-[#074D32] text-white overflow-hidden py-6 sm:py-14 md:py-20 shadow-md w-full max-w-full">
         {/* Ambient radial glows */}
         <div className="absolute top-0 right-1/4 w-72 md:w-96 h-72 md:h-96 bg-warmYellow/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-60 md:w-80 h-60 md:h-80 bg-fresh/20 rounded-full blur-3xl pointer-events-none" />
@@ -171,13 +171,13 @@ export const HomePage: React.FC = () => {
               </div>
 
               {/* Scene / Slide Category Pills */}
-              <div className="pt-1 flex flex-wrap items-center justify-center lg:justify-start gap-1.5 text-xs">
-                <span className="text-ivory-100/70 text-[10px] sm:text-[11px] font-semibold mr-1">Featured:</span>
+              <div className="pt-1 flex items-center justify-center lg:justify-start gap-1.5 text-xs overflow-x-auto no-scrollbar max-w-full pb-1 px-1">
+                <span className="text-ivory-100/70 text-[10px] sm:text-[11px] font-semibold mr-1 flex-shrink-0">Featured:</span>
                 {heroSlides.map((slide, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveSlide(idx)}
-                    className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full font-bold text-[10px] sm:text-xs transition-all ${
+                    className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full font-bold text-[10px] sm:text-xs transition-all flex-shrink-0 whitespace-nowrap ${
                       activeSlide === idx
                         ? 'bg-white text-forest shadow-xs'
                         : 'bg-white/10 text-white/90 hover:bg-white/20'

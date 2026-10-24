@@ -66,7 +66,7 @@ const MainRouter: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-ivory text-charcoal">
+    <div className="min-h-screen flex flex-col bg-ivory text-charcoal overflow-x-hidden max-w-full w-full">
       <Header />
       <main className="flex-1">
         {renderCurrentView()}
