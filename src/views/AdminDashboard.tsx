@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
-import { Product, Order, StoreSettings, Category, PromoCode } from '../types';
+import { Product, Order, StoreSettings, Category, PromoCode, isStoreAdmin } from '../types';
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout, setCurrentView, showToast } = useStore();
@@ -186,7 +186,7 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const isAuthorizedAdmin = user && (user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com');
+  const isAuthorizedAdmin = isStoreAdmin(user);
 
   useEffect(() => {
     if (isAuthorizedAdmin) {
@@ -207,7 +207,7 @@ export const AdminDashboard: React.FC = () => {
               Access Restricted
             </h1>
             <p className="text-xs text-charcoal-muted mt-2 leading-relaxed">
-              KD Supermarket Admin Dashboard is private. Only the store administrator (<span className="font-bold text-forest">siddhukumar2006@gmail.com</span>) can access this page after Google sign-in.
+              KD Supermarket Admin Dashboard is private. Only authorized store administrators (<span className="font-bold text-forest">siddhukumar2006@gmail.com</span> / <span className="font-bold text-forest">vyapaarwebs@gmail.com</span>) can access this page after Google sign-in.
             </p>
           </div>
 

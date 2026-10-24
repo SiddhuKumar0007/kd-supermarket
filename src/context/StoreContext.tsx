@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { CartItem, Product, StoreSettings, User, Address, ToastMessage } from '../types';
+import { CartItem, Product, StoreSettings, User, Address, ToastMessage, isStoreAdmin } from '../types';
 import { api } from '../services/api';
 
 interface StoreContextType {
@@ -307,7 +307,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const res = await api.login(email, password);
       setUser(res.user);
       localStorage.setItem('kd_user', JSON.stringify(res.user));
-      if (res.user.role === 'admin' || res.user.email.toLowerCase() === 'siddhukumar2006@gmail.com') {
+      if (isStoreAdmin(res.user)) {
         setCurrentView('admin');
         showToast(`Welcome Admin ${res.user.name}! Admin Control Panel opened.`, 'success');
       } else {
@@ -338,7 +338,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const res = await api.loginWithGoogle(payload);
       setUser(res.user);
       localStorage.setItem('kd_user', JSON.stringify(res.user));
-      if (res.user.role === 'admin' || res.user.email.toLowerCase() === 'siddhukumar2006@gmail.com') {
+      if (isStoreAdmin(res.user)) {
         setCurrentView('admin');
         showToast(`Welcome Admin ${res.user.name}! Admin Control Panel opened.`, 'success');
       } else {

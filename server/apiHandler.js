@@ -578,12 +578,14 @@ async function handleApiRequest(req, res, urlObj, pathname) {
   if (pathname === '/api/auth/login' && method === 'POST') {
     const { email, password } = await parseJsonBody(req);
     const normalizedEmail = (email || '').toLowerCase().trim();
-    if (normalizedEmail === 'siddhukumar2006@gmail.com' || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123')) {
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+    if (ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123')) {
+      const adminDisplayName = normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)';
       return sendJson(res, 200, {
-        token: 'admin-token-siddhu',
+        token: `admin-token-${normalizedEmail.split('@')[0]}`,
         user: {
-          id: 'admin-siddhu',
-          name: normalizedEmail === 'siddhukumar2006@gmail.com' ? 'Siddhu Kumar (Store Admin)' : 'KD Supermarket Store Admin',
+          id: `admin-${normalizedEmail.split('@')[0]}`,
+          name: adminDisplayName,
           email: normalizedEmail,
           role: 'admin',
           phone: '+91 98113 40853'
@@ -658,7 +660,8 @@ async function handleApiRequest(req, res, urlObj, pathname) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const isAdmin = normalizedEmail === 'siddhukumar2006@gmail.com';
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+    const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
 
     let user = store.users.find(u => u.email.toLowerCase() === normalizedEmail);
 
@@ -668,14 +671,15 @@ async function handleApiRequest(req, res, urlObj, pathname) {
       if (isAdmin) {
         user.role = 'admin';
         if (!user.name || user.name.includes('@')) {
-          user.name = 'Siddhu Kumar (Admin)';
+          user.name = normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)';
         }
       }
       writeStore(store);
     } else {
+      const defaultAdminName = normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)';
       user = {
-        id: isAdmin ? 'admin-siddhu' : `usr-g-${Date.now()}`,
-        name: isAdmin ? (name || 'Siddhu Kumar (Admin)') : (name || email.split('@')[0]),
+        id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-g-${Date.now()}`,
+        name: isAdmin ? (name || defaultAdminName) : (name || email.split('@')[0]),
         email: normalizedEmail,
         role: isAdmin ? 'admin' : 'customer',
         phone: '+91 98113 40853',

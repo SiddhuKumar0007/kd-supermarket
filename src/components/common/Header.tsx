@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 import { api } from '../../services/api';
-import { Product } from '../../types';
+import { Product, isStoreAdmin } from '../../types';
 
 export const Header: React.FC = () => {
   const { 
@@ -376,7 +376,7 @@ export const Header: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    {(user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+                    {isStoreAdmin(user) && (
                       <span className="inline-block mt-1 px-2 py-0.5 rounded bg-forest/10 text-forest text-[10px] font-bold">
                         Store Administrator
                       </span>
@@ -413,7 +413,7 @@ export const Header: React.FC = () => {
                     Track My Order
                   </button>
 
-                  {(user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+                  {isStoreAdmin(user) && (
                     <button
                       onClick={() => {
                         setCurrentView('admin');
@@ -496,7 +496,7 @@ export const Header: React.FC = () => {
             </div>
 
             {/* Admin Panel button - ONLY visible when authorized admin is logged in */}
-            {user && (user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+            {isStoreAdmin(user) && (
               <div className="flex items-center gap-2 text-forest text-[11px] font-bold">
                 <button
                   onClick={() => setCurrentView('admin')}
@@ -554,7 +554,7 @@ export const Header: React.FC = () => {
               </button>
             ))}
 
-            {user && (user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+            {isStoreAdmin(user) && (
               <div className="pt-3 border-t border-gray-100">
                 <button
                   onClick={() => {

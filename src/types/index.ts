@@ -111,6 +111,18 @@ export interface User {
   savedAddresses?: Address[];
 }
 
+export const ADMIN_EMAILS = [
+  'siddhukumar2006@gmail.com',
+  'vyapaarwebs@gmail.com'
+];
+
+export const isStoreAdmin = (user: User | null | undefined): boolean => {
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  if (!user.email) return false;
+  return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
+};
+
 export interface StoreSettings {
   storeName: string;
   storeTagline: string;

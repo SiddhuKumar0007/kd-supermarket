@@ -15,7 +15,7 @@ import {
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/products/ProductCard';
 import { api } from '../services/api';
-import { Order, Product, Address } from '../types';
+import { Order, Product, Address, isStoreAdmin } from '../types';
 
 export const CustomerAccountPage: React.FC = () => {
   const { 
@@ -155,7 +155,7 @@ export const CustomerAccountPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          {(user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+          {isStoreAdmin(user) && (
             <button
               onClick={() => setCurrentView('admin')}
               className="px-4 py-2 bg-white text-forest rounded-xl text-xs font-bold shadow hover:bg-ivory transition-colors flex items-center gap-1.5"

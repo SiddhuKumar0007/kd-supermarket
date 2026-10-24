@@ -272,6 +272,33 @@ export const AuthModal: React.FC = () => {
                   type="button"
                   disabled={loading}
                   onClick={() => handleAccountSelect({
+                    name: 'Vyapaar Webs',
+                    email: 'vyapaarwebs@gmail.com',
+                    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80'
+                  })}
+                  className="w-full p-2.5 rounded-xl border-2 border-forest/30 bg-forest/5 hover:bg-forest/10 flex items-center justify-between transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
+                      alt="Vyapaar Webs"
+                      className="w-7 h-7 rounded-full object-cover border border-forest"
+                    />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-bold text-charcoal">Vyapaar Webs</p>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-forest text-white">Admin Account</span>
+                      </div>
+                      <p className="text-[10px] text-charcoal-muted">vyapaarwebs@gmail.com</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-forest" />
+                </button>
+
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleAccountSelect({
                     name: 'Rajeshwar Jha',
                     email: 'rajeshwar.jha@gmail.com',
                     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80'

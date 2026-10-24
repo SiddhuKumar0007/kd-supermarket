@@ -13,6 +13,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
+import { isStoreAdmin } from '../../types';
 
 export const Footer: React.FC = () => {
   const { setCurrentView, setSelectedCategory, settings, user } = useStore();
@@ -195,7 +196,7 @@ export const Footer: React.FC = () => {
                   Contact & Store Location
                 </button>
               </li>
-              {user && (user.role === 'admin' || user.email?.toLowerCase() === 'siddhukumar2006@gmail.com') && (
+              {isStoreAdmin(user) && (
                 <li>
                   <button onClick={() => setCurrentView('admin')} className="text-fresh-light hover:underline font-semibold flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
