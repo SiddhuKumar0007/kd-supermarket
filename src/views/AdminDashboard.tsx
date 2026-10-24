@@ -39,6 +39,29 @@ import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
 import { Product, Order, StoreSettings, Category, PromoCode, isStoreAdmin } from '../types';
 
+const ALL_STORE_CATEGORIES = [
+  "Rice, Atta & Grains",
+  "Dal & Pulses",
+  "Cooking Oil & Ghee",
+  "Spices & Masalas",
+  "Salt, Sugar & Sweeteners",
+  "Biscuits & Cookies",
+  "Chips, Namkeen & Snacks",
+  "Noodles, Pasta & Instant Foods",
+  "Tea, Coffee & Drinks",
+  "Dairy & Packaged Foods",
+  "Chocolates, Sweets & Bakery",
+  "Breakfast Cereals & Jams",
+  "Pickles, Chutneys & Sauces",
+  "Dry Fruits & Seeds",
+  "Pooja Needs & Incense Sticks",
+  "Bath, Body & Personal Hygiene",
+  "Hair Care, Oral Care & Grooming",
+  "Home Cleaning Products",
+  "Kitchen Rolls, Foil & Disposables",
+  "Other General Store Products"
+];
+
 export const AdminDashboard: React.FC = () => {
   const { user, logout, setCurrentView, showToast } = useStore();
 
@@ -299,19 +322,34 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!productForm.name.trim()) {
+        showToast('Please enter a product title', 'error');
+        return;
+      }
+      const finalCategory = productForm.category || ALL_STORE_CATEGORIES[0];
+      const finalForm = {
+        ...productForm,
+        category: finalCategory,
+        image: productForm.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
+        price: Number(productForm.price) || 10,
+        mrp: Number(productForm.mrp) || Number(productForm.price) || 10,
+        stock: Number(productForm.stock) >= 0 ? Number(productForm.stock) : 50,
+      };
+
       if (editingProduct) {
-        const updated = await api.updateProduct(editingProduct.id, productForm);
+        const updated = await api.updateProduct(editingProduct.id, finalForm);
         setProducts(prev => prev.map(p => p.id === editingProduct.id ? updated : p));
-        showToast('Product updated successfully', 'success');
+        showToast('Product updated successfully! 🟢', 'success');
       } else {
-        const created = await api.addProduct(productForm);
+        const created = await api.addProduct(finalForm);
         setProducts(prev => [created, ...prev]);
-        showToast('Product added to catalogue', 'success');
+        showToast('New product added to store catalogue! 🛒', 'success');
       }
       setIsProductModalOpen(false);
       setEditingProduct(null);
-    } catch (e) {
-      showToast('Failed to save product', 'error');
+    } catch (e: any) {
+      console.error('Failed to save product', e);
+      showToast(e.message || 'Failed to save product', 'error');
     }
   };
 
@@ -992,9 +1030,9 @@ export const AdminDashboard: React.FC = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-charcoal focus:outline-none focus:border-forest"
             >
-              <option value="all">All Categories ({categories.length})</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.name}>{c.name}</option>
+              <option value="all">All Categories</option>
+              {(categories && categories.length > 0 ? categories.map(c => c.name) : ALL_STORE_CATEGORIES).map((catName) => (
+                <option key={catName} value={catName}>{catName}</option>
               ))}
             </select>
 
@@ -1796,14 +1834,15 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold mb-1">Category</label>
+                <label className="block font-bold mb-1">Category *</label>
                 <select
-                  value={productForm.category}
+                  value={productForm.category || ALL_STORE_CATEGORIES[0]}
                   onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-xl"
+                  className="w-full px-3 py-2 border rounded-xl bg-white text-charcoal font-medium focus:border-forest focus:outline-none"
+                  required
                 >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
+                  {(categories && categories.length > 0 ? categories.map(c => c.name) : ALL_STORE_CATEGORIES).map((catName) => (
+                    <option key={catName} value={catName}>{catName}</option>
                   ))}
                 </select>
               </div>
