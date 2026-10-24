@@ -1,0 +1,2048 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Rice, Atta & Grains",
+      "slug": "rice-atta-grains",
+      "icon": "Wheat",
+      "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80",
+      "description": "Premium chakki fresh atta, traditional Katarni chawal, basmati and wholesome grains",
+      "itemCount": 8
+    },
+    {
+      "id": "cat-2",
+      "name": "Dal & Pulses",
+      "slug": "dal-pulses",
+      "icon": "Utensils",
+      "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80",
+      "description": "Unpolished, nutrient-rich Toor, Moong, Masoor, Chana dal & whole pulses",
+      "itemCount": 6
+    },
+    {
+      "id": "cat-3",
+      "name": "Cooking Oil & Ghee",
+      "slug": "cooking-oil-ghee",
+      "icon": "Flame",
+      "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80",
+      "description": "Kachi Ghani mustard oil, sunflower oil, blended oils and pure desi cow ghee",
+      "itemCount": 6
+    },
+    {
+      "id": "cat-4",
+      "name": "Spices & Masalas",
+      "slug": "spices-masalas",
+      "icon": "Sparkles",
+      "image": "https://images.unsplash.com/photo-1596040033282-536f73111fdb?auto=format&fit=crop&w=600&q=80",
+      "description": "Aromatic turmeric, mirch, dhaniya powders, whole garam masalas & blended curries",
+      "itemCount": 6
+    },
+    {
+      "id": "cat-5",
+      "name": "Salt, Sugar & Sweeteners",
+      "slug": "salt-sugar-sweeteners",
+      "icon": "Coins",
+      "image": "https://images.unsplash.com/photo-1581447109200-bf2769116351?auto=format&fit=crop&w=600&q=80",
+      "description": "Iodised salt, rock salt, sulphurless refined sugar and traditional organic jaggery",
+      "itemCount": 4
+    },
+    {
+      "id": "cat-6",
+      "name": "Biscuits & Cookies",
+      "slug": "biscuits-cookies",
+      "icon": "Cookie",
+      "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=600&q=80",
+      "description": "Tea-time biscuits, butter cookies, cream wafers and healthy digestive treats",
+      "itemCount": 6
+    },
+    {
+      "id": "cat-7",
+      "name": "Chips, Namkeen & Snacks",
+      "slug": "chips-namkeen-snacks",
+      "icon": "Smile",
+      "image": "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=600&q=80",
+      "description": "Crispy potato chips, authentic Bhujia, Navrattan mixture and teatime munchies",
+      "itemCount": 6
+    },
+    {
+      "id": "cat-8",
+      "name": "Chocolates & Candies",
+      "slug": "chocolates-candies",
+      "icon": "Gift",
+      "image": "https://images.unsplash.com/photo-1549007994-cb92caebd54b?auto=format&fit=crop&w=600&q=80",
+      "description": "Silk dairy chocolates, wafer bars, sweet candies and gift packs",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-9",
+      "name": "Tea, Coffee & Drinks",
+      "slug": "tea-coffee-drinks",
+      "icon": "Coffee",
+      "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80",
+      "description": "Kadak Assam tea, green tea leaves, instant aromatic coffee & energy drinks",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-10",
+      "name": "Dairy & Packaged Foods",
+      "slug": "dairy-packaged-foods",
+      "icon": "Milk",
+      "image": "https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=600&q=80",
+      "description": "Fresh Amul paneer, butter, curd, flavoured yogurt and packaged dairy",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-11",
+      "name": "Breakfast & Cereals",
+      "slug": "breakfast-cereals",
+      "icon": "Sun",
+      "image": "https://images.unsplash.com/photo-1521483451569-e33803c0330c?auto=format&fit=crop&w=600&q=80",
+      "description": "Crispy corn flakes, rolled oats, muesli and instant breakfast mixes",
+      "itemCount": 4
+    },
+    {
+      "id": "cat-12",
+      "name": "Instant Noodles & Pasta",
+      "slug": "instant-noodles-pasta",
+      "icon": "UtensilsCrossed",
+      "image": "https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=600&q=80",
+      "description": "Maggi 2-Minute noodles, pasta shells, hakka noodles and ready meal soups",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-13",
+      "name": "Packaged Water & Juices",
+      "slug": "packaged-water-juices",
+      "icon": "Droplets",
+      "image": "https://images.unsplash.com/photo-1613478223719-2ab802602423?auto=format&fit=crop&w=600&q=80",
+      "description": "100% real fruit juices, tender coconut water and mineral packaged drinking water",
+      "itemCount": 4
+    },
+    {
+      "id": "cat-14",
+      "name": "Personal Care",
+      "slug": "personal-care",
+      "icon": "Heart",
+      "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80",
+      "description": "Toothpastes, skin lotions, face creams, deodorants and daily grooming",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-15",
+      "name": "Soaps, Shampoo & Hygiene",
+      "slug": "soaps-shampoo-hygiene",
+      "icon": "ShieldCheck",
+      "image": "https://images.unsplash.com/photo-1608248597359-242861c83321?auto=format&fit=crop&w=600&q=80",
+      "description": "Bathing bars, nourishing shampoos, hand washes and personal hygiene essentials",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-16",
+      "name": "Home Cleaning Products",
+      "slug": "home-cleaning-products",
+      "icon": "Home",
+      "image": "https://images.unsplash.com/photo-1585421514738-01798e348b17?auto=format&fit=crop&w=600&q=80",
+      "description": "Floor disinfectant cleaners, toilet cleaners, glass cleaners and fresh scents",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-17",
+      "name": "Detergents & Dishwashing",
+      "slug": "detergents-dishwashing",
+      "icon": "Sparkle",
+      "image": "https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=600&q=80",
+      "description": "Washing powders, liquid detergents, fabric conditioners & lemon dishwash bars",
+      "itemCount": 5
+    },
+    {
+      "id": "cat-18",
+      "name": "Kitchen & Household Essentials",
+      "slug": "kitchen-household-essentials",
+      "icon": "Layers",
+      "image": "https://images.unsplash.com/photo-1584992236310-6edddc08acff?auto=format&fit=crop&w=600&q=80",
+      "description": "Aluminium foils, garbage bags, scrub pads, matchboxes and pantry staples",
+      "itemCount": 4
+    },
+    {
+      "id": "cat-19",
+      "name": "Baby Care Essentials",
+      "slug": "baby-care-essentials",
+      "icon": "Baby",
+      "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=600&q=80",
+      "description": "Soft diapers, gentle baby soaps, wet wipes and baby nutritional feeds",
+      "itemCount": 4
+    },
+    {
+      "id": "cat-20",
+      "name": "Other General Store Products",
+      "slug": "other-general-store-products",
+      "icon": "Package",
+      "image": "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=600&q=80",
+      "description": "Pooja camphor, agarbatti, batteries, bulbs and local Madhubani household necessities",
+      "itemCount": 4
+    }
+  ],
+  "products": [
+    {
+      "id": "p-01",
+      "name": "Aashirvaad Shudh Chakki Atta",
+      "brand": "Aashirvaad",
+      "category": "Rice, Atta & Grains",
+      "categoryId": "cat-1",
+      "subcategory": "Atta & Flours",
+      "packSize": "5 kg",
+      "variants": [
+        {
+          "id": "v-01a",
+          "size": "5 kg",
+          "price": 235,
+          "mrp": 265,
+          "stock": 45,
+          "inStock": true
+        },
+        {
+          "id": "v-01b",
+          "size": "10 kg",
+          "price": 445,
+          "mrp": 495,
+          "stock": 28,
+          "inStock": true
+        }
+      ],
+      "price": 235,
+      "mrp": 265,
+      "discount": 11,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 142,
+      "sku": "KD-ATT-001",
+      "description": "100% pure whole wheat grain flour with zero maida. Freshly stone ground for softer rotis that stay soft longer.",
+      "details": "100% Whole Wheat Grain. Rich in dietary fibre. Ground using 40-step quality verification process.",
+      "image": "/images/products/p-01.jpg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-02",
+      "name": "Fortune Biryani Special Basmati Rice",
+      "brand": "Fortune",
+      "category": "Rice, Atta & Grains",
+      "categoryId": "cat-1",
+      "subcategory": "Basmati Rice",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-02a",
+          "size": "1 kg",
+          "price": 148,
+          "mrp": 185,
+          "stock": 35,
+          "inStock": true
+        },
+        {
+          "id": "v-02b",
+          "size": "5 kg",
+          "price": 699,
+          "mrp": 850,
+          "stock": 16,
+          "inStock": true
+        }
+      ],
+      "price": 148,
+      "mrp": 185,
+      "discount": 20,
+      "stock": 34,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 89,
+      "sku": "KD-RIC-002",
+      "description": "Extra long grain aged basmati rice that elongates up to 2.5 times after cooking. Ideal for festive biryani and pulao in Madhubani.",
+      "details": "Aged premium long grain Basmati. Non-sticky and pearl white appearance when cooked.",
+      "image": "/images/products/p-02.jpg",
+      "tags": [
+        "bestseller",
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-03",
+      "name": "Madhubani Special Katarni Chawal (Aromatic)",
+      "brand": "Local Selection",
+      "category": "Rice, Atta & Grains",
+      "categoryId": "cat-1",
+      "subcategory": "Traditional Rice",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-03a",
+          "size": "1 kg",
+          "price": 95,
+          "mrp": 110,
+          "stock": 50,
+          "inStock": true
+        },
+        {
+          "id": "v-03b",
+          "size": "5 kg",
+          "price": 450,
+          "mrp": 520,
+          "stock": 22,
+          "inStock": true
+        }
+      ],
+      "price": 95,
+      "mrp": 110,
+      "discount": 14,
+      "stock": 50,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 118,
+      "sku": "KD-RIC-003",
+      "description": "Authentic, naturally aromatic Katarni rice sourced directly from regional Bihar farmers. Sweet tasting and tender.",
+      "details": "Heritage indigenous aromatic rice. Perfect for daily meals, khichdi, and sweet kheer.",
+      "image": "/images/products/p-03.png",
+      "tags": [
+        "popular-madhubani",
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-04",
+      "name": "India Gate Feast Rozzana Basmati Rice",
+      "brand": "India Gate",
+      "category": "Rice, Atta & Grains",
+      "categoryId": "cat-1",
+      "subcategory": "Basmati Rice",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-04a",
+          "size": "1 kg",
+          "price": 98,
+          "mrp": 120,
+          "stock": 30,
+          "inStock": true
+        }
+      ],
+      "price": 98,
+      "mrp": 120,
+      "discount": 18,
+      "stock": 30,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewsCount": 64,
+      "sku": "KD-RIC-004",
+      "description": "Daily feast basmati rice with distinctive aroma and authentic grain size for hearty family lunches.",
+      "details": "Aged long grain rice packed under rigorous hygienic standards.",
+      "image": "/images/products/p-04.jpg",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-05",
+      "name": "Tata Sampann Unpolished Toor Dal",
+      "brand": "Tata Sampann",
+      "category": "Dal & Pulses",
+      "categoryId": "cat-2",
+      "subcategory": "Toor / Arhar Dal",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-05a",
+          "size": "1 kg",
+          "price": 165,
+          "mrp": 195,
+          "stock": 40,
+          "inStock": true
+        },
+        {
+          "id": "v-05b",
+          "size": "500 g",
+          "price": 85,
+          "mrp": 99,
+          "stock": 25,
+          "inStock": true
+        }
+      ],
+      "price": 165,
+      "mrp": 195,
+      "discount": 15,
+      "stock": 39,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 92,
+      "sku": "KD-DAL-001",
+      "description": "Unpolished Arhar dal retaining its natural nutrient layers and protein. Free from artificial polish and colour.",
+      "details": "Rich in plant protein and dietary fibre. Cooks evenly and produces thick, flavourful dal tadka.",
+      "image": "/images/products/p-05.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-06",
+      "name": "Tata Sampann Unpolished Moong Dal Dhuli",
+      "brand": "Tata Sampann",
+      "category": "Dal & Pulses",
+      "categoryId": "cat-2",
+      "subcategory": "Moong Dal",
+      "packSize": "500 g",
+      "variants": [
+        {
+          "id": "v-06a",
+          "size": "500 g",
+          "price": 78,
+          "mrp": 92,
+          "stock": 32,
+          "inStock": true
+        },
+        {
+          "id": "v-06b",
+          "size": "1 kg",
+          "price": 152,
+          "mrp": 180,
+          "stock": 20,
+          "inStock": true
+        }
+      ],
+      "price": 78,
+      "mrp": 92,
+      "discount": 15,
+      "stock": 32,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 45,
+      "sku": "KD-DAL-002",
+      "description": "Light on the stomach and quick to cook yellow moong dal. Excellent for khichdi and light lentil soups.",
+      "details": "Naturally wholesome, unpolished yellow split moong dal.",
+      "image": "/images/products/p-06.png",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-07",
+      "name": "Desi Chana Dal Premium",
+      "brand": "KD Choice",
+      "category": "Dal & Pulses",
+      "categoryId": "cat-2",
+      "subcategory": "Chana Dal",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-07a",
+          "size": "1 kg",
+          "price": 92,
+          "mrp": 108,
+          "stock": 45,
+          "inStock": true
+        }
+      ],
+      "price": 92,
+      "mrp": 108,
+      "discount": 15,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewsCount": 52,
+      "sku": "KD-DAL-003",
+      "description": "Handpicked premium golden Bengal gram dal. Delicious for Dal fry, Poori stuffing, and crispy snacks.",
+      "details": "High energy, zero cholesterol, freshly milled pulse.",
+      "image": "/images/products/p-07.jpg",
+      "tags": [
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-08",
+      "name": "Rajma Chitra (Himalayan Kidney Beans)",
+      "brand": "KD Choice",
+      "category": "Dal & Pulses",
+      "categoryId": "cat-2",
+      "subcategory": "Rajma & Chana",
+      "packSize": "500 g",
+      "variants": [
+        {
+          "id": "v-08a",
+          "size": "500 g",
+          "price": 88,
+          "mrp": 105,
+          "stock": 24,
+          "inStock": true
+        }
+      ],
+      "price": 88,
+      "mrp": 105,
+      "discount": 16,
+      "stock": 24,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 38,
+      "sku": "KD-DAL-004",
+      "description": "Plump speckled Chitra Rajma that softens into rich creamy gravy for restaurant-style Rajma Chawal.",
+      "details": "Finest quality kidney beans high in dietary iron and minerals.",
+      "image": "/images/products/p-08.jpeg",
+      "tags": [
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-09",
+      "name": "Fortune Kachi Ghani Pure Mustard Oil (Sarson Tel)",
+      "brand": "Fortune",
+      "category": "Cooking Oil & Ghee",
+      "categoryId": "cat-3",
+      "subcategory": "Mustard Oil",
+      "packSize": "1 Litre",
+      "variants": [
+        {
+          "id": "v-09a",
+          "size": "1 Litre",
+          "price": 142,
+          "mrp": 165,
+          "stock": 60,
+          "inStock": true
+        },
+        {
+          "id": "v-09b",
+          "size": "5 Litre",
+          "price": 685,
+          "mrp": 780,
+          "stock": 25,
+          "inStock": true
+        }
+      ],
+      "price": 142,
+      "mrp": 165,
+      "discount": 14,
+      "stock": 60,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 160,
+      "sku": "KD-OIL-001",
+      "description": "Traditional cold-pressed pungency (teekha swad) essential for Bihari tadka, pickles, and traditional fish & sabzi recipes in Madhubani.",
+      "details": "100% pure cold pressed mustard seeds with natural antioxidants.",
+      "image": "/images/products/p-09.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-10",
+      "name": "Fortune Sunlite Refined Sunflower Oil",
+      "brand": "Fortune",
+      "category": "Cooking Oil & Ghee",
+      "categoryId": "cat-3",
+      "subcategory": "Refined Oil",
+      "packSize": "1 Litre",
+      "variants": [
+        {
+          "id": "v-10a",
+          "size": "1 Litre",
+          "price": 125,
+          "mrp": 145,
+          "stock": 40,
+          "inStock": true
+        }
+      ],
+      "price": 125,
+      "mrp": 145,
+      "discount": 14,
+      "stock": 40,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewsCount": 88,
+      "sku": "KD-OIL-002",
+      "description": "Light, clear refined sunflower oil enriched with Vitamins A & D for daily healthy family frying.",
+      "details": "Low absorb technology, neutral taste, perfect for puris and frying.",
+      "image": "/images/products/p-10.jpeg",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-11",
+      "name": "Amul Pure Desi Ghee Pouch",
+      "brand": "Amul",
+      "category": "Cooking Oil & Ghee",
+      "categoryId": "cat-3",
+      "subcategory": "Ghee",
+      "packSize": "1 Litre",
+      "variants": [
+        {
+          "id": "v-11a",
+          "size": "1 Litre",
+          "price": 585,
+          "mrp": 630,
+          "stock": 35,
+          "inStock": true
+        },
+        {
+          "id": "v-11b",
+          "size": "500 ml",
+          "price": 305,
+          "mrp": 325,
+          "stock": 28,
+          "inStock": true
+        }
+      ],
+      "price": 585,
+      "mrp": 630,
+      "discount": 7,
+      "stock": 35,
+      "inStock": true,
+      "rating": 5,
+      "reviewsCount": 135,
+      "sku": "KD-GHE-001",
+      "description": "Pure milk fat clarified butter with granular texture (danedar) and rich traditional aroma.",
+      "details": "Made from fresh cream. Untouched by hand. Wholesome goodness for rotis, dal, and sweets.",
+      "image": "/images/products/p-11.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-12",
+      "name": "MDH Deggi Mirch (Red Pepper Powder)",
+      "brand": "MDH",
+      "category": "Spices & Masalas",
+      "categoryId": "cat-4",
+      "subcategory": "Ground Spices",
+      "packSize": "100 g",
+      "variants": [
+        {
+          "id": "v-12a",
+          "size": "100 g",
+          "price": 79,
+          "mrp": 90,
+          "stock": 55,
+          "inStock": true
+        }
+      ],
+      "price": 79,
+      "mrp": 90,
+      "discount": 12,
+      "stock": 55,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 77,
+      "sku": "KD-SPI-001",
+      "description": "Unique blend of colourful Indian red peppers imparting glorious natural red colour and moderate spiciness.",
+      "details": "Authentic spice blend without artificial colours.",
+      "image": "/images/products/p-12.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-13",
+      "name": "Everest Garam Masala Powder",
+      "brand": "Everest",
+      "category": "Spices & Masalas",
+      "categoryId": "cat-4",
+      "subcategory": "Blended Masalas",
+      "packSize": "100 g",
+      "variants": [
+        {
+          "id": "v-13a",
+          "size": "100 g",
+          "price": 82,
+          "mrp": 94,
+          "stock": 48,
+          "inStock": true
+        }
+      ],
+      "price": 82,
+      "mrp": 94,
+      "discount": 13,
+      "stock": 48,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 110,
+      "sku": "KD-SPI-002",
+      "description": "Royal blend of 13 roasted spices delivering fragrant warmth to veg and non-veg curries.",
+      "details": "Contains cardamom, clove, cinnamon, black pepper, and cumin.",
+      "image": "/images/products/p-13.jpg",
+      "tags": [
+        "bestseller",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-14",
+      "name": "Catch Pure Turmeric (Haldi) Powder",
+      "brand": "Catch",
+      "category": "Spices & Masalas",
+      "categoryId": "cat-4",
+      "subcategory": "Ground Spices",
+      "packSize": "200 g",
+      "variants": [
+        {
+          "id": "v-14a",
+          "size": "200 g",
+          "price": 62,
+          "mrp": 72,
+          "stock": 50,
+          "inStock": true
+        }
+      ],
+      "price": 62,
+      "mrp": 72,
+      "discount": 14,
+      "stock": 50,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewsCount": 65,
+      "sku": "KD-SPI-003",
+      "description": "Low-temperature ground turmeric high in active curcumin for rich yellow hue and immunity benefits.",
+      "details": "100% pure rhizome turmeric powder.",
+      "image": "/images/products/p-14.jpeg",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-15",
+      "name": "Tata Salt Vacuum Evaporated Iodised",
+      "brand": "Tata",
+      "category": "Salt, Sugar & Sweeteners",
+      "categoryId": "cat-5",
+      "subcategory": "Iodised Salt",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-15a",
+          "size": "1 kg",
+          "price": 27,
+          "mrp": 30,
+          "stock": 95,
+          "inStock": true
+        }
+      ],
+      "price": 27,
+      "mrp": 30,
+      "discount": 10,
+      "stock": 95,
+      "inStock": true,
+      "rating": 5,
+      "reviewsCount": 220,
+      "sku": "KD-SLT-001",
+      "description": "Desh Ka Namak. Pure vacuum evaporated salt with optimal iodine content for health and development.",
+      "details": "Free-flowing iodised white cooking salt.",
+      "image": "/images/products/p-15.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-16",
+      "name": "Madhur Pure Sulphurless Refined Sugar",
+      "brand": "Madhur",
+      "category": "Salt, Sugar & Sweeteners",
+      "categoryId": "cat-5",
+      "subcategory": "Sugar",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-16a",
+          "size": "1 kg",
+          "price": 54,
+          "mrp": 60,
+          "stock": 70,
+          "inStock": true
+        },
+        {
+          "id": "v-16b",
+          "size": "5 kg",
+          "price": 255,
+          "mrp": 290,
+          "stock": 30,
+          "inStock": true
+        }
+      ],
+      "price": 54,
+      "mrp": 60,
+      "discount": 10,
+      "stock": 70,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 88,
+      "sku": "KD-SUG-001",
+      "description": "Sparkling crystal clear sugar processed without harmful sulphur chemicals. Dissolves cleanly in tea and sweets.",
+      "details": "100% vegetarian, sulphurless refined white cane sugar.",
+      "image": "/images/products/p-16.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-17",
+      "name": "Britannia Good Day Cashew Cookies Pack",
+      "brand": "Britannia",
+      "category": "Biscuits & Cookies",
+      "categoryId": "cat-6",
+      "subcategory": "Cookies",
+      "packSize": "600 g Super Saver",
+      "variants": [
+        {
+          "id": "v-17a",
+          "size": "600 g",
+          "price": 110,
+          "mrp": 135,
+          "stock": 45,
+          "inStock": true
+        }
+      ],
+      "price": 110,
+      "mrp": 135,
+      "discount": 19,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 140,
+      "sku": "KD-BIS-001",
+      "description": "Crunchy butter cookies packed with rich cashew nut bits and the signature smile.",
+      "details": "Enriched with real cashews and butter.",
+      "image": "/images/products/p-17.png",
+      "tags": [
+        "bestseller",
+        "popular-madhubani",
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-18",
+      "name": "Parle-G Gold Glucose Biscuits",
+      "brand": "Parle",
+      "category": "Biscuits & Cookies",
+      "categoryId": "cat-6",
+      "subcategory": "Glucose Biscuits",
+      "packSize": "1 kg Family Pack",
+      "variants": [
+        {
+          "id": "v-18a",
+          "size": "1 kg",
+          "price": 115,
+          "mrp": 130,
+          "stock": 55,
+          "inStock": true
+        }
+      ],
+      "price": 115,
+      "mrp": 130,
+      "discount": 12,
+      "stock": 55,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 180,
+      "sku": "KD-BIS-002",
+      "description": "India's beloved teatime biscuit, bigger and crispier in the special Gold edition.",
+      "details": "Wheat flour, sugar, milk solids and glucose.",
+      "image": "/images/products/p-18.png",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-19",
+      "name": "Sunfeast Dark Fantasy Choco Fills",
+      "brand": "Sunfeast",
+      "category": "Biscuits & Cookies",
+      "categoryId": "cat-6",
+      "subcategory": "Cream & Choco Cookies",
+      "packSize": "300 g",
+      "variants": [
+        {
+          "id": "v-19a",
+          "size": "300 g",
+          "price": 129,
+          "mrp": 160,
+          "stock": 32,
+          "inStock": true
+        }
+      ],
+      "price": 129,
+      "mrp": 160,
+      "discount": 19,
+      "stock": 32,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 95,
+      "sku": "KD-BIS-003",
+      "description": "Rich dark cocoa crust filled with molten, luxurious chocolate centre that melts upon heating.",
+      "details": "Premium molten choco filling biscuit cookies.",
+      "image": "/images/products/p-19.jpg",
+      "tags": [
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-20",
+      "name": "Haldiram's Nagpur Bhujia Sev",
+      "brand": "Haldiram's",
+      "category": "Chips, Namkeen & Snacks",
+      "categoryId": "cat-7",
+      "subcategory": "Namkeen",
+      "packSize": "400 g",
+      "variants": [
+        {
+          "id": "v-20a",
+          "size": "400 g",
+          "price": 115,
+          "mrp": 130,
+          "stock": 40,
+          "inStock": true
+        }
+      ],
+      "price": 115,
+      "mrp": 130,
+      "discount": 12,
+      "stock": 40,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 165,
+      "sku": "KD-SNK-001",
+      "description": "Crispy, spicy moth bean and besan sev seasoned with pure Indian spices. Perfect with afternoon tea.",
+      "details": "Traditional Rajasthani style spicy crispy sev.",
+      "image": "/images/products/p-20.png",
+      "tags": [
+        "bestseller",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-21",
+      "name": "Lay's India's Magic Masala Potato Chips",
+      "brand": "Lay's",
+      "category": "Chips, Namkeen & Snacks",
+      "categoryId": "cat-7",
+      "subcategory": "Potato Chips",
+      "packSize": "73 g Party Pack",
+      "variants": [
+        {
+          "id": "v-21a",
+          "size": "73 g",
+          "price": 30,
+          "mrp": 30,
+          "stock": 65,
+          "inStock": true
+        }
+      ],
+      "price": 30,
+      "mrp": 30,
+      "discount": 0,
+      "stock": 65,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewsCount": 120,
+      "sku": "KD-SNK-002",
+      "description": "Thin cut crunchy potatoes seasoned with signature Indian spices and tangy heat.",
+      "details": "100% high quality potato chips.",
+      "image": "/images/products/p-21.jpg",
+      "tags": [
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-22",
+      "name": "Cadbury Dairy Milk Silk Chocolate Bar",
+      "brand": "Cadbury",
+      "category": "Chocolates & Candies",
+      "categoryId": "cat-8",
+      "subcategory": "Milk Chocolates",
+      "packSize": "60 g",
+      "variants": [
+        {
+          "id": "v-22a",
+          "size": "60 g",
+          "price": 78,
+          "mrp": 85,
+          "stock": 50,
+          "inStock": true
+        },
+        {
+          "id": "v-22b",
+          "size": "150 g",
+          "price": 175,
+          "mrp": 190,
+          "stock": 25,
+          "inStock": true
+        }
+      ],
+      "price": 78,
+      "mrp": 85,
+      "discount": 8,
+      "stock": 50,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 155,
+      "sku": "KD-CHO-001",
+      "description": "Creamier, smoother, velvet chocolate experience that glides on your tongue.",
+      "details": "Made with a glass and a half of fresh milk in every bar.",
+      "image": "/images/products/p-22.jpg",
+      "tags": [
+        "bestseller",
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-23",
+      "name": "Nestle KitKat 4-Finger Share Pack",
+      "brand": "Nestle",
+      "category": "Chocolates & Candies",
+      "categoryId": "cat-8",
+      "subcategory": "Wafer Chocolates",
+      "packSize": "Pack of 3",
+      "variants": [
+        {
+          "id": "v-23a",
+          "size": "Pack of 3",
+          "price": 80,
+          "mrp": 90,
+          "stock": 35,
+          "inStock": true
+        }
+      ],
+      "price": 80,
+      "mrp": 90,
+      "discount": 11,
+      "stock": 35,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 80,
+      "sku": "KD-CHO-002",
+      "description": "Crispy baked wafer fingers coated in creamy milk chocolate. Have a break, have a KitKat.",
+      "details": "Crisp wafer fingers with smooth chocolate layer.",
+      "image": "/images/products/p-23.jpg",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-24",
+      "name": "Tata Tea Premium (Desh Ki Chai)",
+      "brand": "Tata Tea",
+      "category": "Tea, Coffee & Drinks",
+      "categoryId": "cat-9",
+      "subcategory": "Tea",
+      "packSize": "500 g",
+      "variants": [
+        {
+          "id": "v-24a",
+          "size": "500 g",
+          "price": 220,
+          "mrp": 260,
+          "stock": 45,
+          "inStock": true
+        },
+        {
+          "id": "v-24b",
+          "size": "1 kg",
+          "price": 425,
+          "mrp": 495,
+          "stock": 30,
+          "inStock": true
+        }
+      ],
+      "price": 220,
+      "mrp": 260,
+      "discount": 15,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 195,
+      "sku": "KD-TEA-001",
+      "description": "Expert blend of big tea leaves for aroma and small tea grains for strong kadak taste. Essential morning chai in Bihar.",
+      "details": "100% fine Assam CTC black tea blend.",
+      "image": "/images/products/p-24.png",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-25",
+      "name": "Nescafe Classic 100% Pure Instant Coffee",
+      "brand": "Nescafe",
+      "category": "Tea, Coffee & Drinks",
+      "categoryId": "cat-9",
+      "subcategory": "Instant Coffee",
+      "packSize": "50 g Glass Jar",
+      "variants": [
+        {
+          "id": "v-25a",
+          "size": "50 g",
+          "price": 175,
+          "mrp": 195,
+          "stock": 35,
+          "inStock": true
+        }
+      ],
+      "price": 175,
+      "mrp": 195,
+      "discount": 10,
+      "stock": 35,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 88,
+      "sku": "KD-COF-001",
+      "description": "Rich and dark roasted Robusta coffee beans roasted to perfection for an invigorating aroma and smooth froth.",
+      "details": "100% pure instant coffee granules.",
+      "image": "/images/products/p-25.png",
+      "tags": [
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-26",
+      "name": "Amul Pasteurised Butter",
+      "brand": "Amul",
+      "category": "Dairy & Packaged Foods",
+      "categoryId": "cat-10",
+      "subcategory": "Butter",
+      "packSize": "500 g",
+      "variants": [
+        {
+          "id": "v-26a",
+          "size": "500 g",
+          "price": 275,
+          "mrp": 290,
+          "stock": 40,
+          "inStock": true
+        },
+        {
+          "id": "v-26b",
+          "size": "100 g",
+          "price": 58,
+          "mrp": 60,
+          "stock": 60,
+          "inStock": true
+        }
+      ],
+      "price": 275,
+      "mrp": 290,
+      "discount": 5,
+      "stock": 40,
+      "inStock": true,
+      "rating": 5,
+      "reviewsCount": 210,
+      "sku": "KD-DAI-001",
+      "description": "Utterly Butterly Delicious fresh cream butter with a pinch of salt. Great on toast, parathas, and pav bhaji.",
+      "details": "Pasteurised table butter made from wholesome cow and buffalo milk.",
+      "image": "/images/products/p-26.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-27",
+      "name": "Amul Fresh Malai Paneer Block",
+      "brand": "Amul",
+      "category": "Dairy & Packaged Foods",
+      "categoryId": "cat-10",
+      "subcategory": "Paneer",
+      "packSize": "200 g",
+      "variants": [
+        {
+          "id": "v-27a",
+          "size": "200 g",
+          "price": 92,
+          "mrp": 98,
+          "stock": 35,
+          "inStock": true
+        }
+      ],
+      "price": 92,
+      "mrp": 98,
+      "discount": 6,
+      "stock": 35,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 94,
+      "sku": "KD-DAI-002",
+      "description": "Soft, spongy fresh cottage cheese cubes ready for Shahi Paneer, Matar Paneer, and curries.",
+      "details": "High milk protein, pasteurised rich malai paneer.",
+      "image": "/images/products/p-27.png",
+      "tags": [
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-28",
+      "name": "Kellogg's Real Almond & Honey Corn Flakes",
+      "brand": "Kellogg's",
+      "category": "Breakfast & Cereals",
+      "categoryId": "cat-11",
+      "subcategory": "Cereals",
+      "packSize": "475 g",
+      "variants": [
+        {
+          "id": "v-28a",
+          "size": "475 g",
+          "price": 235,
+          "mrp": 275,
+          "stock": 25,
+          "inStock": true
+        }
+      ],
+      "price": 235,
+      "mrp": 275,
+      "discount": 15,
+      "stock": 25,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 65,
+      "sku": "KD-BRK-001",
+      "description": "Golden crispy sun-ripened corn flakes toasted with real Californian almond slices and natural honey.",
+      "details": "Fortified with Iron and essential B-group vitamins.",
+      "image": "/images/products/p-28.png",
+      "tags": [
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-29",
+      "name": "Maggi 2-Minute Masala Instant Noodles",
+      "brand": "Nestle Maggi",
+      "category": "Instant Noodles & Pasta",
+      "categoryId": "cat-12",
+      "subcategory": "Instant Noodles",
+      "packSize": "Pack of 6 (420 g)",
+      "variants": [
+        {
+          "id": "v-29a",
+          "size": "Pack of 6",
+          "price": 84,
+          "mrp": 96,
+          "stock": 75,
+          "inStock": true
+        },
+        {
+          "id": "v-29b",
+          "size": "Pack of 12",
+          "price": 165,
+          "mrp": 190,
+          "stock": 40,
+          "inStock": true
+        }
+      ],
+      "price": 84,
+      "mrp": 96,
+      "discount": 13,
+      "stock": 75,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 260,
+      "sku": "KD-NOD-001",
+      "description": "India's favourite masala instant noodles with the beloved signature spice tastemaker. Cooked in just 2 minutes.",
+      "details": "Fortified with Iron. Made with 10 roasted spices.",
+      "image": "/images/products/p-29.jpg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-30",
+      "name": "Real Fruit Power Mixed Fruit Juice",
+      "brand": "Real",
+      "category": "Packaged Water & Juices",
+      "categoryId": "cat-13",
+      "subcategory": "Fruit Juices",
+      "packSize": "1 Litre",
+      "variants": [
+        {
+          "id": "v-30a",
+          "size": "1 Litre",
+          "price": 110,
+          "mrp": 130,
+          "stock": 45,
+          "inStock": true
+        }
+      ],
+      "price": 110,
+      "mrp": 130,
+      "discount": 15,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 88,
+      "sku": "KD-JUC-001",
+      "description": "Rich blend of 9 natural fruits including mango, apple, guava, and orange packed with Vitamin C.",
+      "details": "No added preservatives. 100% goodness of natural mixed fruits.",
+      "image": "/images/products/p-30.png",
+      "tags": [
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-31",
+      "name": "Colgate Strong Teeth Dental Cream",
+      "brand": "Colgate",
+      "category": "Personal Care",
+      "categoryId": "cat-14",
+      "subcategory": "Oral Care",
+      "packSize": "200 g Saver Pack",
+      "variants": [
+        {
+          "id": "v-31a",
+          "size": "200 g",
+          "price": 115,
+          "mrp": 135,
+          "stock": 50,
+          "inStock": true
+        }
+      ],
+      "price": 115,
+      "mrp": 135,
+      "discount": 15,
+      "stock": 50,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 140,
+      "sku": "KD-PER-001",
+      "description": "With Amino Shakti formula that adds natural calcium to teeth making them 2x stronger against cavities.",
+      "details": "I.D.A. accepted calcium protection toothpaste.",
+      "image": "/images/products/p-31.jpg",
+      "tags": [
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-32",
+      "name": "Dettol Original Germ Protection Bathing Bar",
+      "brand": "Dettol",
+      "category": "Soaps, Shampoo & Hygiene",
+      "categoryId": "cat-15",
+      "subcategory": "Soaps",
+      "packSize": "125 g (Pack of 4)",
+      "variants": [
+        {
+          "id": "v-32a",
+          "size": "Pack of 4",
+          "price": 195,
+          "mrp": 235,
+          "stock": 45,
+          "inStock": true
+        }
+      ],
+      "price": 195,
+      "mrp": 235,
+      "discount": 17,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 175,
+      "sku": "KD-SOP-001",
+      "description": "Trusted 99.9% germ protection soap with signature pine fragrance and moisturizing glycerin.",
+      "details": "Dermatologically tested antibacterial family soap.",
+      "image": "/images/products/p-32.jpg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-33",
+      "name": "Dove Daily Shine Nourishing Shampoo",
+      "brand": "Dove",
+      "category": "Soaps, Shampoo & Hygiene",
+      "categoryId": "cat-15",
+      "subcategory": "Shampoo",
+      "packSize": "340 ml Bottle",
+      "variants": [
+        {
+          "id": "v-33a",
+          "size": "340 ml",
+          "price": 290,
+          "mrp": 345,
+          "stock": 30,
+          "inStock": true
+        }
+      ],
+      "price": 290,
+      "mrp": 345,
+      "discount": 16,
+      "stock": 30,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 105,
+      "sku": "KD-SOP-002",
+      "description": "Infused with Nutritive Serum that seals cuticles and protects hair from daily wear and tear.",
+      "details": "Leaves hair looking shiny, healthy and smooth from first wash.",
+      "image": "/images/products/p-33.jpg",
+      "tags": [
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-34",
+      "name": "Lizol Citrus Surface Disinfectant Cleaner",
+      "brand": "Lizol",
+      "category": "Home Cleaning Products",
+      "categoryId": "cat-16",
+      "subcategory": "Floor Cleaners",
+      "packSize": "1 Litre",
+      "variants": [
+        {
+          "id": "v-34a",
+          "size": "1 Litre",
+          "price": 185,
+          "mrp": 215,
+          "stock": 40,
+          "inStock": true
+        }
+      ],
+      "price": 185,
+      "mrp": 215,
+      "discount": 14,
+      "stock": 40,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 130,
+      "sku": "KD-CLN-001",
+      "description": "Kills 99.9% germs, removes tough floor stains, and leaves a refreshing citrus lime aroma throughout your home.",
+      "details": "Safe on tiles, marble, granite, and mosaic floors.",
+      "image": "/images/products/p-34.jpg",
+      "tags": [
+        "bestseller",
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-35",
+      "name": "Surf Excel Easy Wash Detergent Powder",
+      "brand": "Surf Excel",
+      "category": "Detergents & Dishwashing",
+      "categoryId": "cat-17",
+      "subcategory": "Washing Powder",
+      "packSize": "1 kg",
+      "variants": [
+        {
+          "id": "v-35a",
+          "size": "1 kg",
+          "price": 135,
+          "mrp": 155,
+          "stock": 55,
+          "inStock": true
+        },
+        {
+          "id": "v-35b",
+          "size": "3 kg",
+          "price": 380,
+          "mrp": 440,
+          "stock": 25,
+          "inStock": true
+        }
+      ],
+      "price": 135,
+      "mrp": 155,
+      "discount": 13,
+      "stock": 55,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 185,
+      "sku": "KD-DET-001",
+      "description": "Superfine powder engineered with stain-removing power of 10 hands. Removes tough grease and oil easily.",
+      "details": "Dissolves quickly in hard water and gentle on clothes.",
+      "image": "/images/products/p-35.jpeg",
+      "tags": [
+        "bestseller",
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-36",
+      "name": "Vim Lemon Dishwash Bar Saver Pack",
+      "brand": "Vim",
+      "category": "Detergents & Dishwashing",
+      "categoryId": "cat-17",
+      "subcategory": "Dishwash Bars",
+      "packSize": "300 g (Pack of 3)",
+      "variants": [
+        {
+          "id": "v-36a",
+          "size": "Pack of 3",
+          "price": 65,
+          "mrp": 75,
+          "stock": 65,
+          "inStock": true
+        }
+      ],
+      "price": 65,
+      "mrp": 75,
+      "discount": 13,
+      "stock": 65,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 140,
+      "sku": "KD-DET-002",
+      "description": "Powered by 100 lemon concentrates to remove burned oil, ghee, and grease from steel, brass, and non-stick vessels.",
+      "details": "Tough on grease, gentle on hands with waterproof tub packing.",
+      "image": "/images/products/p-36.jpeg",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-37",
+      "name": "Scotch-Brite Heavy Duty Scrub Sponge Pad",
+      "brand": "Scotch-Brite",
+      "category": "Kitchen & Household Essentials",
+      "categoryId": "cat-18",
+      "subcategory": "Kitchen Tools",
+      "packSize": "Pack of 3",
+      "variants": [
+        {
+          "id": "v-37a",
+          "size": "Pack of 3",
+          "price": 85,
+          "mrp": 100,
+          "stock": 40,
+          "inStock": true
+        }
+      ],
+      "price": 85,
+      "mrp": 100,
+      "discount": 15,
+      "stock": 40,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewsCount": 78,
+      "sku": "KD-KIT-001",
+      "description": "Dual action scrub sponge with stain cutters on one side and absorbent cellulose sponge on the other.",
+      "details": "Durable and hygienic kitchen cleaning essential.",
+      "image": "/images/products/p-37.png",
+      "tags": [
+        "daily-essentials"
+      ]
+    },
+    {
+      "id": "p-38",
+      "name": "Pampers All Round Protection Baby Diaper Pants",
+      "brand": "Pampers",
+      "category": "Baby Care Essentials",
+      "categoryId": "cat-19",
+      "subcategory": "Diapers",
+      "packSize": "Medium (M) - 48 Count",
+      "variants": [
+        {
+          "id": "v-38a",
+          "size": "Medium (M) 48 count",
+          "price": 680,
+          "mrp": 799,
+          "stock": 25,
+          "inStock": true
+        },
+        {
+          "id": "v-38b",
+          "size": "Large (L) 44 count",
+          "price": 699,
+          "mrp": 825,
+          "stock": 20,
+          "inStock": true
+        }
+      ],
+      "price": 680,
+      "mrp": 799,
+      "discount": 15,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 110,
+      "sku": "KD-BAB-001",
+      "description": "Magic gel technology locks wetness for up to 12 hours with ultra-soft breathable waistbands.",
+      "details": "Enriched with aloe vera lotion to prevent diaper rash.",
+      "image": "/images/products/p-38.jpeg",
+      "tags": [
+        "popular-madhubani",
+        "special-offers"
+      ]
+    },
+    {
+      "id": "p-39",
+      "name": "Mangaldeep Pure Bhimseni Camphor (Kapoor)",
+      "brand": "Mangaldeep",
+      "category": "Other General Store Products",
+      "categoryId": "cat-20",
+      "subcategory": "Pooja Samagri",
+      "packSize": "100 g",
+      "variants": [
+        {
+          "id": "v-39a",
+          "size": "100 g",
+          "price": 110,
+          "mrp": 130,
+          "stock": 45,
+          "inStock": true
+        }
+      ],
+      "price": 110,
+      "mrp": 130,
+      "discount": 15,
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 75,
+      "sku": "KD-GEN-001",
+      "description": "100% pure organic flakes camphor. Burns completely with zero ash and divine fragrant aroma for morning aarti.",
+      "details": "Pure natural camphor for religious puja and air purification.",
+      "image": "/images/products/p-39.jpg",
+      "tags": [
+        "bestseller",
+        "popular-madhubani"
+      ]
+    },
+    {
+      "id": "p-40",
+      "name": "Cycle Pure Agarbathies (Fragrance Pack)",
+      "brand": "Cycle Pure",
+      "category": "Other General Store Products",
+      "categoryId": "cat-20",
+      "subcategory": "Incense Sticks",
+      "packSize": "Pack of 3 Boxes",
+      "variants": [
+        {
+          "id": "v-40a",
+          "size": "Pack of 3",
+          "price": 95,
+          "mrp": 115,
+          "stock": 50,
+          "inStock": true
+        }
+      ],
+      "price": 95,
+      "mrp": 115,
+      "discount": 17,
+      "stock": 50,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewsCount": 95,
+      "sku": "KD-GEN-002",
+      "description": "Handcrafted traditional floral and sandal fragrance incense sticks delivering soothing aroma.",
+      "details": "Eco-friendly, carbon-reduced sticks.",
+      "image": "/images/products/p-40.jpeg",
+      "tags": [
+        "daily-essentials",
+        "popular-madhubani"
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "KD-847211-6973",
+      "customerName": "Siddhu Kumar",
+      "customerPhone": "+91 ",
+      "customerEmail": "siddhujha2006@gmail.com",
+      "address": {
+        "fullName": "Siddhu Kumar",
+        "phone": "+91 ",
+        "street": " hj",
+        "locality": "State Bank More",
+        "city": "Madhubani",
+        "state": "Bihar",
+        "pinCode": "847211",
+        "landmark": "Near State Bank More"
+      },
+      "items": [
+        {
+          "productId": "p-02",
+          "name": "Fortune Biryani Special Basmati Rice",
+          "packSize": "1 kg",
+          "price": 148,
+          "quantity": 1,
+          "image": "/images/products/p-02.jpg"
+        },
+        {
+          "productId": "p-05",
+          "name": "Tata Sampann Unpolished Toor Dal",
+          "packSize": "1 kg",
+          "price": 165,
+          "quantity": 1,
+          "image": "/images/products/p-05.jpeg"
+        }
+      ],
+      "subtotal": 313,
+      "deliveryFee": 30,
+      "discountAmount": 0,
+      "total": 343,
+      "paymentMethod": "Cash on Delivery",
+      "paymentStatus": "PAID",
+      "orderStatus": "Delivered",
+      "deliverySlot": "Today: 4:00 PM – 8:00 PM (Evening)",
+      "instructions": "",
+      "createdAt": "2026-10-24T18:30:26.442Z",
+      "statusHistory": [
+        {
+          "status": "Order Placed",
+          "timestamp": "2026-10-24T18:30:26.442Z",
+          "note": "Order placed successfully via Cash on Delivery"
+        },
+        {
+          "status": "Ready for Dispatch",
+          "timestamp": "2026-10-24T18:31:23.230Z",
+          "note": "Status updated to Ready for Dispatch by store admin"
+        },
+        {
+          "status": "Out for Delivery",
+          "timestamp": "2026-10-24T18:31:36.512Z",
+          "note": "Status updated to Out for Delivery by store admin"
+        },
+        {
+          "status": "Delivered",
+          "timestamp": "2026-10-24T18:31:39.970Z",
+          "note": "Status updated to Delivered by store admin"
+        }
+      ]
+    },
+    {
+      "id": "KD-847211-1021",
+      "customerName": "Rameshwar Prasad Jha",
+      "customerPhone": "+91 98350 21980",
+      "customerEmail": "rameshwar.jha@example.com",
+      "address": {
+        "fullName": "Rameshwar Prasad Jha",
+        "phone": "+91 98350 21980",
+        "street": "Near Watson High School, Opposite Durga Mandir",
+        "locality": "Tirhut Colony",
+        "city": "Madhubani",
+        "state": "Bihar",
+        "pinCode": "847211",
+        "landmark": "Durga Mandir Road"
+      },
+      "items": [
+        {
+          "productId": "p-01",
+          "name": "Aashirvaad Shudh Chakki Atta",
+          "packSize": "5 kg",
+          "price": 235,
+          "quantity": 1,
+          "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "productId": "p-09",
+          "name": "Fortune Kachi Ghani Pure Mustard Oil (Sarson Tel)",
+          "packSize": "1 Litre",
+          "price": 142,
+          "quantity": 2,
+          "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "productId": "p-15",
+          "name": "Tata Salt Vacuum Evaporated Iodised",
+          "packSize": "1 kg",
+          "price": 27,
+          "quantity": 2,
+          "image": "https://images.unsplash.com/photo-1581447109200-bf2769116351?auto=format&fit=crop&w=600&q=80"
+        }
+      ],
+      "subtotal": 573,
+      "deliveryFee": 0,
+      "discountAmount": 0,
+      "total": 573,
+      "paymentMethod": "UPI",
+      "paymentStatus": "PAID",
+      "orderStatus": "Out for Delivery",
+      "deliverySlot": "Today: 4:00 PM - 8:00 PM",
+      "instructions": "Please ring bell and leave with security or call on arrival",
+      "createdAt": "2026-10-09T14:30:00.000Z",
+      "statusHistory": [
+        {
+          "status": "Order Placed",
+          "timestamp": "2026-10-09T14:30:00.000Z",
+          "note": "Order placed online via UPI"
+        },
+        {
+          "status": "Order Confirmed",
+          "timestamp": "2026-10-09T14:45:00.000Z",
+          "note": "Order confirmed by KD Supermarket staff"
+        },
+        {
+          "status": "Preparing Your Order",
+          "timestamp": "2026-10-09T15:15:00.000Z",
+          "note": "Items packed from supermarket shelves"
+        },
+        {
+          "status": "Ready for Dispatch",
+          "timestamp": "2026-10-09T15:45:00.000Z",
+          "note": "Bags verified and ready at dispatch desk"
+        },
+        {
+          "status": "Out for Delivery",
+          "timestamp": "2026-10-09T16:20:00.000Z",
+          "note": "Assigned to store delivery associate for Tirhut Colony area"
+        }
+      ]
+    },
+    {
+      "id": "KD-847211-1022",
+      "customerName": "Sunita Devi",
+      "customerPhone": "+91 94312 88712",
+      "customerEmail": "sunita.madhubani@example.com",
+      "address": {
+        "fullName": "Sunita Devi",
+        "phone": "+91 94312 88712",
+        "street": "House 24, Babu Saheb Colony",
+        "locality": "Babu Saheb Colony",
+        "city": "Madhubani",
+        "state": "Bihar",
+        "pinCode": "847211",
+        "landmark": "Near State Bank More"
+      },
+      "items": [
+        {
+          "productId": "p-03",
+          "name": "Madhubani Special Katarni Chawal (Aromatic)",
+          "packSize": "1 kg",
+          "price": 95,
+          "quantity": 2,
+          "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "productId": "p-05",
+          "name": "Tata Sampann Unpolished Toor Dal",
+          "packSize": "1 kg",
+          "price": 165,
+          "quantity": 1,
+          "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "productId": "p-11",
+          "name": "Amul Pure Desi Ghee Pouch",
+          "packSize": "500 ml",
+          "price": 305,
+          "quantity": 1,
+          "image": "https://images.unsplash.com/photo-1589367920969-ab8e050bbb04?auto=format&fit=crop&w=600&q=80"
+        }
+      ],
+      "subtotal": 660,
+      "deliveryFee": 0,
+      "discountAmount": 0,
+      "total": 660,
+      "paymentMethod": "Cash on Delivery",
+      "paymentStatus": "PAID",
+      "orderStatus": "Delivered",
+      "deliverySlot": "Today: 6:00 PM - 9:00 PM",
+      "instructions": "Call on arrival at colony gate",
+      "createdAt": "2026-10-09T16:10:00.000Z",
+      "statusHistory": [
+        {
+          "status": "Order Placed",
+          "timestamp": "2026-10-09T16:10:00.000Z",
+          "note": "Order placed for COD delivery"
+        },
+        {
+          "status": "Order Confirmed",
+          "timestamp": "2026-10-09T16:25:00.000Z",
+          "note": "Store confirmed COD booking"
+        },
+        {
+          "status": "Preparing Your Order",
+          "timestamp": "2026-10-09T16:50:00.000Z",
+          "note": "Picking fresh stock"
+        },
+        {
+          "status": "Delivered",
+          "timestamp": "2026-10-24T18:31:30.026Z",
+          "note": "Status updated to Delivered by store admin"
+        }
+      ]
+    },
+    {
+      "id": "KD-847211-1020",
+      "customerName": "Amit Kumar Mishra",
+      "customerPhone": "+91 97714 55190",
+      "customerEmail": "amit.mishra@example.com",
+      "address": {
+        "fullName": "Amit Kumar Mishra",
+        "phone": "+91 97714 55190",
+        "street": "Suratganj Chowk, Flat 3B",
+        "locality": "Suratganj",
+        "city": "Madhubani",
+        "state": "Bihar",
+        "pinCode": "847211",
+        "landmark": "Near Central Bank ATM"
+      },
+      "items": [
+        {
+          "productId": "p-24",
+          "name": "Tata Tea Premium (Desh Ki Chai)",
+          "packSize": "500 g",
+          "price": 220,
+          "quantity": 1,
+          "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80"
+        },
+        {
+          "productId": "p-17",
+          "name": "Britannia Good Day Cashew Cookies Pack",
+          "packSize": "600 g Super Saver",
+          "price": 110,
+          "quantity": 2,
+          "image": "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=600&q=80"
+        }
+      ],
+      "subtotal": 440,
+      "deliveryFee": 30,
+      "discountAmount": 0,
+      "total": 470,
+      "paymentMethod": "UPI",
+      "paymentStatus": "PAID",
+      "orderStatus": "Delivered",
+      "deliverySlot": "Morning 8:00 AM - 11:00 AM",
+      "instructions": "Hand over to family",
+      "createdAt": "2026-10-08T09:15:00.000Z",
+      "statusHistory": [
+        {
+          "status": "Order Placed",
+          "timestamp": "2026-10-08T09:15:00.000Z",
+          "note": "Order placed"
+        },
+        {
+          "status": "Order Confirmed",
+          "timestamp": "2026-10-08T09:30:00.000Z",
+          "note": "Order accepted"
+        },
+        {
+          "status": "Preparing Your Order",
+          "timestamp": "2026-10-08T09:50:00.000Z",
+          "note": "Packed"
+        },
+        {
+          "status": "Ready for Dispatch",
+          "timestamp": "2026-10-08T10:10:00.000Z",
+          "note": "Dispatched"
+        },
+        {
+          "status": "Out for Delivery",
+          "timestamp": "2026-10-08T10:25:00.000Z",
+          "note": "Delivery agent on the way"
+        },
+        {
+          "status": "Delivered",
+          "timestamp": "2026-10-08T10:55:00.000Z",
+          "note": "Successfully delivered to customer"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "storeName": "KD SUPERMARKET",
+    "storeTagline": "Your Everyday Essentials, Delivered with Ease!",
+    "storeType": "General Store / Supermarket / Grocery",
+    "address": "STATE BANK MORE, Watson High School, Tirhut Colony, Madhubani, Bihar 847211",
+    "whatsappNumber": "+91 98113 40853",
+    "whatsappRaw": "919811340853",
+    "googleRating": 4.8,
+    "googleReviewsCount": 31,
+    "googleMapsUrl": "https://maps.google.com/?q=STATE+BANK+MORE+Watson+High+School+Tirhut+Colony+Madhubani+Bihar+847211",
+    "storeTimings": "Open 7 Days a week: 7:30 AM – 9:30 PM",
+    "minOrderValue": 199,
+    "deliveryFee": 30,
+    "freeDeliveryThreshold": 499,
+    "deliveryAreas": [
+      "Tirhut Colony",
+      "State Bank More",
+      "Watson High School Road",
+      "Babu Saheb Colony",
+      "Suratganj",
+      "Station Road",
+      "Ganga Sagar",
+      "Collectorate Area",
+      "Madhubani Town (All Localities within 847211)"
+    ],
+    "announcementText": "🎉 Free Home Delivery on orders above ₹499 in Madhubani Town! Call/WhatsApp: +91 98113 40853",
+    "razorpayKeyId": "rzp_test_KDSupermarket847211",
+    "isRazorpayTestMode": true,
+    "codEnabled": true,
+    "whatsappOrderingEnabled": true
+  },
+  "users": [
+    {
+      "id": "usr-admin",
+      "name": "KD Supermarket Manager",
+      "email": "admin@kdsupermarket.com",
+      "role": "admin",
+      "phone": "+91 98113 40853"
+    },
+    {
+      "id": "usr-customer-1",
+      "name": "Rameshwar Prasad Jha",
+      "email": "customer@example.com",
+      "role": "customer",
+      "phone": "+91 98350 21980",
+      "savedAddresses": [
+        {
+          "id": "addr-1",
+          "fullName": "Rameshwar Prasad Jha",
+          "phone": "+91 98350 21980",
+          "street": "Near Watson High School, Opposite Durga Mandir",
+          "locality": "Tirhut Colony",
+          "city": "Madhubani",
+          "state": "Bihar",
+          "pinCode": "847211",
+          "landmark": "Durga Mandir Road",
+          "isDefault": true
+        }
+      ]
+    },
+    {
+      "id": "usr-g-1792857434058",
+      "name": "Google Test User",
+      "email": "test.google@gmail.com",
+      "role": "customer",
+      "phone": "+91 98113 40853",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+      "provider": "google",
+      "savedAddresses": []
+    },
+    {
+      "id": "admin-siddhu",
+      "name": "Siddhu Kumar",
+      "email": "siddhukumar2006@gmail.com",
+      "role": "admin",
+      "phone": "+91 98113 40853",
+      "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Siddhu%20Kumar",
+      "provider": "google",
+      "savedAddresses": []
+    },
+    {
+      "id": "usr-g-1792866523640",
+      "name": "Siddhu Kumar",
+      "email": "siddhujha2006@gmail.com",
+      "role": "customer",
+      "phone": "+91 98113 40853",
+      "avatar": "https://lh3.googleusercontent.com/a/ACg8ocIrUXsc4tmh4h4TMggYVu2DRyWGz8DnAIvwY4DrXzFmwlRQE2Jw=s96-c",
+      "provider": "google",
+      "savedAddresses": []
+    }
+  ],
+  "coupons": []
+}

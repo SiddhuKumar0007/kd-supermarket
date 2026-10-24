@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root, [data-theme="emerald"] {
+  --color-forest: #0A6847;
+  --color-forest-dark: #044E32;
+  --color-forest-light: #118B5F;
+  --color-fresh: #10B981;
+  --color-fresh-dark: #059669;
+  --color-fresh-light: #34D399;
+  --color-warm-yellow: #F59E0B;
+  --color-warm-yellow-dark: #D97706;
+  --color-warm-yellow-light: #FBBF24;
+  --color-ivory: #F8FAF8;
+  --color-ivory-100: #EEF4EF;
+  --color-ivory-200: #DCE8DF;
+  --color-charcoal: #141E17;
+}
+
+[data-theme="royal"] {
+  --color-forest: #144D34;
+  --color-forest-dark: #0B3322;
+  --color-forest-light: #1F6B4A;
+  --color-fresh: #2E9B5F;
+  --color-fresh-dark: #1E7A46;
+  --color-fresh-light: #48C269;
+  --color-warm-yellow: #E5A93C;
+  --color-warm-yellow-dark: #C68E28;
+  --color-warm-yellow-light: #F4C46A;
+  --color-ivory: #F6F8F5;
+  --color-ivory-100: #EAEFEA;
+  --color-ivory-200: #D8E2D8;
+  --color-charcoal: #18221B;
+}
+
+[data-theme="teal"] {
+  --color-forest: #0D7A73;
+  --color-forest-dark: #07504C;
+  --color-forest-light: #149D94;
+  --color-fresh: #06B6D4;
+  --color-fresh-dark: #0891B2;
+  --color-fresh-light: #67E8F9;
+  --color-warm-yellow: #F97316;
+  --color-warm-yellow-dark: #EA580C;
+  --color-warm-yellow-light: #FB923C;
+  --color-ivory: #F7FAFA;
+  --color-ivory-100: #EBF3F3;
+  --color-ivory-200: #D6E8E8;
+  --color-charcoal: #132223;
+}
+
+[data-theme="botanical"] {
+  --color-forest: #2D6A4F;
+  --color-forest-dark: #1B4332;
+  --color-forest-light: #40916C;
+  --color-fresh: #52B788;
+  --color-fresh-dark: #2D6A4F;
+  --color-fresh-light: #74C69D;
+  --color-warm-yellow: #E09F3E;
+  --color-warm-yellow-dark: #C27D22;
+  --color-warm-yellow-light: #F1B760;
+  --color-ivory: #F9FAF8;
+  --color-ivory-100: #EDF1EC;
+  --color-ivory-200: #DCE3DB;
+  --color-charcoal: #1E2721;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ivory, #F8FAF8);
+    color: var(--color-charcoal, #141E17);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ivory-100, #EEF4EF);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A3C9B2;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-forest, #0A6847);
+}
+
+/* Shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f4ec 25%, #e3ece0 50%, #f0f4ec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Badge pulse animation */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.04);
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s infinite ease-in-out;
+}

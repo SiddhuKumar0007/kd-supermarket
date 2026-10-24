@@ -1,0 +1,624 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ShoppingBag, 
+  Sparkles, 
+  ArrowRight, 
+  MessageCircle, 
+  CheckCircle2, 
+  Percent, 
+  MapPin, 
+  Star, 
+  Truck, 
+  ShieldCheck, 
+  HeartHandshake, 
+  BadgePercent,
+  Clock,
+  ExternalLink
+} from 'lucide-react';
+import { useStore } from '../context/StoreContext';
+import { ProductCard } from '../components/products/ProductCard';
+import { api } from '../services/api';
+import { Product, Category } from '../types';
+
+export const HomePage: React.FC = () => {
+  const { setCurrentView, setSelectedCategory, settings, selectedLocation } = useStore();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const heroSlides = [
+    {
+      image: "https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1200&q=80",
+      badge: "🌿 100% Farm Fresh & Daily Quality",
+      title: "Fresh Groceries at Fair Store Rates",
+      subtitle: "Atta, pulses, edible oils, spices & fresh pantry items",
+      tag: "Fresh Produce & Staples",
+      promo: "Free Delivery Above ₹499"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1200&q=80",
+      badge: "🌾 Regional Madhubani Special",
+      title: "Aromatic Katarni Chawal & Chakki Atta",
+      subtitle: "Directly sourced whole grains & Kachi Ghani mustard oil",
+      tag: "Regional Mithila Staples",
+      promo: "Special Store Discounts"
+    },
+    {
+      image: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80",
+      badge: "🛒 Comprehensive Supermarket Aisle",
+      title: "Snacks, Dairy, Beverages & Cleaning",
+      subtitle: "Amul dairy, Britannia biscuits, Maggi & Surf Excel",
+      tag: "Top Branded Packaged Foods",
+      promo: "WhatsApp Ordering Available"
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % 3);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true);
+        const [prods, cats] = await Promise.all([
+          api.getProducts(),
+          api.getCategories()
+        ]);
+        setProducts(prods);
+        setCategories(cats);
+      } catch (err) {
+        console.error('Failed to load homepage data', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const bestSellers = products.filter(p => p.tags?.includes('bestseller')).slice(0, 8);
+  const dailyEssentials = products.filter(p => p.tags?.includes('daily-essentials')).slice(0, 8);
+  const popularMadhubani = products.filter(p => p.tags?.includes('popular-madhubani')).slice(0, 8);
+  const specialOffers = products.filter(p => p.tags?.includes('special-offers') || p.discount >= 15).slice(0, 8);
+  const latestArrivals = products.slice(0, 8);
+
+  const trustHighlights = [
+    {
+      title: "Quality Everyday Essentials",
+      desc: "Top branded & locally verified staples",
+      icon: ShieldCheck,
+    },
+    {
+      title: "Reasonable Prices",
+      desc: "Fair local pricing with genuine savings",
+      icon: BadgePercent,
+    },
+    {
+      title: "Exciting Store Offers",
+      desc: "Regular discounts on household bundles",
+      icon: Percent,
+    },
+    {
+      title: "Easy Online Ordering",
+      desc: "Smooth checkout & live order tracking",
+      icon: Truck,
+    },
+    {
+      title: "Convenient Local Shopping",
+      desc: "State Bank More store with WhatsApp chat",
+      icon: HeartHandshake,
+    },
+  ];
+
+  return (
+    <div className="space-y-12 md:space-y-16 pb-12">
+      {/* 1. Hero Banner */}
+      <section className="relative bg-gradient-to-br from-forest-dark via-forest to-[#074D32] text-white overflow-hidden py-12 md:py-20 shadow-lg">
+        {/* Ambient radial glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-warmYellow/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-fresh/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-warmYellow border border-white/20 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-warmYellow" />
+                <span>Madhubani's Premier Supermarket • State Bank More</span>
+              </div>
+
+              <h1 className="font-heading font-black text-3xl sm:text-5xl lg:text-5xl tracking-tight leading-tight text-white drop-shadow-sm">
+                Your Everyday Essentials, <br className="hidden sm:inline" />
+                <span className="text-warmYellow drop-shadow">Delivered with Ease!</span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-ivory-100 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                Shop fresh farm produce, stoneground atta, golden mustard oils, wholesome dals, tea, snacks, and household staples from <strong>KD SUPERMARKET</strong> with fast home delivery in Madhubani.
+              </p>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-1">
+                <button
+                  onClick={() => setCurrentView('catalog')}
+                  className="px-7 py-3.5 bg-warmYellow hover:bg-warmYellow-dark text-charcoal font-black rounded-xl text-sm transition-all shadow-hover flex items-center gap-2 group active:scale-95"
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>Shop Now</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+
+                <button
+                  onClick={() => setCurrentView('offers')}
+                  className="px-6 py-3.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-xl text-sm transition-colors border border-white/20 flex items-center gap-2 backdrop-blur-xs"
+                >
+                  <BadgePercent className="w-4 h-4 text-warmYellow" />
+                  <span>Explore Offers</span>
+                </button>
+
+                <a
+                  href={`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=Hello%20KD%20SUPERMARKET,%20I%20would%20like%20to%20order%20groceries.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-xl text-sm transition-colors flex items-center gap-2 shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4 fill-white" />
+                  <span>Order on WhatsApp</span>
+                </a>
+              </div>
+
+              {/* Scene / Slide Category Pills */}
+              <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-2 text-xs">
+                <span className="text-ivory-100/70 text-[11px] font-semibold mr-1">Featured Aisle:</span>
+                {heroSlides.map((slide, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveSlide(idx)}
+                    className={`px-3 py-1.5 rounded-full font-bold text-xs transition-all ${
+                      activeSlide === idx
+                        ? 'bg-white text-forest shadow-md scale-105'
+                        : 'bg-white/10 text-white/90 hover:bg-white/20'
+                    }`}
+                  >
+                    {slide.tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* Verified Store Metrics */}
+              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-5 text-xs text-ivory-100 border-t border-white/15">
+                <div className="flex items-center gap-1.5 font-semibold">
+                  <Star className="w-4 h-4 text-warmYellow fill-warmYellow" />
+                  <span className="font-bold text-white">4.8 / 5 Rating</span>
+                  <span className="text-white/80">(31 Google Reviews)</span>
+                </div>
+                <div className="flex items-center gap-1.5 font-semibold">
+                  <MapPin className="w-4 h-4 text-warmYellow" />
+                  <span>Tirhut Colony, Madhubani 847211</span>
+                </div>
+                <div className="flex items-center gap-1.5 font-semibold">
+                  <Clock className="w-4 h-4 text-warmYellow" />
+                  <span>Open Daily 7:30 AM – 9:30 PM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Hero Visual Card with New Front Image & Floating Badges */}
+            <div className="lg:col-span-5 flex justify-center">
+              <div className="relative w-full max-w-lg">
+                {/* Floating Top Badge */}
+                <div className="absolute -top-3.5 right-4 z-20 bg-white/95 backdrop-blur-md text-charcoal px-3 py-1.5 rounded-full shadow-lg border border-gray-100 flex items-center gap-2 text-xs font-extrabold animate-soft-pulse">
+                  <span className="w-2 h-2 rounded-full bg-fresh animate-ping" />
+                  <span className="text-forest">⚡ Express 2-Hour Delivery</span>
+                </div>
+
+                {/* Main Front Image Card */}
+                <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 bg-forest-dark group">
+                  <img
+                    key={heroSlides[activeSlide].image}
+                    src={heroSlides[activeSlide].image}
+                    alt={heroSlides[activeSlide].title}
+                    className="w-full h-84 md:h-96 object-cover transition-all duration-700 ease-out group-hover:scale-105"
+                  />
+                  
+                  {/* Subtle Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 text-white">
+                    <span className="inline-block px-2.5 py-1 rounded-md text-[10px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-1.5 w-fit">
+                      {heroSlides[activeSlide].badge}
+                    </span>
+                    <h3 className="font-heading font-black text-xl text-white drop-shadow">
+                      {heroSlides[activeSlide].title}
+                    </h3>
+                    <p className="text-xs text-ivory-100 mt-1 max-w-sm drop-shadow">
+                      {heroSlides[activeSlide].subtitle}
+                    </p>
+
+                    {/* Slide Dots */}
+                    <div className="flex items-center gap-2 mt-3 pt-2 border-t border-white/20">
+                      {heroSlides.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveSlide(i)}
+                          className={`h-1.5 rounded-full transition-all ${
+                            activeSlide === i ? 'w-8 bg-warmYellow' : 'w-2 bg-white/40 hover:bg-white/70'
+                          }`}
+                          aria-label={`Go to slide ${i + 1}`}
+                        />
+                      ))}
+                      <span className="text-[10px] text-white/70 ml-auto font-medium">
+                        {heroSlides[activeSlide].promo}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Bottom Left Rating Badge */}
+                <div className="absolute -bottom-5 -left-3 z-20 bg-white text-charcoal p-3 rounded-2xl shadow-hover border border-gray-100 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-forest text-white flex items-center justify-center font-black text-sm shadow">
+                    4.8★
+                  </div>
+                  <div className="text-xs">
+                    <p className="font-black text-charcoal flex items-center gap-1">
+                      <span>Verified Supermarket</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-fresh fill-fresh/20" />
+                    </p>
+                    <p className="text-[10px] text-charcoal-muted">31 Google Customer Reviews</p>
+                  </div>
+                </div>
+
+                {/* Floating Bottom Right Discount Pill */}
+                <div className="absolute -bottom-5 -right-3 z-20 bg-warmYellow text-charcoal px-3 py-2 rounded-2xl shadow-hover border border-amber-300 flex items-center gap-1.5 text-xs font-black">
+                  <BadgePercent className="w-4 h-4 text-charcoal" />
+                  <span>Code: KD50 (₹50 Off)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Trust Highlights */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+          {trustHighlights.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <div
+                key={idx}
+                className="bg-white p-4 rounded-2xl border border-gray-100 shadow-card flex flex-col items-center text-center space-y-2 hover:border-forest/20 transition-all hover:scale-[1.02]"
+              >
+                <div className="w-11 h-11 rounded-xl bg-ivory-100 text-forest flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-forest" />
+                </div>
+                <h4 className="font-bold text-xs text-charcoal">{item.title}</h4>
+                <p className="text-[11px] text-charcoal-muted leading-tight">{item.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 3. Shop by Category (All 20 Categories) */}
+      <section className="max-w-7xl mx-auto px-4 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-2 border-b border-gray-200 pb-3">
+          <div>
+            <span className="text-xs font-bold text-forest uppercase tracking-wider">
+              Browse Supermarket Aisle
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl md:text-3xl text-charcoal">
+              Shop by Category
+            </h2>
+          </div>
+          <button
+            onClick={() => setCurrentView('catalog')}
+            className="text-xs font-bold text-forest hover:text-forest-dark flex items-center gap-1 group self-start md:self-auto"
+          >
+            <span>View All 20 Categories in Catalogue</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+
+        {/* Categories Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => {
+                setSelectedCategory(cat.name);
+                setCurrentView('catalog');
+              }}
+              className="group bg-white rounded-2xl border border-gray-100 p-3 hover:border-forest/30 shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer flex flex-col items-center text-center overflow-hidden"
+            >
+              <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden mb-3 bg-ivory-50">
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+              </div>
+              <h3 className="font-bold text-xs text-charcoal group-hover:text-forest transition-colors line-clamp-1">
+                {cat.name}
+              </h3>
+              <p className="text-[10px] text-charcoal-muted mt-0.5">
+                {cat.itemCount} items
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. Best Sellers */}
+      <section className="max-w-7xl mx-auto px-4 space-y-6">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div>
+            <span className="text-xs font-bold text-forest uppercase tracking-wider">
+              Customer Favorites
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl text-charcoal">
+              Best Sellers
+            </h2>
+          </div>
+          <button
+            onClick={() => setCurrentView('catalog')}
+            className="text-xs font-bold text-forest hover:underline"
+          >
+            See All →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {bestSellers.map((prod) => (
+            <ProductCard key={prod.id} product={prod} />
+          ))}
+        </div>
+      </section>
+
+      {/* 5. Special Promotional Offers Banner */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="relative rounded-3xl bg-gradient-to-r from-forest to-[#1A6340] text-white p-6 md:p-10 shadow-hover overflow-hidden">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            <div className="md:col-span-8 space-y-3">
+              <span className="px-3 py-1 rounded-full bg-warmYellow text-charcoal text-xs font-black uppercase tracking-wider">
+                SUPERMARKET DEALS
+              </span>
+              <h3 className="font-heading font-black text-2xl md:text-3xl text-white">
+                Save Big on Monthly Rations & Kitchen Staples
+              </h3>
+              <p className="text-xs md:text-sm text-ivory-100 max-w-xl">
+                Genuine discounts on Aashirvaad Atta, Fortune Mustard Oil, Tata Salt & pulses. Place orders online or send your shopping list directly over WhatsApp!
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <button
+                  onClick={() => setCurrentView('offers')}
+                  className="px-5 py-2.5 bg-warmYellow hover:bg-warmYellow-dark text-charcoal font-bold rounded-xl text-xs transition-colors shadow"
+                >
+                  View Special Offers
+                </button>
+                <button
+                  onClick={() => setCurrentView('catalog')}
+                  className="px-5 py-2.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-xs transition-colors border border-white/20"
+                >
+                  Explore All Products
+                </button>
+              </div>
+            </div>
+            <div className="md:col-span-4 flex justify-center md:justify-end">
+              <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-center max-w-xs space-y-1">
+                <p className="text-[11px] text-warmYellow font-bold uppercase">Free Home Delivery</p>
+                <p className="text-xl font-black text-white">Orders Above ₹499</p>
+                <p className="text-[10px] text-ivory-200">Across Madhubani Town (PIN 847211)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Popular in Madhubani */}
+      <section className="max-w-7xl mx-auto px-4 space-y-6">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div>
+            <span className="text-xs font-bold text-forest uppercase tracking-wider">
+              Local Demand
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl text-charcoal">
+              Popular in Madhubani
+            </h2>
+          </div>
+          <button
+            onClick={() => setCurrentView('catalog')}
+            className="text-xs font-bold text-forest hover:underline"
+          >
+            See All →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {popularMadhubani.map((prod) => (
+            <ProductCard key={prod.id} product={prod} />
+          ))}
+        </div>
+      </section>
+
+      {/* 7. Daily Essentials & Special Offers */}
+      <section className="max-w-7xl mx-auto px-4 space-y-6">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+          <div>
+            <span className="text-xs font-bold text-forest uppercase tracking-wider">
+              Everyday Pantry
+            </span>
+            <h2 className="font-heading font-extrabold text-2xl text-charcoal">
+              Daily Essentials
+            </h2>
+          </div>
+          <button
+            onClick={() => setCurrentView('catalog')}
+            className="text-xs font-bold text-forest hover:underline"
+          >
+            See All →
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {dailyEssentials.map((prod) => (
+            <ProductCard key={prod.id} product={prod} />
+          ))}
+        </div>
+      </section>
+
+      {/* 8. Why Shop With Us? */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="bg-ivory-100 rounded-3xl p-6 md:p-12 border border-gray-200 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-forest uppercase tracking-wider">
+              Neighbourhood Convenience
+            </span>
+            <h2 className="font-heading font-black text-2xl md:text-3xl text-charcoal">
+              Why Choose KD SUPERMARKET?
+            </h2>
+            <p className="text-xs md:text-sm text-charcoal-muted leading-relaxed">
+              We bring modern e-commerce convenience together with the warmth and personal trust of your local grocery store.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-5 rounded-2xl shadow-card border border-gray-100 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center text-forest">
+                <ShoppingBag className="w-5 h-5 text-forest" />
+              </div>
+              <h3 className="font-bold text-sm text-charcoal">Browse Online & Check Prices</h3>
+              <p className="text-xs text-charcoal-muted leading-relaxed">
+                Check transparent prices and stock availability from home anytime before stepping out or placing an order.
+              </p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl shadow-card border border-gray-100 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-fresh/10 flex items-center justify-center text-fresh">
+                <MessageCircle className="w-5 h-5 text-fresh fill-fresh/20" />
+              </div>
+              <h3 className="font-bold text-sm text-charcoal">Order via WhatsApp or Online</h3>
+              <p className="text-xs text-charcoal-muted leading-relaxed">
+                Seamless online checkout with UPI, Card, or Cash on Delivery, plus 1-click cart sharing to store WhatsApp (+91 98113 40853).
+              </p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl shadow-card border border-gray-100 space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-warmYellow/20 flex items-center justify-center text-charcoal">
+                <Truck className="w-5 h-5 text-forest" />
+              </div>
+              <h3 className="font-bold text-sm text-charcoal">Track Your Order Live</h3>
+              <p className="text-xs text-charcoal-muted leading-relaxed">
+                Follow your order from packed, dispatch to out-for-delivery with clear database status updates.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. Verified Customer Reviews & Google Rating */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="bg-white rounded-3xl p-6 md:p-10 border border-gray-200 shadow-card">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-5 space-y-3 text-center lg:text-left">
+              <span className="text-xs font-bold text-forest uppercase tracking-wider">
+                Store Reputation
+              </span>
+              <h2 className="font-heading font-extrabold text-2xl md:text-3xl text-charcoal">
+                Customer Feedback
+              </h2>
+              <div className="flex items-center justify-center lg:justify-start gap-2">
+                <div className="text-3xl font-black text-forest">4.8</div>
+                <div>
+                  <div className="flex items-center text-warmYellow">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-warmYellow" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-charcoal-muted">Google verified rating • 31 reviews</p>
+                </div>
+              </div>
+              <p className="text-xs text-charcoal-muted leading-relaxed">
+                Real feedback from Madhubani residents visiting our store at State Bank More, Tirhut Colony.
+              </p>
+              <a
+                href={settings.googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-ivory-100 hover:bg-ivory-200 border border-gray-200 rounded-xl text-xs font-bold text-charcoal transition-colors"
+              >
+                <span>Read Verified Google Reviews</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* Customer Testimonial Quotes as supplied in the prompt */}
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-ivory-50 border border-gray-100 space-y-2">
+                <div className="flex items-center gap-1 text-warmYellow">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-warmYellow" />
+                  ))}
+                </div>
+                <p className="text-xs text-charcoal font-medium leading-relaxed italic">
+                  "Fresh groceries at reasonable rates, good discounts, and convenient shopping in Madhubani."
+                </p>
+                <p className="text-[11px] font-bold text-forest">— Verified Local Customer</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-ivory-50 border border-gray-100 space-y-2">
+                <div className="flex items-center gap-1 text-warmYellow">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-warmYellow" />
+                  ))}
+                </div>
+                <p className="text-xs text-charcoal font-medium leading-relaxed italic">
+                  "Great variety of grocery staples, courteous staff, and very convenient home delivery service."
+                </p>
+                <p className="text-[11px] font-bold text-forest">— Madhubani Resident</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. Store Location & Directions Banner */}
+      <section className="max-w-7xl mx-auto px-4">
+        <div className="bg-forest rounded-3xl p-6 md:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 text-center md:text-left">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-warmYellow text-xs font-bold">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Visit In-Store</span>
+            </div>
+            <h3 className="font-heading font-black text-xl md:text-2xl">
+              KD SUPERMARKET, STATE BANK MORE
+            </h3>
+            <p className="text-xs text-ivory-100 max-w-xl">
+              Watson High School, Tirhut Colony, Madhubani, Bihar 847211. Open daily 7:30 AM – 9:30 PM.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <a
+              href={settings.googleMapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-2.5 bg-warmYellow hover:bg-warmYellow-dark text-charcoal font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow"
+            >
+              <MapPin className="w-4 h-4" />
+              <span>Get Directions</span>
+            </a>
+            <a
+              href="tel:+919811340853"
+              className="px-5 py-2.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-xl text-xs transition-colors border border-white/20"
+            >
+              Call Store: +91 98113 40853
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
