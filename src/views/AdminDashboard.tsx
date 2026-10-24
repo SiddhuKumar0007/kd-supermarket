@@ -31,7 +31,9 @@ import {
   Tag,
   BadgePercent,
   Copy,
-  Calendar
+  Calendar,
+  Phone,
+  MessageCircle
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
@@ -420,24 +422,24 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-6">
       {/* Admin Top Navigation Bar */}
-      <div className="bg-forest rounded-3xl p-5 md:p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4 shadow-card">
+      <div className="bg-forest rounded-3xl p-4 md:p-6 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-card">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-warmYellow text-forest flex items-center justify-center font-black text-xl shadow">
+          <div className="w-11 h-11 md:w-12 md:h-12 rounded-2xl bg-warmYellow text-forest flex items-center justify-center font-black text-lg md:text-xl shadow">
             KD
           </div>
           <div>
-            <h1 className="font-heading font-black text-xl md:text-2xl text-white">
-              KD Supermarket Admin Dashboard
+            <h1 className="font-heading font-black text-lg md:text-2xl text-white">
+              KD Supermarket Admin
             </h1>
-            <p className="text-xs text-ivory-100 flex items-center gap-1.5">
+            <p className="text-[11px] md:text-xs text-ivory-100 flex items-center gap-1.5">
               <span>State Bank More, Madhubani</span>
               <span>•</span>
-              <span className="text-warmYellow font-bold">Live Database Sync</span>
+              <span className="text-warmYellow font-bold">Admin Portal</span>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           <button
             onClick={loadAdminData}
             className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
@@ -465,7 +467,7 @@ export const AdminDashboard: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 overflow-x-auto gap-2 text-xs font-bold">
+      <div className="flex border-b border-gray-200 overflow-x-auto gap-2 text-xs font-bold no-scrollbar py-1 scroll-smooth">
         {[
           { id: 'overview', label: 'Dashboard Overview' },
           { id: 'orders', label: `Orders (${orders.length})` },
@@ -622,8 +624,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Orders Table */}
-          <div className="overflow-x-auto">
+          {/* Orders Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-ivory-100 text-charcoal-muted uppercase text-[10px] tracking-wider font-bold">
                 <tr>
@@ -691,6 +693,234 @@ export const AdminDashboard: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Products Mobile Cards (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredProducts.length === 0 ? (
+              <div className="p-8 text-center text-xs text-charcoal-muted bg-ivory-50 rounded-2xl">
+                No products match your current search or filters.
+              </div>
+            ) : (
+              filteredProducts.map((p) => {
+                const isInStock = p.inStock !== false && (p.stock || 0) > 0;
+                return (
+                  <div key={p.id} className="p-3.5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-3">
+                    {/* Top row: Image + Name + Category + Edit/Delete */}
+                    <div className="flex items-start gap-3">
+                      <img 
+                        src={p.image} 
+                        alt={p.name} 
+                        className="w-14 h-14 object-contain p-1 bg-white rounded-xl border border-gray-200 shadow-xs flex-shrink-0" 
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <p className="font-bold text-xs text-charcoal leading-tight line-clamp-2">{p.name}</p>
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                            <button
+                              onClick={() => {
+                                setEditingProduct(p);
+                                setProductForm({
+                                  name: p.name,
+                                  brand: p.brand,
+                                  category: p.category,
+                                  packSize: p.packSize,
+                                  price: p.price,
+                                  mrp: p.mrp,
+                                  stock: p.stock,
+                                  inStock: p.inStock !== false && p.stock > 0,
+                                  sku: p.sku || p.id,
+                                  description: p.description || '',
+                                  image: p.image
+                                });
+                                setImageInputMode('upload');
+                                setIsProductModalOpen(true);
+                              }}
+                              className="p-1.5 hover:bg-forest/10 rounded-lg text-forest"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(p.id)}
+                              className="p-1.5 hover:bg-red-50 rounded-lg text-red-600"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-charcoal-muted mt-1">
+                          <span className="font-semibold text-forest uppercase">{p.brand}</span>
+                          <span>•</span>
+                          <span className="px-1.5 py-0.2 bg-ivory-100 rounded text-charcoal">{p.category.split('&')[0]}</span>
+                        </div>
+                        <div className="flex items-baseline gap-1.5 mt-1">
+                          <span className="font-black text-forest text-sm">₹{p.price}</span>
+                          {p.mrp > p.price && (
+                            <span className="text-[10px] text-charcoal-light line-through">₹{p.mrp}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle row: In/Out Toggle & Weight Input */}
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleProductInStock(p)}
+                        className={`w-full py-2 px-2 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 ${
+                          isInStock
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isInStock ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                        <span>{isInStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
+                      </button>
+
+                      <div className="flex items-center gap-1 bg-ivory-50 border border-gray-200 rounded-xl px-2 py-1">
+                        <Scale className="w-3 h-3 text-forest flex-shrink-0" />
+                        <input
+                          type="text"
+                          defaultValue={p.packSize}
+                          key={`${p.id}-${p.packSize}`}
+                          onBlur={(e) => {
+                            if (e.target.value !== p.packSize) {
+                              handleUpdatePackSize(p.id, e.target.value);
+                            }
+                          }}
+                          className="w-full bg-transparent text-xs font-bold text-charcoal focus:outline-none"
+                          placeholder="Pack size"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bottom row: Quick Weight Chips & Stock Stepper */}
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <div className="flex flex-wrap gap-1">
+                        {['250 g', '500 g', '1 kg', '2 kg', '5 kg', '1 L'].map(sz => (
+                          <button
+                            type="button"
+                            key={sz}
+                            onClick={() => handleUpdatePackSize(p.id, sz)}
+                            className={`px-1.5 py-0.5 rounded text-[9px] border font-bold ${
+                              p.packSize === sz ? 'bg-forest text-white border-forest' : 'bg-white text-charcoal-muted border-gray-200'
+                            }`}
+                          >
+                            {sz}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-xl p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStockChange(p.id, -5)}
+                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-8 text-center text-xs font-black text-charcoal">{p.stock}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStockChange(p.id, 5)}
+                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Orders Mobile Touch Cards */}
+          <div className="md:hidden space-y-3">
+            {filteredOrders.length === 0 ? (
+              <div className="p-8 text-center text-xs text-charcoal-muted bg-ivory-50 rounded-2xl">
+                No orders match your filter.
+              </div>
+            ) : (
+              filteredOrders.map((ord) => (
+                <div key={ord.id} className="p-4 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-mono font-black text-xs text-forest">{ord.id}</span>
+                      <p className="text-[10px] text-charcoal-muted">
+                        {new Date(ord.createdAt).toLocaleDateString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      ord.orderStatus === 'Delivered'
+                        ? 'bg-fresh/15 text-fresh-dark'
+                        : ord.orderStatus === 'Cancelled'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-warmYellow/30 text-charcoal'
+                    }`}>
+                      {ord.orderStatus}
+                    </span>
+                  </div>
+
+                  <div className="bg-ivory-50 p-2.5 rounded-xl space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-xs text-charcoal">{ord.customerName}</p>
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={`tel:${ord.customerPhone}`}
+                          className="px-2 py-0.5 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-charcoal flex items-center gap-1 shadow-xs"
+                        >
+                          <Phone className="w-3 h-3 text-forest" />
+                          <span>Call</span>
+                        </a>
+                        <a
+                          href={`https://wa.me/91${ord.customerPhone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(ord.customerName)},%20update%20regarding%20your%20KD%20Supermarket%20Order%20${ord.id}:`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs"
+                        >
+                          <MessageCircle className="w-3 h-3 text-emerald-600" />
+                          <span>WA</span>
+                        </a>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-charcoal-muted">{ord.address.locality}, PIN {ord.address.pinCode}</p>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <div>
+                      <span className="text-[10px] text-charcoal-muted uppercase block font-semibold">Total</span>
+                      <span className="font-black text-forest text-sm">₹{ord.total}</span>
+                      <span className={`text-[10px] font-bold ml-1 ${ord.paymentStatus === 'PAID' ? 'text-fresh' : 'text-amber-600'}`}>
+                        ({ord.paymentStatus})
+                      </span>
+                    </div>
+
+                    <div className="flex-1 max-w-[140px] text-right">
+                      <select
+                        value={ord.orderStatus}
+                        onChange={(e) => handleUpdateOrderStatus(ord.id, e.target.value)}
+                        className="w-full py-1.5 px-2 bg-forest text-white rounded-xl text-xs font-bold focus:outline-none shadow-xs text-center cursor-pointer"
+                      >
+                        <option value="Order Placed">Placed</option>
+                        <option value="Order Confirmed">Confirmed</option>
+                        <option value="Preparing Your Order">Preparing</option>
+                        <option value="Ready for Dispatch">Ready</option>
+                        <option value="Out for Delivery">Out for Deliv</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-charcoal-muted border-t border-gray-100 pt-1.5 truncate">
+                    <strong>Items ({ord.items.length}):</strong> {ord.items.map(i => `${i.name} (x${i.quantity})`).join(', ')}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
@@ -769,7 +999,7 @@ export const AdminDashboard: React.FC = () => {
             </select>
 
             {/* Quick Status Filter Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
               <button
                 type="button"
                 onClick={() => setStockStatusFilter('all')}
@@ -809,8 +1039,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Products Table */}
-          <div className="overflow-x-auto">
+          {/* Products Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-ivory-100 text-charcoal-muted uppercase text-[10px] tracking-wider font-bold">
                 <tr>
@@ -983,6 +1213,148 @@ export const AdminDashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Products Mobile Cards (md:hidden) */}
+          <div className="md:hidden space-y-3">
+            {filteredProducts.length === 0 ? (
+              <div className="p-8 text-center text-xs text-charcoal-muted bg-ivory-50 rounded-2xl">
+                No products match your current search or filters.
+              </div>
+            ) : (
+              filteredProducts.map((p) => {
+                const isInStock = p.inStock !== false && (p.stock || 0) > 0;
+                return (
+                  <div key={p.id} className="p-3.5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-3">
+                    {/* Top row: Image + Name + Category + Edit/Delete */}
+                    <div className="flex items-start gap-3">
+                      <img 
+                        src={p.image} 
+                        alt={p.name} 
+                        className="w-14 h-14 object-contain p-1 bg-white rounded-xl border border-gray-200 shadow-xs flex-shrink-0" 
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <p className="font-bold text-xs text-charcoal leading-tight line-clamp-2">{p.name}</p>
+                          <div className="flex items-center gap-1 flex-shrink-0 ml-1">
+                            <button
+                              onClick={() => {
+                                setEditingProduct(p);
+                                setProductForm({
+                                  name: p.name,
+                                  brand: p.brand,
+                                  category: p.category,
+                                  packSize: p.packSize,
+                                  price: p.price,
+                                  mrp: p.mrp,
+                                  stock: p.stock,
+                                  inStock: p.inStock !== false && p.stock > 0,
+                                  sku: p.sku || p.id,
+                                  description: p.description || '',
+                                  image: p.image
+                                });
+                                setImageInputMode('upload');
+                                setIsProductModalOpen(true);
+                              }}
+                              className="p-1.5 hover:bg-forest/10 rounded-lg text-forest"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(p.id)}
+                              className="p-1.5 hover:bg-red-50 rounded-lg text-red-600"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-charcoal-muted mt-1">
+                          <span className="font-semibold text-forest uppercase">{p.brand}</span>
+                          <span>•</span>
+                          <span className="px-1.5 py-0.2 bg-ivory-100 rounded text-charcoal">{p.category.split('&')[0]}</span>
+                        </div>
+                        <div className="flex items-baseline gap-1.5 mt-1">
+                          <span className="font-black text-forest text-sm">₹{p.price}</span>
+                          {p.mrp > p.price && (
+                            <span className="text-[10px] text-charcoal-light line-through">₹{p.mrp}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle row: In/Out Toggle & Weight Input */}
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 items-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleProductInStock(p)}
+                        className={`w-full py-2 px-2 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 ${
+                          isInStock
+                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : 'bg-rose-100 text-rose-800 border border-rose-300'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${isInStock ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+                        <span>{isInStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
+                      </button>
+
+                      <div className="flex items-center gap-1 bg-ivory-50 border border-gray-200 rounded-xl px-2 py-1">
+                        <Scale className="w-3 h-3 text-forest flex-shrink-0" />
+                        <input
+                          type="text"
+                          defaultValue={p.packSize}
+                          key={`${p.id}-${p.packSize}`}
+                          onBlur={(e) => {
+                            if (e.target.value !== p.packSize) {
+                              handleUpdatePackSize(p.id, e.target.value);
+                            }
+                          }}
+                          className="w-full bg-transparent text-xs font-bold text-charcoal focus:outline-none"
+                          placeholder="Pack size"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Bottom row: Quick Weight Chips & Stock Stepper */}
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <div className="flex flex-wrap gap-1">
+                        {['250 g', '500 g', '1 kg', '2 kg', '5 kg', '1 L'].map(sz => (
+                          <button
+                            type="button"
+                            key={sz}
+                            onClick={() => handleUpdatePackSize(p.id, sz)}
+                            className={`px-1.5 py-0.5 rounded text-[9px] border font-bold ${
+                              p.packSize === sz ? 'bg-forest text-white border-forest' : 'bg-white text-charcoal-muted border-gray-200'
+                            }`}
+                          >
+                            {sz}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-1 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-xl p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStockChange(p.id, -5)}
+                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="w-8 text-center text-xs font-black text-charcoal">{p.stock}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleQuickStockChange(p.id, 5)}
+                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -1343,18 +1715,18 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Product Add / Edit Modal */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 max-h-[90vh] overflow-y-auto">
-            <div className="p-4 bg-forest text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 bg-forest text-white flex items-center justify-between flex-shrink-0 shadow-xs">
               <h3 className="font-heading font-bold text-sm">
                 {editingProduct ? 'Edit Supermarket Product' : 'Add New Grocery Product'}
               </h3>
-              <button onClick={() => setIsProductModalOpen(false)}>
+              <button onClick={() => setIsProductModalOpen(false)} className="p-1 rounded-lg hover:bg-white/10">
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="p-5 space-y-3 text-xs">
+            <form onSubmit={handleSaveProduct} className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
               <div>
                 <label className="block font-bold mb-1">Product Title</label>
                 <input
@@ -1617,11 +1989,11 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 py-2.5 bg-forest text-white rounded-xl font-bold">
+              <div className="sticky bottom-0 bg-white pt-3 pb-1 border-t border-gray-100 flex gap-2">
+                <button type="submit" className="flex-1 py-2.5 bg-forest hover:bg-forest-dark text-white rounded-xl font-bold transition-colors shadow">
                   {editingProduct ? 'Save Changes' : 'Create Product'}
                 </button>
-                <button type="button" onClick={() => setIsProductModalOpen(false)} className="px-4 py-2.5 bg-gray-100 rounded-xl font-bold">
+                <button type="button" onClick={() => setIsProductModalOpen(false)} className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-charcoal rounded-xl font-bold transition-colors">
                   Cancel
                 </button>
               </div>
@@ -1632,21 +2004,21 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Promo Code Add / Edit Modal */}
       {isCouponModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150">
-            <div className="p-4 bg-forest text-white flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-4 bg-forest text-white flex items-center justify-between flex-shrink-0 shadow-xs">
               <div className="flex items-center gap-2">
                 <Tag className="w-4 h-4 text-warmYellow" />
                 <h3 className="font-heading font-bold text-sm">
                   {editingCoupon ? `Edit Promo Code: ${editingCoupon.code}` : 'Create New Promo Code'}
                 </h3>
               </div>
-              <button onClick={() => setIsCouponModalOpen(false)}>
+              <button onClick={() => setIsCouponModalOpen(false)} className="p-1 rounded-lg hover:bg-white/10">
                 <X className="w-5 h-5 text-white/80 hover:text-white" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveCoupon} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveCoupon} className="p-5 space-y-3.5 text-xs overflow-y-auto flex-1">
               <div>
                 <label className="block font-bold mb-1 text-charcoal">
                   Promo Code Name <span className="text-red-500">*</span>
@@ -1772,7 +2144,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
+              <div className="sticky bottom-0 bg-white pt-3 pb-1 border-t border-gray-100 flex gap-2">
                 <button
                   type="submit"
                   className="flex-1 py-2.5 bg-forest hover:bg-forest-dark text-white rounded-xl font-bold transition-colors shadow"

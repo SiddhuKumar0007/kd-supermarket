@@ -50,7 +50,7 @@ export const CartDrawer: React.FC = () => {
         className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in"
       />
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
           {/* Header */}
           <div className="p-4 bg-forest text-white flex items-center justify-between shadow-sm">
@@ -170,7 +170,7 @@ export const CartDrawer: React.FC = () => {
 
           {/* Footer & Checkout Action */}
           {cart.length > 0 && (
-            <div className="p-4 bg-white border-t border-gray-200 space-y-3">
+            <div className="p-4 bg-white border-t border-gray-200 space-y-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {/* Cost Breakdown */}
               <div className="space-y-1.5 text-xs">
                 <div className="flex justify-between text-charcoal-muted">

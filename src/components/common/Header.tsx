@@ -206,8 +206,8 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          {/* Search Bar with Autocomplete */}
-          <div ref={searchRef} className="flex-1 max-w-xl relative">
+          {/* Search Bar with Autocomplete (Desktop) */}
+          <div ref={searchRef} className="hidden md:block flex-1 max-w-xl relative">
             <form onSubmit={handleSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
@@ -461,6 +461,37 @@ export const Header: React.FC = () => {
               </span>
             </button>
           </div>
+        </div>
+
+        {/* Mobile Full-Width Search Input (md:hidden) */}
+        <div className="md:hidden mt-2.5 relative">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Search atta, dal, oil, ghee, biscuits, snacks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              className="w-full pl-9 pr-10 py-2.5 bg-ivory-50 border border-gray-200 rounded-full text-xs text-charcoal placeholder-charcoal-light focus:outline-none focus:border-forest focus:ring-2 focus:ring-forest/20 focus:bg-white transition-all shadow-xs"
+            />
+            <Search className="w-4 h-4 text-charcoal-light absolute left-3 pointer-events-none" />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-9 text-charcoal-light hover:text-charcoal p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <button
+              type="submit"
+              className="absolute right-1.5 bg-forest hover:bg-forest-dark text-white p-1.5 rounded-full transition-colors"
+              aria-label="Submit search"
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+          </form>
         </div>
       </div>
 

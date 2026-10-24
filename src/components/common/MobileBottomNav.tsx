@@ -1,6 +1,7 @@
 import React from 'react';
-import { Home, Grid, Search, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Home, Grid, Search, ShoppingBag, ShoppingCart, ShieldCheck } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
+import { isStoreAdmin } from '../../types';
 
 export const MobileBottomNav: React.FC = () => {
   const { currentView, setCurrentView, cartCount, setIsCartOpen, user, setIsAuthModalOpen, setAuthModalMode } = useStore();
@@ -14,8 +15,10 @@ export const MobileBottomNav: React.FC = () => {
     }
   };
 
+  const isAdminUser = isStoreAdmin(user);
+
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 py-2 px-3 shadow-lg flex items-center justify-around">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] px-3 shadow-lg flex items-center justify-around select-none">
       {/* Home */}
       <button
         onClick={() => setCurrentView('home')}
@@ -38,16 +41,31 @@ export const MobileBottomNav: React.FC = () => {
         <span>Categories</span>
       </button>
 
-      {/* Track Orders */}
-      <button
-        onClick={() => setCurrentView('track-order')}
-        className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
-          currentView === 'track-order' ? 'text-forest font-bold' : 'text-charcoal-muted'
-        }`}
-      >
-        <ShoppingBag className="w-5 h-5" />
-        <span>Track</span>
-      </button>
+      {/* Admin Panel button (for Admin) OR Track (for regular users) */}
+      {isAdminUser ? (
+        <button
+          onClick={() => setCurrentView('admin')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
+            currentView === 'admin' ? 'text-forest font-bold' : 'text-charcoal-muted'
+          }`}
+        >
+          <div className="relative">
+            <ShieldCheck className="w-5 h-5 text-forest" />
+            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </div>
+          <span className="text-forest font-bold">Admin</span>
+        </button>
+      ) : (
+        <button
+          onClick={() => setCurrentView('track-order')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
+            currentView === 'track-order' ? 'text-forest font-bold' : 'text-charcoal-muted'
+          }`}
+        >
+          <ShoppingBag className="w-5 h-5" />
+          <span>Track</span>
+        </button>
+      )}
 
       {/* My Account / Orders */}
       <button

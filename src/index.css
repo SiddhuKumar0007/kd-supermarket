@@ -129,3 +129,17 @@
 .animate-soft-pulse {
   animation: softPulse 2s infinite ease-in-out;
 }
+
+/* Mobile Optimization & Touch Utilities */
+html {
+  -webkit-tap-highlight-color: transparent;
+  scroll-behavior: smooth;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
