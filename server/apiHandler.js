@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import handler from '../api/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,24 +55,16 @@ export function apiMiddleware(req, res, next) {
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = urlObj.pathname;
 
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    });
-    res.end();
-    return;
-  }
-
   if (!pathname.startsWith('/api')) {
     return next();
   }
 
-  handleApiRequest(req, res, urlObj, pathname).catch(err => {
-    console.error('API Error:', err);
-    sendJson(res, 500, { error: 'Internal Server Error', message: err.message });
+  // Try live MongoDB handler first
+  handler(req, res).catch(err => {
+    console.warn('MongoDB API Handler failed, falling back to local store.json...', err.message);
+    handleApiRequest(req, res, urlObj, pathname).catch(e => {
+      sendJson(res, 500, { error: 'Internal Server Error', message: e.message });
+    });
   });
 }
 

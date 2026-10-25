@@ -297,14 +297,19 @@ export const api = {
       tags: productData.tags || ['daily-essentials']
     };
 
-    // Async ping local server if on dev
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/products`, {
+    try {
+      const res = await fetch(`${API_BASE}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProduct),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const prods = getLocalProducts().filter(p => p.id !== saved.id);
+        saveLocalProducts([saved, ...prods]);
+        return saved;
+      }
+    } catch (e) {}
 
     const prods = getLocalProducts();
     const updatedList = [newProduct, ...prods];
@@ -313,13 +318,25 @@ export const api = {
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/products/${id}`, {
+    try {
+      const res = await fetch(`${API_BASE}/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const prods = getLocalProducts();
+        const idx = prods.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          prods[idx] = saved;
+        } else {
+          prods.unshift(saved);
+        }
+        saveLocalProducts(prods);
+        return saved;
+      }
+    } catch (e) {}
 
     const prods = getLocalProducts();
     const idx = prods.findIndex(p => p.id === id);
@@ -332,11 +349,11 @@ export const api = {
   },
 
   async deleteProduct(id: string): Promise<boolean> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/products/${id}`, {
+    try {
+      await fetch(`${API_BASE}/products/${id}`, {
         method: 'DELETE',
-      }).catch(() => {});
-    }
+      });
+    } catch (e) {}
 
     const prods = getLocalProducts().filter(p => p.id !== id);
     saveLocalProducts(prods);
@@ -395,13 +412,19 @@ export const api = {
       ]
     };
 
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/orders`, {
+    try {
+      const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newOrder),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const orders = getLocalOrders().filter(o => o.id !== saved.id);
+        saveLocalOrders([saved, ...orders]);
+        return saved;
+      }
+    } catch (e) {}
 
     const orders = getLocalOrders();
     const updatedOrders = [newOrder, ...orders];
@@ -443,13 +466,21 @@ export const api = {
   },
 
   async updateOrderStatus(id: string, status: string, note?: string, paymentStatus?: string): Promise<Order> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/orders/${id}/status`, {
+    try {
+      const res = await fetch(`${API_BASE}/orders/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, note, paymentStatus }),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const orders = getLocalOrders();
+        const idx = orders.findIndex(o => o.id === id);
+        if (idx !== -1) orders[idx] = saved;
+        saveLocalOrders(orders);
+        return saved;
+      }
+    } catch (e) {}
 
     const orders = getLocalOrders();
     const idx = orders.findIndex(o => o.id === id);
@@ -481,13 +512,19 @@ export const api = {
   },
 
   async updateSettings(updates: Partial<StoreSettings>): Promise<StoreSettings> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/settings`, {
+    try {
+      const res = await fetch(`${API_BASE}/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = data.settings || data;
+        saveLocalSettings(updated);
+        return updated;
+      }
+    } catch (e) {}
     const current = getLocalSettings();
     const updated = { ...current, ...updates };
     saveLocalSettings(updated);
@@ -559,13 +596,19 @@ export const api = {
       expiryDate: couponData.expiryDate || '2027-12-31'
     };
 
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/admin/coupons`, {
+    try {
+      const res = await fetch(`${API_BASE}/coupons`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCoupon),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const coupons = getLocalCoupons().filter(c => c.id !== saved.id);
+        saveLocalCoupons([saved, ...coupons]);
+        return saved;
+      }
+    } catch (e) {}
 
     const coupons = getLocalCoupons();
     const updated = [newCoupon, ...coupons];
@@ -574,13 +617,21 @@ export const api = {
   },
 
   async updateCoupon(id: string, updates: Partial<PromoCode>): Promise<PromoCode> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/admin/coupons/${id}`, {
+    try {
+      const res = await fetch(`${API_BASE}/coupons/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
-      }).catch(() => {});
-    }
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        const coupons = getLocalCoupons();
+        const idx = coupons.findIndex(c => c.id === id);
+        if (idx !== -1) coupons[idx] = saved;
+        saveLocalCoupons(coupons);
+        return saved;
+      }
+    } catch (e) {}
 
     const coupons = getLocalCoupons();
     const idx = coupons.findIndex(c => c.id === id);
@@ -593,11 +644,11 @@ export const api = {
   },
 
   async deleteCoupon(id: string): Promise<boolean> {
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/admin/coupons/${id}`, {
+    try {
+      await fetch(`${API_BASE}/coupons/${id}`, {
         method: 'DELETE',
-      }).catch(() => {});
-    }
+      });
+    } catch (e) {}
 
     const coupons = getLocalCoupons().filter(c => c.id !== id);
     saveLocalCoupons(coupons);
