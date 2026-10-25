@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, ChevronRight, Lock, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, ShieldCheck, CheckCircle2, Lock } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
 
 const GoogleIcon = ({ className = "w-5 h-5 mr-3 flex-shrink-0" }: { className?: string }) => (
@@ -35,14 +35,9 @@ export const AuthModal: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [googleButtonRendered, setGoogleButtonRendered] = useState(false);
 
-  // Fallback Google selector
-  const [showManualGoogle, setShowManualGoogle] = useState(false);
-  const [manualEmail, setManualEmail] = useState('');
-  const [manualName, setManualName] = useState('');
-
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
 
-  // Render Google Official Button when modal opens
+  // Render Official Google One-Tap & Sign-In Button
   useEffect(() => {
     if (!isAuthModalOpen) return;
 
@@ -99,49 +94,12 @@ export const AuthModal: React.FC = () => {
   const handleGoogleClick = () => {
     if (googleClientId && (window as any).google?.accounts?.id) {
       try {
-        (window as any).google.accounts.id.prompt((notification: any) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            setShowManualGoogle(true);
-          }
-        });
+        (window as any).google.accounts.id.prompt();
         return;
       } catch (err) {
-        console.warn('Google prompt fallback', err);
+        console.warn('Google prompt error', err);
       }
     }
-    setShowManualGoogle(true);
-  };
-
-  const handleAccountSelect = async (account: { name: string; email: string; avatar: string }) => {
-    setLoading(true);
-    setErrorMsg('');
-    try {
-      const ok = await loginWithGoogle({
-        name: account.name,
-        email: account.email,
-        avatar: account.avatar,
-        googleId: `g-${Date.now()}`
-      });
-      if (ok) {
-        setIsAuthModalOpen(false);
-        setShowManualGoogle(false);
-      }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Google login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleManualGoogleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualEmail) return;
-    const finalName = manualName || manualEmail.split('@')[0];
-    await handleAccountSelect({
-      name: finalName,
-      email: manualEmail,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(finalName)}`
-    });
   };
 
   return (
@@ -150,10 +108,7 @@ export const AuthModal: React.FC = () => {
         {/* Header */}
         <div className="relative p-6 bg-gradient-to-br from-forest to-forest-dark text-white text-center">
           <button
-            onClick={() => {
-              setIsAuthModalOpen(false);
-              setShowManualGoogle(false);
-            }}
+            onClick={() => setIsAuthModalOpen(false)}
             className="absolute top-4 right-4 text-white/70 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -179,232 +134,47 @@ export const AuthModal: React.FC = () => {
             </div>
           )}
 
-          {/* MAIN GOOGLE LOGIN SECTION */}
-          {!showManualGoogle && (
-            <div className="space-y-4">
-              <div className="text-center space-y-1">
-                <p className="text-xs text-charcoal font-semibold">
-                  Access your orders, saved addresses & quick delivery
-                </p>
-                <p className="text-[11px] text-charcoal-muted">
-                  Safe, fast, and password-free login with your Google Account.
-                </p>
-              </div>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-charcoal font-semibold">
+              Access your orders, saved addresses & quick delivery
+            </p>
+            <p className="text-[11px] text-charcoal-muted">
+              Safe, fast, and password-free login with your Google Account.
+            </p>
+          </div>
 
-              {/* Single Google Sign-In Button */}
-              <div className="flex justify-center min-h-[44px]">
-                <div id="google-signin-wrapper" className={googleButtonRendered ? "flex justify-center w-full" : "hidden"}></div>
+          {/* Official Google Sign-In Button */}
+          <div className="flex justify-center min-h-[44px]">
+            <div id="google-signin-wrapper" className={googleButtonRendered ? "flex justify-center w-full" : "hidden"}></div>
 
-                {!googleButtonRendered && (
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={handleGoogleClick}
-                    className="w-full py-3 px-4 bg-white hover:bg-gray-50 text-charcoal font-bold text-xs rounded-full border-2 border-gray-200 shadow-sm hover:shadow transition-all flex items-center justify-center active:scale-[0.98]"
-                  >
-                    <GoogleIcon />
-                    <span>Continue with Google</span>
-                  </button>
-                )}
-              </div>
+            {!googleButtonRendered && (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleGoogleClick}
+                className="w-full py-3 px-4 bg-white hover:bg-gray-50 text-charcoal font-bold text-xs rounded-full border-2 border-gray-200 shadow-sm hover:shadow transition-all flex items-center justify-center active:scale-[0.98]"
+              >
+                <GoogleIcon />
+                <span>Continue with Google</span>
+              </button>
+            )}
+          </div>
 
-              {/* Direct Quick Sign-In Option (Bypasses Google Popup for Customers & Admins) */}
-              <div className="pt-2 border-t border-gray-100 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setShowManualGoogle(true)}
-                  className="w-full py-2.5 px-3 bg-forest/5 hover:bg-forest/10 border border-forest/20 text-forest rounded-2xl text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.99]"
-                >
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-forest" />
-                    <span>Direct 1-Tap Sign-In / Enter Any Gmail</span>
-                  </span>
-                  <span className="text-[10px] text-forest/70 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
-                    Customer & Admin <ChevronRight className="w-3.5 h-3.5" />
-                  </span>
-                </button>
-              </div>
-
-              {/* Benefits Checklist */}
-              <div className="pt-1 border-t border-gray-100 space-y-2">
-                <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
-                  <span>No passwords to remember</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
-                  <span>Live order tracking in Madhubani town</span>
-                </div>
-                <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
-                  <span>Instant checkout with 1-click reordering</span>
-                </div>
-              </div>
+          {/* Benefits Checklist */}
+          <div className="pt-2 border-t border-gray-100 space-y-2">
+            <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
+              <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
+              <span>No passwords to remember</span>
             </div>
-          )}
-
-          {/* Direct & Fallback Google Account Selector */}
-          {showManualGoogle && (
-            <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                <div>
-                  <h4 className="text-xs font-bold text-charcoal">Quick 1-Tap Sign-In</h4>
-                  <p className="text-[10px] text-charcoal-muted">Choose your profile or enter any Gmail</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowManualGoogle(false)}
-                  className="text-xs text-forest font-bold hover:underline px-2 py-1 rounded-lg hover:bg-forest/5"
-                >
-                  ← Back
-                </button>
-              </div>
-
-              {/* SECTION 1: CUSTOMER ACCESS */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-charcoal uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5 text-forest" />
-                  <span>Customer Login (Place Orders & Delivery)</span>
-                </div>
-
-                <form onSubmit={handleManualGoogleSubmit} className="p-3 bg-gray-50/80 rounded-2xl border border-gray-200/80 space-y-2">
-                  <p className="text-[11px] text-charcoal font-medium">Log in with your own Gmail:</p>
-                  <input
-                    type="text"
-                    placeholder="Your Name (Optional)"
-                    value={manualName}
-                    onChange={(e) => setManualName(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-forest"
-                  />
-                  <input
-                    type="email"
-                    required
-                    placeholder="yourname@gmail.com"
-                    value={manualEmail}
-                    onChange={(e) => setManualEmail(e.target.value)}
-                    className="w-full px-3 py-1.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-forest"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading || !manualEmail}
-                    className="w-full py-2 bg-forest text-white rounded-xl text-xs font-bold hover:bg-forest-dark transition-all flex items-center justify-center gap-1.5 active:scale-[0.99] shadow-sm disabled:opacity-50"
-                  >
-                    <GoogleIcon className="w-4 h-4 mr-1 text-white" />
-                    <span>Continue as Customer</span>
-                  </button>
-                </form>
-
-                <p className="text-[10px] text-charcoal-muted font-medium pt-1">Or 1-tap customer demo accounts:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleAccountSelect({
-                      name: 'Rajeshwar Jha',
-                      email: 'rajeshwar.jha@gmail.com',
-                      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80'
-                    })}
-                    className="p-2 rounded-xl border border-gray-200 hover:border-forest/40 hover:bg-forest/5 flex items-center gap-2 transition-colors text-left"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80"
-                      alt="Rajeshwar"
-                      className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-bold text-charcoal truncate">Rajeshwar Jha</p>
-                      <p className="text-[9px] text-charcoal-muted">Customer</p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleAccountSelect({
-                      name: 'Priya Kumari',
-                      email: 'priya.kumari.bihar@gmail.com',
-                      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80'
-                    })}
-                    className="p-2 rounded-xl border border-gray-200 hover:border-forest/40 hover:bg-forest/5 flex items-center gap-2 transition-colors text-left"
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
-                      alt="Priya"
-                      className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-bold text-charcoal truncate">Priya Kumari</p>
-                      <p className="text-[9px] text-charcoal-muted">Customer</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* SECTION 2: STORE ADMIN ACCESS */}
-              <div className="pt-2 border-t border-gray-100 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-charcoal uppercase tracking-wider">
-                  <ShieldCheck className="w-3.5 h-3.5 text-forest" />
-                  <span>Store Admin Access (Staff & Owners)</span>
-                </div>
-
-                <div className="space-y-1.5">
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleAccountSelect({
-                      name: 'Siddhu Kumar',
-                      email: 'siddhukumar2006@gmail.com',
-                      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80'
-                    })}
-                    className="w-full p-2 rounded-xl border-2 border-forest/30 bg-forest/5 hover:bg-forest/10 flex items-center justify-between transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                        alt="Siddhu Kumar"
-                        className="w-6 h-6 rounded-full object-cover border border-forest"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-bold text-charcoal">Siddhu Kumar</p>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-forest text-white">Owner Admin</span>
-                        </div>
-                        <p className="text-[10px] text-charcoal-muted">siddhukumar2006@gmail.com</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-forest" />
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={loading}
-                    onClick={() => handleAccountSelect({
-                      name: 'Vyapaar Webs',
-                      email: 'vyapaarwebs@gmail.com',
-                      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80'
-                    })}
-                    className="w-full p-2 rounded-xl border-2 border-forest/30 bg-forest/5 hover:bg-forest/10 flex items-center justify-between transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
-                        alt="Vyapaar Webs"
-                        className="w-6 h-6 rounded-full object-cover border border-forest"
-                      />
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-bold text-charcoal">Vyapaar Webs</p>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-forest text-white">Admin</span>
-                        </div>
-                        <p className="text-[10px] text-charcoal-muted">vyapaarwebs@gmail.com</p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-forest" />
-                  </button>
-                </div>
-              </div>
+            <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
+              <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
+              <span>Live order tracking in Madhubani town</span>
             </div>
-          )}
+            <div className="flex items-center gap-2 text-[11px] text-charcoal-muted">
+              <CheckCircle2 className="w-3.5 h-3.5 text-forest flex-shrink-0" />
+              <span>Instant checkout with 1-click reordering</span>
+            </div>
+          </div>
 
           {/* Footer note */}
           <div className="pt-3 text-center text-[11px] text-charcoal-muted border-t border-gray-100 flex items-center justify-center gap-1.5">
