@@ -31,14 +31,14 @@ export const CheckoutPage: React.FC = () => {
     showToast 
   } = useStore();
 
-  // Form Fields (Comprehensive Madhubani Address)
-  const [fullName, setFullName] = useState(user?.name || '');
-  const [phone, setPhone] = useState(user?.phone || '+91 ');
+  // Form Fields (Clean initial state - zero auto-fill)
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [alternatePhone, setAlternatePhone] = useState('');
-  const [email, setEmail] = useState(user?.email || '');
+  const [email, setEmail] = useState('');
   const [houseNo, setHouseNo] = useState('');
   const [street, setStreet] = useState('');
-  const [locality, setLocality] = useState(selectedLocation.replace(', Madhubani (847211)', ''));
+  const [locality, setLocality] = useState('');
   const [landmark, setLandmark] = useState('');
   const [pinCode, setPinCode] = useState('847211');
   const [deliverySlot, setDeliverySlot] = useState('Today: 4:00 PM – 8:00 PM (Evening)');
@@ -204,7 +204,7 @@ export const CheckoutPage: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmitOrder}>
+      <form onSubmit={handleSubmitOrder} autoComplete="off" autoCorrect="off" autoCapitalize="off" data-lpignore="true">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
           {/* Left Column: Delivery Details & Payment */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-6">
@@ -234,6 +234,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_cust_fullname"
+                    autoComplete="off"
                     placeholder="e.g. Rameshwar Prasad Jha"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -246,7 +248,9 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="tel"
                     required
-                    placeholder="+91 98350 21980"
+                    name="kd_cust_primary_phone"
+                    autoComplete="off"
+                    placeholder="e.g. 9835021980"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
@@ -257,6 +261,8 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block font-bold text-charcoal mb-1">Alternate Phone (Calling - Optional)</label>
                   <input
                     type="tel"
+                    name="kd_cust_alt_phone"
+                    autoComplete="off"
                     placeholder="e.g. 9811340853"
                     value={alternatePhone}
                     onChange={(e) => setAlternatePhone(e.target.value)}
@@ -268,6 +274,8 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block font-bold text-charcoal mb-1">Email Address (Optional for invoice)</label>
                   <input
                     type="email"
+                    name="kd_cust_email_addr"
+                    autoComplete="off"
                     placeholder="rameshwar.jha@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -290,6 +298,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_addr_house"
+                    autoComplete="off"
                     placeholder="e.g. House No. 24, 2nd Floor, Jha Niwas"
                     value={houseNo}
                     onChange={(e) => setHouseNo(e.target.value)}
@@ -302,6 +312,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_addr_street"
+                    autoComplete="off"
                     placeholder="e.g. Gali No. 3, Near Old Water Tank Road"
                     value={street}
                     onChange={(e) => setStreet(e.target.value)}
@@ -314,6 +326,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_addr_locality"
+                    autoComplete="off"
                     placeholder="e.g. Tirhut Colony / State Bank More / Suratganj"
                     value={locality}
                     onChange={(e) => setLocality(e.target.value)}
@@ -326,6 +340,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_addr_landmark"
+                    autoComplete="off"
                     placeholder="e.g. Near Watson High School / Opposite Durga Mandir"
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
@@ -348,6 +364,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
+                    name="kd_addr_pincode"
+                    autoComplete="off"
                     value={pinCode}
                     onChange={(e) => setPinCode(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"

@@ -230,8 +230,8 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [user]);
 
-  // Play realistic recurring supermarket order alert chime via Web Audio API
-  const playOrderAlarmSound = () => {
+  // High-volume piercing Police / Ambulance emergency siren via Web Audio API
+  const playPoliceAlarmSound = () => {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
@@ -240,30 +240,63 @@ export const AdminDashboard: React.FC = () => {
         ctx.resume().catch(() => {});
       }
       const now = ctx.currentTime;
-      
-      // Tone 1: High crisp ding
-      const osc1 = ctx.createOscillator();
-      const gain1 = ctx.createGain();
-      osc1.type = 'sine';
-      osc1.frequency.setValueAtTime(880, now); // A5
-      gain1.gain.setValueAtTime(0.35, now);
-      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      osc1.connect(gain1);
-      gain1.connect(ctx.destination);
-      osc1.start(now);
-      osc1.stop(now + 0.4);
+      const sirenDuration = 1.6;
 
-      // Tone 2: Harmonious dong
+      // Master Output with High Emergency Volume (0.85)
+      const masterGain = ctx.createGain();
+      masterGain.gain.setValueAtTime(0.85, now);
+      masterGain.gain.setValueAtTime(0.85, now + sirenDuration - 0.08);
+      masterGain.gain.exponentialRampToValueAtTime(0.001, now + sirenDuration);
+      masterGain.connect(ctx.destination);
+
+      // Primary Horn: Sawtooth wave for sharp piercing emergency siren horn
+      const osc1 = ctx.createOscillator();
+      osc1.type = 'sawtooth';
+
+      // Secondary Horn: Square wave slightly detuned for real police siren acoustic beat
       const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(1174.66, now + 0.2); // D6
-      gain2.gain.setValueAtTime(0.4, now + 0.2);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.start(now + 0.2);
-      osc2.stop(now + 0.85);
+      osc2.type = 'square';
+      const horn2Gain = ctx.createGain();
+      horn2Gain.gain.setValueAtTime(0.4, now);
+      horn2Gain.gain.setValueAtTime(0.4, now + sirenDuration - 0.08);
+      horn2Gain.gain.exponentialRampToValueAtTime(0.001, now + sirenDuration);
+      osc2.connect(horn2Gain);
+      horn2Gain.connect(masterGain);
+
+      // 3 Rapid Police / Ambulance Siren Cycles (Wail & Yelp)
+      // Cycle 1: 0.0s - 0.5s (650Hz -> 1350Hz -> 650Hz)
+      osc1.frequency.setValueAtTime(650, now);
+      osc1.frequency.exponentialRampToValueAtTime(1350, now + 0.25);
+      osc1.frequency.exponentialRampToValueAtTime(650, now + 0.50);
+
+      osc2.frequency.setValueAtTime(657, now);
+      osc2.frequency.exponentialRampToValueAtTime(1357, now + 0.25);
+      osc2.frequency.exponentialRampToValueAtTime(657, now + 0.50);
+
+      // Cycle 2: 0.5s - 1.0s (650Hz -> 1350Hz -> 650Hz)
+      osc1.frequency.setValueAtTime(650, now + 0.50);
+      osc1.frequency.exponentialRampToValueAtTime(1350, now + 0.75);
+      osc1.frequency.exponentialRampToValueAtTime(650, now + 1.00);
+
+      osc2.frequency.setValueAtTime(657, now + 0.50);
+      osc2.frequency.exponentialRampToValueAtTime(1357, now + 0.75);
+      osc2.frequency.exponentialRampToValueAtTime(657, now + 1.00);
+
+      // Cycle 3: 1.0s - 1.55s (Rapid Yelp 800Hz -> 1450Hz -> 750Hz)
+      osc1.frequency.setValueAtTime(800, now + 1.00);
+      osc1.frequency.exponentialRampToValueAtTime(1450, now + 1.25);
+      osc1.frequency.exponentialRampToValueAtTime(750, now + 1.55);
+
+      osc2.frequency.setValueAtTime(807, now + 1.00);
+      osc2.frequency.exponentialRampToValueAtTime(1457, now + 1.25);
+      osc2.frequency.exponentialRampToValueAtTime(757, now + 1.55);
+
+      osc1.connect(masterGain);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + sirenDuration);
+      osc2.stop(now + sirenDuration);
     } catch (e) {}
   };
 
@@ -277,9 +310,9 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     let timer: any = null;
     if (isAlarmRinging) {
-      playOrderAlarmSound();
+      playPoliceAlarmSound();
       timer = setInterval(() => {
-        playOrderAlarmSound();
+        playPoliceAlarmSound();
       }, 1800);
     }
     return () => {
@@ -640,6 +673,16 @@ export const AdminDashboard: React.FC = () => {
           </button>
 
           <button
+            type="button"
+            onClick={playPoliceAlarmSound}
+            className="px-2.5 py-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 active:scale-95 text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md"
+            title="Click to test High-Volume Police/Ambulance Alarm Siren"
+          >
+            <BellRing className="w-3.5 h-3.5 text-white animate-bounce" />
+            <span>Test Siren 🚨</span>
+          </button>
+
+          <button
             onClick={() => setCurrentView('home')}
             className="px-3 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-semibold transition-colors"
           >
@@ -671,7 +714,7 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                   <span className="text-xs font-bold text-amber-200 flex items-center gap-1">
                     <Radio className="w-3.5 h-3.5 animate-ping" />
-                    <span>{isAlarmRinging ? '🔊 Alarm Ringing...' : '🔇 Alarm Silenced'}</span>
+                    <span>{isAlarmRinging ? '🚨 Police Siren Ringing (High Volume)...' : '🔇 Alarm Silenced'}</span>
                   </span>
                 </div>
                 <h3 className="font-heading font-black text-base sm:text-lg text-white mt-1">
