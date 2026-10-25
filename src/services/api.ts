@@ -700,12 +700,16 @@ export const api = {
   // Authentication
   async login(email: string, password?: string): Promise<{ token: string; user: User }> {
     const normalizedEmail = (email || '').toLowerCase().trim();
-    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
     const isAdmin = ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123');
+
+    const adminName = normalizedEmail === 'kdsuperm@gmail.com' 
+      ? 'KD Supermarket Desk (Admin)' 
+      : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)');
 
     const user: User = {
       id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-${Date.now()}`,
-      name: isAdmin ? (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)') : normalizedEmail.split('@')[0],
+      name: isAdmin ? adminName : normalizedEmail.split('@')[0],
       email: normalizedEmail,
       role: isAdmin ? 'admin' : 'customer',
       phone: '+91 98113 40853',
@@ -746,9 +750,11 @@ export const api = {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
     const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
-    const defaultAdminName = normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)';
+    const defaultAdminName = normalizedEmail === 'kdsuperm@gmail.com'
+      ? 'KD Supermarket Desk (Admin)'
+      : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)');
 
     const user: User = {
       id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-g-${Date.now()}`,

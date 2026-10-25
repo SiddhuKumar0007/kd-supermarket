@@ -116,7 +116,8 @@ export interface User {
 
 export const ADMIN_EMAILS = [
   'siddhukumar2006@gmail.com',
-  'vyapaarwebs@gmail.com'
+  'vyapaarwebs@gmail.com',
+  'kdsuperm@gmail.com'
 ];
 
 export const isStoreAdmin = (user: User | null | undefined): boolean => {

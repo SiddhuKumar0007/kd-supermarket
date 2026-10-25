@@ -418,9 +418,11 @@ export default async function handler(req, res) {
     if (pathname === '/api/auth/login' && method === 'POST') {
       const { email, password } = await parseBody(req);
       const normalizedEmail = (email || '').toLowerCase().trim();
-      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
       if (ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123')) {
-        const adminDisplayName = normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)';
+        const adminDisplayName = normalizedEmail === 'kdsuperm@gmail.com'
+          ? 'KD Supermarket Desk (Admin)'
+          : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)');
         return sendJson(res, 200, {
           token: `admin-token-${normalizedEmail.split('@')[0]}`,
           user: {
@@ -464,9 +466,11 @@ export default async function handler(req, res) {
       if (!email) return sendJson(res, 400, { error: 'Valid Google account email is required' });
 
       const normalizedEmail = email.toLowerCase().trim();
-      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com'];
+      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
       const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
-      const displayName = isAdmin ? (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)') : (name || email.split('@')[0]);
+      const displayName = isAdmin 
+        ? (normalizedEmail === 'kdsuperm@gmail.com' ? 'KD Supermarket Desk (Admin)' : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)'))
+        : (name || email.split('@')[0]);
 
       const user = {
         id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-g-${Date.now()}`,
