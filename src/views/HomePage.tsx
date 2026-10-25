@@ -146,6 +146,14 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-12 md:space-y-16 pb-8 sm:pb-12 w-full max-w-full overflow-hidden">
+      {/* Store Paused Notice if Admin has toggled OFF */}
+      {settings.acceptingOrders === false && (
+        <div className="bg-red-600 text-white px-4 py-2.5 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-md">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping flex-shrink-0" />
+          <span>Notice: Store is temporarily not accepting new online orders. Orders will resume shortly!</span>
+        </div>
+      )}
+
       {/* 1. Hero Banner */}
       <section className="relative bg-gradient-to-br from-forest-dark via-forest to-[#074D32] text-white overflow-hidden py-6 sm:py-14 md:py-20 shadow-md w-full max-w-full">
         {/* Ambient radial glows */}

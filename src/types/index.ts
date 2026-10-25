@@ -143,6 +143,8 @@ export interface StoreSettings {
   isRazorpayTestMode: boolean;
   codEnabled: boolean;
   whatsappOrderingEnabled: boolean;
+  acceptingOrders?: boolean;
+  pausedMessage?: string;
 }
 
 export interface ToastMessage {

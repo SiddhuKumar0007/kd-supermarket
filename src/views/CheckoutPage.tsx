@@ -42,10 +42,8 @@ export const CheckoutPage: React.FC = () => {
   const [deliverySlot, setDeliverySlot] = useState('Today: 4:00 PM – 8:00 PM (Evening)');
   const [instructions, setInstructions] = useState('');
 
-  // Payment State
-  const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'Card/NetBanking' | 'Cash on Delivery' | 'WhatsApp'>('UPI');
-  const [upiOption, setUpiOption] = useState<'qr' | 'id'>('qr');
-  const [upiId, setUpiId] = useState('');
+  // Payment State (Locked to Cash on Delivery)
+  const [paymentMethod, setPaymentMethod] = useState<'Cash on Delivery'>('Cash on Delivery');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -108,6 +106,11 @@ export const CheckoutPage: React.FC = () => {
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (settings.acceptingOrders === false) {
+      showToast('Store is currently paused for new orders. Please check back shortly or call us.', 'error');
+      return;
+    }
+
     if (!fullName.trim() || !phone.trim() || !street.trim()) {
       showToast('Please provide your name, mobile number, and full address.', 'error');
       return;
@@ -116,15 +119,8 @@ export const CheckoutPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // 1. If Razorpay Cards/Netbanking was selected, trigger test flow
-      let paymentStatus: 'PENDING' | 'PAID' = paymentMethod === 'Cash on Delivery' ? 'PENDING' : 'PAID';
-      
-      if (paymentMethod === 'Card/NetBanking') {
-        const rzpOrder = await api.createRazorpayOrder(grandTotal, `rec_${Date.now()}`);
-        // Simulate immediate test completion in sandbox
-        await api.verifyPayment(rzpOrder.id, `pay_test_${Date.now()}`);
-        paymentStatus = 'PAID';
-      }
+      // Cash on Delivery Order Creation
+      const paymentStatus: 'PENDING' = 'PENDING';
 
       // 2. Create the real server order via backend API
       const orderPayload = {
@@ -154,19 +150,13 @@ export const CheckoutPage: React.FC = () => {
         deliveryFee,
         discountAmount,
         total: grandTotal,
-        paymentMethod: paymentMethod === 'WhatsApp' ? 'WhatsApp Order Assistance' : paymentMethod,
+        paymentMethod: 'Cash on Delivery',
         paymentStatus,
         deliverySlot,
         instructions
       };
 
       const createdOrder = await api.createOrder(orderPayload);
-
-      // If WhatsApp option, also open chat
-      if (paymentMethod === 'WhatsApp') {
-        const msg = `Hello KD Supermarket! I placed order #${createdOrder.id} for ₹${grandTotal} on your website. Please confirm delivery to ${locality}, Madhubani.`;
-        window.open(`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=${encodeURIComponent(msg)}`, '_blank');
-      }
 
       clearCart();
       showToast(`Order ${createdOrder.id} created successfully!`, 'success');
@@ -204,6 +194,19 @@ export const CheckoutPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
           {/* Left Column: Delivery Details & Payment */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+            {/* Store Paused Alert */}
+            {settings.acceptingOrders === false && (
+              <div className="p-4 rounded-2xl bg-red-50 border-2 border-red-300 text-red-800 space-y-1 shadow-sm">
+                <div className="flex items-center gap-2 font-black text-sm text-red-700">
+                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                  <span>Store is Currently Not Accepting Orders</span>
+                </div>
+                <p className="text-xs text-red-700 leading-relaxed">
+                  KD Supermarket manager has temporarily paused accepting new orders. Please check back shortly or call us directly at +91 98113 40853.
+                </p>
+              </div>
+            )}
+
             {/* 1. Contact & Customer Details */}
             <div className="bg-white p-4 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl border border-gray-200 shadow-card space-y-3 sm:space-y-4">
               <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
@@ -356,195 +359,41 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* 3. Payment Method Selection */}
-            <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-200 shadow-card space-y-4">
-              <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">3</span>
-                <span>Select Payment Method</span>
-              </h3>
+            {/* 3. Payment Method: Cash on Delivery Exclusive */}
+            <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-200 shadow-card space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">3</span>
+                  <span>Payment Method</span>
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-fresh/15 text-forest border border-fresh/30">
+                  Cash on Delivery Active
+                </span>
+              </div>
 
-              <div className="space-y-3">
-                {/* UPI Option */}
-                <div 
-                  onClick={() => setPaymentMethod('UPI')}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'UPI' 
-                      ? 'border-forest bg-forest/5 shadow-sm' 
-                      : 'border-gray-200 hover:border-forest/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center text-forest">
-                        <QrCode className="w-5 h-5 text-forest" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-xs text-charcoal">UPI (Google Pay, PhonePe, Paytm, BHIM)</p>
-                        <p className="text-[11px] text-charcoal-muted">Instant zero-fee payment with QR or UPI ID</p>
-                      </div>
-                    </div>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'UPI'} 
-                      onChange={() => setPaymentMethod('UPI')} 
-                      className="accent-forest"
-                    />
+              {/* Cash on Delivery Card (Sole Option) */}
+              <div className="p-4 rounded-2xl border-2 border-forest bg-forest/5 shadow-xs flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-forest text-white flex items-center justify-center shadow-xs">
+                    <Truck className="w-5 h-5 text-white" />
                   </div>
-
-                  {paymentMethod === 'UPI' && (
-                    <div className="mt-3 pt-3 border-t border-forest/10 space-y-3 text-xs">
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setUpiOption('qr')}
-                          className={`px-3 py-1.5 rounded-lg font-bold text-xs ${upiOption === 'qr' ? 'bg-forest text-white' : 'bg-gray-100 text-charcoal'}`}
-                        >
-                          Scan Store QR Code
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setUpiOption('id')}
-                          className={`px-3 py-1.5 rounded-lg font-bold text-xs ${upiOption === 'id' ? 'bg-forest text-white' : 'bg-gray-100 text-charcoal'}`}
-                        >
-                          Enter UPI ID
-                        </button>
-                      </div>
-
-                      {upiOption === 'qr' ? (
-                        <div className="p-3 bg-white rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center gap-4">
-                          {/* Demo Store QR visual */}
-                          <div className="w-24 h-24 bg-forest/10 p-2 rounded-xl flex items-center justify-center border border-forest/20 text-center">
-                            <QrCode className="w-16 h-16 text-forest" />
-                          </div>
-                          <div className="text-xs space-y-1">
-                            <p className="font-bold text-charcoal">KD SUPERMARKET STORE UPI</p>
-                            <p className="text-[11px] text-charcoal-muted font-mono">kdsupermarket@upi</p>
-                            <p className="text-[11px] text-fresh-dark font-medium">✓ Verified Merchant in Madhubani</p>
-                            <p className="text-[10px] text-charcoal-light">Amount to be paid: ₹{grandTotal}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="yourname@okhdfcbank"
-                            value={upiId}
-                            onChange={(e) => setUpiId(e.target.value)}
-                            className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-forest"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => showToast('UPI ID Verified', 'success')}
-                            className="px-3 py-2 bg-fresh text-white rounded-xl text-xs font-bold"
-                          >
-                            Verify
-                          </button>
-                        </div>
-                      )}
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-black text-xs text-charcoal">Cash on Delivery (COD)</p>
+                      <span className="px-1.5 py-0.2 bg-warmYellow text-charcoal text-[9px] font-black rounded">100% Verified</span>
                     </div>
-                  )}
-                </div>
-
-                {/* Card / Netbanking (Razorpay Test Mode) */}
-                <div 
-                  onClick={() => setPaymentMethod('Card/NetBanking')}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'Card/NetBanking' 
-                      ? 'border-forest bg-forest/5 shadow-sm' 
-                      : 'border-gray-200 hover:border-forest/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center text-forest">
-                        <CreditCard className="w-5 h-5 text-forest" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-xs text-charcoal">Cards, Net Banking & Wallets (Razorpay)</p>
-                        <p className="text-[11px] text-charcoal-muted">Visa, Mastercard, RuPay, SBI, HDFC, ICICI Netbanking</p>
-                      </div>
-                    </div>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'Card/NetBanking'} 
-                      onChange={() => setPaymentMethod('Card/NetBanking')} 
-                      className="accent-forest"
-                    />
-                  </div>
-
-                  {paymentMethod === 'Card/NetBanking' && (
-                    <div className="mt-3 pt-3 border-t border-forest/10 text-xs text-charcoal-muted space-y-1">
-                      <p className="flex items-center gap-1.5 text-forest font-semibold">
-                        <Lock className="w-3.5 h-3.5" />
-                        <span>Secure 256-bit encrypted checkout via Razorpay ({settings.isRazorpayTestMode ? 'Test Mode Enabled' : 'Live'})</span>
-                      </p>
-                      <p className="text-[11px]">
-                        Payment will be verified and authenticated via server-side verification before confirming your supermarket order.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Cash on Delivery */}
-                <div 
-                  onClick={() => setPaymentMethod('Cash on Delivery')}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'Cash on Delivery' 
-                      ? 'border-forest bg-forest/5 shadow-sm' 
-                      : 'border-gray-200 hover:border-forest/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-fresh/10 flex items-center justify-center text-fresh">
-                        <Truck className="w-5 h-5 text-fresh" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-xs text-charcoal">Cash on Delivery (COD)</p>
-                        <p className="text-[11px] text-charcoal-muted">Pay in cash or UPI to delivery agent at your doorstep</p>
-                      </div>
-                    </div>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'Cash on Delivery'} 
-                      onChange={() => setPaymentMethod('Cash on Delivery')} 
-                      className="accent-forest"
-                    />
+                    <p className="text-[11px] text-charcoal-muted mt-0.5">Pay in cash or UPI to delivery agent at your doorstep</p>
                   </div>
                 </div>
-
-                {/* WhatsApp Assisted Ordering */}
-                <div 
-                  onClick={() => setPaymentMethod('WhatsApp')}
-                  className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                    paymentMethod === 'WhatsApp' 
-                      ? 'border-forest bg-forest/5 shadow-sm' 
-                      : 'border-gray-200 hover:border-forest/30'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-fresh/15 flex items-center justify-center text-fresh-dark">
-                        <MessageCircle className="w-5 h-5 fill-fresh text-white" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-xs text-charcoal">Order via WhatsApp Assistance</p>
-                        <p className="text-[11px] text-charcoal-muted">Directly book and chat with KD Supermarket desk on WhatsApp</p>
-                      </div>
-                    </div>
-                    <input 
-                      type="radio" 
-                      name="paymentMethod" 
-                      checked={paymentMethod === 'WhatsApp'} 
-                      onChange={() => setPaymentMethod('WhatsApp')} 
-                      className="accent-forest"
-                    />
-                  </div>
+                <div className="w-5 h-5 rounded-full bg-forest text-white flex items-center justify-center flex-shrink-0">
+                  <CheckCircle2 className="w-4 h-4" />
                 </div>
               </div>
+
+              <p className="text-[10px] text-charcoal-muted flex items-center gap-1.5 pt-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-forest" />
+                <span>Pay safely when you receive your fresh items in Madhubani town.</span>
+              </p>
             </div>
           </div>
 
@@ -648,14 +497,21 @@ export const CheckoutPage: React.FC = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 bg-forest hover:bg-forest-dark disabled:opacity-50 text-white rounded-xl text-sm font-extrabold transition-all shadow-md flex items-center justify-center gap-2 group active:scale-95"
+                disabled={isSubmitting || settings.acceptingOrders === false}
+                className={`w-full py-3.5 rounded-xl text-sm font-extrabold transition-all shadow-md flex items-center justify-center gap-2 group ${
+                  settings.acceptingOrders === false
+                    ? 'bg-gray-400 text-white cursor-not-allowed opacity-80'
+                    : 'bg-forest hover:bg-forest-dark disabled:opacity-50 text-white active:scale-95'
+                }`}
               >
                 {isSubmitting ? (
                   <span>Processing Order...</span>
+                ) : settings.acceptingOrders === false ? (
+                  <span>Store Paused — Orders Disabled</span>
                 ) : (
                   <>
-                    <span>Confirm & Place Order (₹{grandTotal})</span>
+                    <Truck className="w-4 h-4 text-warmYellow" />
+                    <span>Confirm Cash on Delivery Order (₹{grandTotal})</span>
                     <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}

@@ -304,6 +304,12 @@ export default async function handler(req, res) {
       }
 
       if (method === 'POST') {
+        const settingsCol = db.collection('settings');
+        const currentSettings = await settingsCol.findOne({ _id: 'global_settings' });
+        if (currentSettings && currentSettings.acceptingOrders === false) {
+          return sendJson(res, 403, { error: 'Store is currently not accepting new orders. Please contact store directly on WhatsApp or call +91 98113 40853.' });
+        }
+
         const body = await parseBody(req);
         if (!body.items || body.items.length === 0) {
           return sendJson(res, 400, { error: 'Order must contain items' });

@@ -33,7 +33,14 @@ import {
   Copy,
   Calendar,
   Phone,
-  MessageCircle
+  MessageCircle,
+  Bell,
+  BellRing,
+  Volume2,
+  VolumeX,
+  Power,
+  Eye,
+  Radio
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
@@ -63,7 +70,7 @@ const ALL_STORE_CATEGORIES = [
 ];
 
 export const AdminDashboard: React.FC = () => {
-  const { user, logout, setCurrentView, showToast } = useStore();
+  const { user, logout, setCurrentView, showToast, refreshSettings } = useStore();
 
   // Active Admin Tab
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'inventory' | 'categories' | 'coupons' | 'settings'>('products');
@@ -76,6 +83,10 @@ export const AdminDashboard: React.FC = () => {
   const [coupons, setCoupons] = useState<PromoCode[]>([]);
   const [adminSettings, setAdminSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Live Order Alarm & Master Switch States
+  const [isAlarmSilenced, setIsAlarmSilenced] = useState(false);
+  const [acknowledgedOrderIds, setAcknowledgedOrderIds] = useState<string[]>([]);
 
   // Promo Code Filters & Modals
   const [couponSearch, setCouponSearch] = useState('');
@@ -218,6 +229,115 @@ export const AdminDashboard: React.FC = () => {
       loadAdminData();
     }
   }, [user]);
+
+  // Play realistic recurring supermarket order alert chime via Web Audio API
+  const playOrderAlarmSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+      const now = ctx.currentTime;
+      
+      // Tone 1: High crisp ding
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(880, now); // A5
+      gain1.gain.setValueAtTime(0.35, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.4);
+
+      // Tone 2: Harmonious dong
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1174.66, now + 0.2); // D6
+      gain2.gain.setValueAtTime(0.4, now + 0.2);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.2);
+      osc2.stop(now + 0.85);
+    } catch (e) {}
+  };
+
+  // Find unconfirmed incoming orders
+  const unconfirmedOrders = orders.filter(
+    o => o.orderStatus === 'Order Placed' && !acknowledgedOrderIds.includes(o.id)
+  );
+  const isAlarmRinging = !isAlarmSilenced && unconfirmedOrders.length > 0;
+
+  // Sound loop: plays repeatedly every 1.8 seconds while there is an unconfirmed order
+  useEffect(() => {
+    let timer: any = null;
+    if (isAlarmRinging) {
+      playOrderAlarmSound();
+      timer = setInterval(() => {
+        playOrderAlarmSound();
+      }, 1800);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isAlarmRinging]);
+
+  // Periodic polling every 5 seconds for new orders
+  useEffect(() => {
+    if (!isAuthorizedAdmin) return;
+    const interval = setInterval(async () => {
+      try {
+        const freshOrders = await api.getOrders();
+        setOrders(prev => {
+          const prevPlacedIds = prev.filter(o => o.orderStatus === 'Order Placed').map(o => o.id);
+          const freshPlaced = freshOrders.filter(o => o.orderStatus === 'Order Placed');
+          const hasBrandNew = freshPlaced.some(o => !prevPlacedIds.includes(o.id));
+          if (hasBrandNew) {
+            setIsAlarmSilenced(false); // Unsilenec immediately for brand new incoming order!
+          }
+          return freshOrders;
+        });
+      } catch (e) {}
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [isAuthorizedAdmin]);
+
+  // Confirm order and stop alarm
+  const handleConfirmAndStopAlarm = async (orderId: string) => {
+    try {
+      await api.updateOrderStatus(orderId, 'Order Confirmed', 'Order confirmed by store admin');
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: 'Order Confirmed' as any } : o));
+      setAcknowledgedOrderIds(prev => [...prev, orderId]);
+      showToast(`Order #${orderId} confirmed! Alarm stopped.`, 'success');
+    } catch (e) {
+      showToast('Failed to confirm order', 'error');
+    }
+  };
+
+  // Master Store Switch: Toggle Accepting Orders ON/OFF
+  const handleToggleAcceptingOrders = async () => {
+    if (!adminSettings) return;
+    const currentAccepting = adminSettings.acceptingOrders !== false;
+    const nextState = !currentAccepting;
+    try {
+      const updated = await api.updateSettings({ ...adminSettings, acceptingOrders: nextState });
+      setAdminSettings(updated);
+      await refreshSettings();
+      showToast(
+        nextState 
+          ? '🟢 Store is now OPEN & ACCEPTING ORDERS!' 
+          : '🔴 Store is PAUSED! New customer orders are now blocked.',
+        nextState ? 'success' : 'info'
+      );
+    } catch (e) {
+      showToast('Failed to update store order status', 'error');
+    }
+  };
 
   // If not logged in as authorized admin, show access restricted screen
   if (!isAuthorizedAdmin) {
@@ -477,7 +597,25 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+          {/* Master Store Toggle: Orders ON/OFF */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xs">
+            <span className="text-[11px] font-bold text-white/90">Store Orders:</span>
+            <button
+              type="button"
+              onClick={handleToggleAcceptingOrders}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-md active:scale-95 ${
+                adminSettings?.acceptingOrders !== false
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  : 'bg-red-600 hover:bg-red-700 text-white'
+              }`}
+              title="Click to pause or resume accepting customer orders"
+            >
+              <Power className="w-3.5 h-3.5" />
+              <span>{adminSettings?.acceptingOrders !== false ? '🟢 Store ON (Open)' : '🔴 Store OFF (Paused)'}</span>
+            </button>
+          </div>
+
           <button
             onClick={loadAdminData}
             className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors"
@@ -503,6 +641,70 @@ export const AdminDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* 🚨 ACTIVE ORDER ALARM & NOTIFICATION BANNER */}
+      {unconfirmedOrders.length > 0 && (
+        <div className="bg-gradient-to-r from-red-600 via-amber-600 to-red-600 text-white p-4 sm:p-5 rounded-3xl shadow-2xl border-2 border-white/30 animate-pulse space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-white text-red-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                <BellRing className="w-7 h-7 animate-bounce text-red-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded text-[10px] font-black bg-white text-red-600 uppercase tracking-wider">
+                    {unconfirmedOrders.length} New Unconfirmed Order{unconfirmedOrders.length > 1 ? 's' : ''}
+                  </span>
+                  <span className="text-xs font-bold text-amber-200 flex items-center gap-1">
+                    <Radio className="w-3.5 h-3.5 animate-ping" />
+                    <span>{isAlarmRinging ? '🔊 Alarm Ringing...' : '🔇 Alarm Silenced'}</span>
+                  </span>
+                </div>
+                <h3 className="font-heading font-black text-base sm:text-lg text-white mt-1">
+                  Order #{unconfirmedOrders[0].id} • ₹{unconfirmedOrders[0].total} ({unconfirmedOrders[0].customerName})
+                </h3>
+                <p className="text-xs text-white/90">
+                  {unconfirmedOrders[0].customerPhone} • {unconfirmedOrders[0].address?.street}, {unconfirmedOrders[0].address?.locality}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => handleConfirmAndStopAlarm(unconfirmedOrders[0].id)}
+                className="flex-1 sm:flex-none px-4 py-2.5 bg-white text-red-700 hover:bg-ivory rounded-xl text-xs font-black shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95"
+              >
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Confirm Order & Stop Alarm</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('orders');
+                  setOrderStatusFilter('Order Placed');
+                  setOrderSearch(unconfirmedOrders[0].id);
+                }}
+                className="px-3.5 py-2.5 bg-black/30 hover:bg-black/50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+              >
+                <Eye className="w-4 h-4" />
+                <span>View Order</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsAlarmSilenced(!isAlarmSilenced)}
+                className="px-3 py-2.5 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                title={isAlarmSilenced ? "Resume Alarm" : "Silence Alarm"}
+              >
+                {isAlarmSilenced ? <Volume2 className="w-4 h-4 text-warmYellow" /> : <VolumeX className="w-4 h-4 text-white" />}
+                <span className="hidden md:inline">{isAlarmSilenced ? 'Unmute' : 'Silence'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 overflow-x-auto gap-2 text-xs font-bold no-scrollbar py-1 scroll-smooth">
