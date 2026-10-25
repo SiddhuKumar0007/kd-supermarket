@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShoppingBag, 
   Sparkles, 
@@ -13,7 +13,13 @@ import {
   HeartHandshake, 
   BadgePercent,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Video,
+  Image as ImageIcon
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/products/ProductCard';
@@ -26,6 +32,29 @@ export const HomePage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [showVideo, setShowVideo] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
 
   const heroSlides = [
     {
@@ -152,11 +181,28 @@ export const HomePage: React.FC = () => {
                 </button>
 
                 <button
+                  onClick={() => {
+                    setShowVideo(true);
+                    setTimeout(() => {
+                      if (videoRef.current) {
+                        videoRef.current.currentTime = 0;
+                        videoRef.current.play().catch(() => {});
+                        setIsPlaying(true);
+                      }
+                    }, 50);
+                  }}
+                  className="px-4 py-2.5 sm:px-5 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-xs sm:text-sm transition-all border border-white/25 flex items-center gap-1.5 backdrop-blur-md active:scale-95 shadow-sm"
+                >
+                  <Play className="w-3.5 h-3.5 text-warmYellow fill-warmYellow" />
+                  <span>Watch Store Tour</span>
+                </button>
+
+                <button
                   onClick={() => setCurrentView('offers')}
                   className="px-4 py-2.5 sm:px-6 sm:py-3.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-xl text-xs sm:text-sm transition-colors border border-white/20 flex items-center gap-1.5 backdrop-blur-xs"
                 >
                   <BadgePercent className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warmYellow" />
-                  <span>Explore Offers</span>
+                  <span>Offers</span>
                 </button>
 
                 <a
@@ -166,7 +212,7 @@ export const HomePage: React.FC = () => {
                   className="px-4 py-2.5 sm:px-5 sm:py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-xl text-xs sm:text-sm transition-colors flex items-center gap-1.5 shadow-xs"
                 >
                   <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
-                  <span>Order on WhatsApp</span>
+                  <span>WhatsApp</span>
                 </a>
               </div>
 
@@ -206,53 +252,135 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Hero Visual Card with New Front Image & Floating Badges */}
+            {/* Hero Visual Card with Live Video / Front Image & Floating Badges */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-sm sm:max-w-lg">
+              <div className="relative w-full max-w-sm sm:max-w-md">
                 {/* Floating Top Badge */}
-                <div className="absolute top-2 right-2 sm:-top-3.5 sm:right-4 z-20 bg-white/95 backdrop-blur-md text-charcoal px-2.5 py-1 rounded-full shadow-md border border-gray-100 flex items-center gap-1.5 text-[10px] sm:text-xs font-extrabold">
+                <div className="absolute top-2 right-2 sm:-top-3.5 sm:right-4 z-30 bg-white/95 backdrop-blur-md text-charcoal px-2.5 py-1 rounded-full shadow-md border border-gray-100 flex items-center gap-1.5 text-[10px] sm:text-xs font-extrabold">
                   <span className="w-1.5 h-1.5 rounded-full bg-fresh animate-ping" />
                   <span className="text-forest">⚡ Express 2-Hour Delivery</span>
                 </div>
 
-                {/* Main Front Image Card */}
-                <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-2 sm:border-4 border-white/20 bg-forest-dark group">
-                  <img
-                    key={heroSlides[activeSlide].image}
-                    src={heroSlides[activeSlide].image}
-                    alt={heroSlides[activeSlide].title}
-                    className="w-full h-52 sm:h-72 md:h-96 object-cover transition-all duration-700 ease-out group-hover:scale-105"
-                  />
-                  
-                  {/* Subtle Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
-                    <span className="inline-block px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-1 w-fit">
-                      {heroSlides[activeSlide].badge}
-                    </span>
-                    <h3 className="font-heading font-black text-base sm:text-xl text-white drop-shadow">
-                      {heroSlides[activeSlide].title}
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-ivory-100 mt-0.5 max-w-sm drop-shadow line-clamp-1 sm:line-clamp-none">
-                      {heroSlides[activeSlide].subtitle}
-                    </p>
+                {/* Mode Switcher: Video vs Photos */}
+                <div className="absolute top-2 left-2 z-30 flex items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-xl border border-white/20">
+                  <button
+                    onClick={() => {
+                      setShowVideo(true);
+                      setTimeout(() => {
+                        if (videoRef.current) {
+                          videoRef.current.play().catch(() => {});
+                          setIsPlaying(true);
+                        }
+                      }, 50);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all ${
+                      showVideo ? 'bg-warmYellow text-charcoal shadow-sm' : 'text-white/80 hover:text-white'
+                    }`}
+                  >
+                    <Video className="w-3 h-3" />
+                    <span>Store Video</span>
+                  </button>
+                  <button
+                    onClick={() => setShowVideo(false)}
+                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all ${
+                      !showVideo ? 'bg-white text-forest shadow-sm' : 'text-white/80 hover:text-white'
+                    }`}
+                  >
+                    <ImageIcon className="w-3 h-3" />
+                    <span>Photos</span>
+                  </button>
+                </div>
 
-                    {/* Slide Dots */}
-                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
-                      {heroSlides.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setActiveSlide(i)}
-                          className={`h-1.5 rounded-full transition-all ${
-                            activeSlide === i ? 'w-6 sm:w-8 bg-warmYellow' : 'w-2 bg-white/40 hover:bg-white/70'
-                          }`}
-                          aria-label={`Go to slide ${i + 1}`}
-                        />
-                      ))}
-                      <span className="text-[9px] sm:text-[10px] text-white/70 ml-auto font-medium">
-                        {heroSlides[activeSlide].promo}
-                      </span>
+                {/* Main Media Card */}
+                <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white/25 bg-black group aspect-[4/5] sm:aspect-[9/12] max-h-[440px] flex items-center justify-center">
+                  {showVideo ? (
+                    <div className="relative w-full h-full bg-black flex items-center justify-center">
+                      <video
+                        ref={videoRef}
+                        src="/videos/kd-store-intro.mp4"
+                        autoPlay
+                        loop
+                        muted={isMuted}
+                        playsInline
+                        onPlay={() => setIsPlaying(true)}
+                        onPause={() => setIsPlaying(false)}
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Video Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
+
+                      {/* Video Controls Overlay */}
+                      <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between text-white">
+                        <div className="min-w-0 flex-1 mr-2">
+                          <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-0.5">
+                            KD SUPERMARKET • Madhubani
+                          </span>
+                          <p className="text-xs font-bold text-white drop-shadow truncate">
+                            State Bank More • Tirhut Colony
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={togglePlay}
+                            className="w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-90"
+                            title={isPlaying ? "Pause Video" : "Play Video"}
+                          >
+                            {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={toggleMute}
+                            className="w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-90"
+                            title={isMuted ? "Unmute Sound" : "Mute Sound"}
+                          >
+                            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-warmYellow" />}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* Image Slide Display */
+                    <div className="relative w-full h-full">
+                      <img
+                        key={heroSlides[activeSlide].image}
+                        src={heroSlides[activeSlide].image}
+                        alt={heroSlides[activeSlide].title}
+                        className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105"
+                      />
+                      {/* Subtle Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
+                        <span className="inline-block px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-1 w-fit">
+                          {heroSlides[activeSlide].badge}
+                        </span>
+                        <h3 className="font-heading font-black text-base sm:text-xl text-white drop-shadow">
+                          {heroSlides[activeSlide].title}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-ivory-100 mt-0.5 max-w-sm drop-shadow line-clamp-1 sm:line-clamp-none">
+                          {heroSlides[activeSlide].subtitle}
+                        </p>
+
+                        {/* Slide Dots */}
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
+                          {heroSlides.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setActiveSlide(i)}
+                              className={`h-1.5 rounded-full transition-all ${
+                                activeSlide === i ? 'w-6 sm:w-8 bg-warmYellow' : 'w-2 bg-white/40 hover:bg-white/70'
+                              }`}
+                              aria-label={`Go to slide ${i + 1}`}
+                            />
+                          ))}
+                          <span className="text-[9px] sm:text-[10px] text-white/70 ml-auto font-medium">
+                            {heroSlides[activeSlide].promo}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bottom Badges on Tablet/Desktop */}
