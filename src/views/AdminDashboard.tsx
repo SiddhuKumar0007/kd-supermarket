@@ -222,13 +222,9 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const isAuthorizedAdmin = isStoreAdmin(user);
-
   useEffect(() => {
-    if (isAuthorizedAdmin) {
-      loadAdminData();
-    }
-  }, [user]);
+    loadAdminData();
+  }, []);
 
   // Alert sound selection: 'chime' (Swiggy/Zomato Store Chime - pleasant & loud), 'bell' (Temple Ding-Dong), 'trill' (POS Trill), 'siren' (Police Siren)
   const [alarmTone, setAlarmTone] = useState<'chime' | 'bell' | 'trill' | 'siren'>('chime');
@@ -356,7 +352,6 @@ export const AdminDashboard: React.FC = () => {
 
   // Periodic polling every 5 seconds for new orders
   useEffect(() => {
-    if (!isAuthorizedAdmin) return;
     const interval = setInterval(async () => {
       try {
         const freshOrders = await api.getOrders();
@@ -372,7 +367,7 @@ export const AdminDashboard: React.FC = () => {
       } catch (e) {}
     }, 5000);
     return () => clearInterval(interval);
-  }, [isAuthorizedAdmin]);
+  }, []);
 
   // Confirm order and stop alarm
   const handleConfirmAndStopAlarm = async (orderId: string) => {
@@ -406,35 +401,7 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // If not logged in as authorized admin, show access restricted screen
-  if (!isAuthorizedAdmin) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-20 text-center animate-in fade-in duration-200">
-        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-card space-y-5">
-          <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto shadow-xs">
-            <Lock className="w-8 h-8" />
-          </div>
-          <div>
-            <h1 className="font-heading font-black text-xl text-charcoal">
-              Access Restricted
-            </h1>
-            <p className="text-xs text-charcoal-muted mt-2 leading-relaxed">
-              KD Supermarket Admin Dashboard is private. Only authorized store administrators (<span className="font-bold text-forest">siddhukumar2006@gmail.com</span> / <span className="font-bold text-forest">vyapaarwebs@gmail.com</span>) can access this page after Google sign-in.
-            </p>
-          </div>
 
-          <div className="pt-2">
-            <button
-              onClick={() => setCurrentView('home')}
-              className="w-full py-3 bg-forest hover:bg-forest-dark text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95"
-            >
-              Return to Store
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // --- Handlers for Admin Operations ---
 
