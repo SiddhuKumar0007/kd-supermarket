@@ -230,8 +230,10 @@ export const AdminDashboard: React.FC = () => {
     }
   }, [user]);
 
-  // High-volume piercing Police / Ambulance emergency siren via Web Audio API
-  const playPoliceAlarmSound = () => {
+  // Alert sound selection: 'chime' (Swiggy/Zomato Store Chime - pleasant & loud), 'bell' (Temple Ding-Dong), 'trill' (POS Trill), 'siren' (Police Siren)
+  const [alarmTone, setAlarmTone] = useState<'chime' | 'bell' | 'trill' | 'siren'>('chime');
+
+  const playOrderAlarmSound = (tone = alarmTone) => {
     try {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
@@ -240,63 +242,95 @@ export const AdminDashboard: React.FC = () => {
         ctx.resume().catch(() => {});
       }
       const now = ctx.currentTime;
-      const sirenDuration = 1.6;
 
-      // Master Output with High Emergency Volume (0.85)
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.85, now);
-      masterGain.gain.setValueAtTime(0.85, now + sirenDuration - 0.08);
-      masterGain.gain.exponentialRampToValueAtTime(0.001, now + sirenDuration);
-      masterGain.connect(ctx.destination);
+      if (tone === 'chime') {
+        // 🎵 Pleasant Swiggy/Zomato/Blinkit Store Chime (Bright, melodious multi-bell chime)
+        const notes = [
+          { freq: 784, time: 0.0, dur: 0.35, gain: 0.55 },    // G5
+          { freq: 1046.5, time: 0.14, dur: 0.35, gain: 0.65 }, // C6
+          { freq: 1318.5, time: 0.28, dur: 0.35, gain: 0.70 }, // E6
+          { freq: 1568, time: 0.42, dur: 0.65, gain: 0.80 },   // G6
+          { freq: 1318.5, time: 0.85, dur: 0.35, gain: 0.60 }, // E6
+          { freq: 1568, time: 1.0, dur: 0.75, gain: 0.85 }     // G6
+        ];
 
-      // Primary Horn: Sawtooth wave for sharp piercing emergency siren horn
-      const osc1 = ctx.createOscillator();
-      osc1.type = 'sawtooth';
+        notes.forEach(({ freq, time, dur, gain }) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + time);
 
-      // Secondary Horn: Square wave slightly detuned for real police siren acoustic beat
-      const osc2 = ctx.createOscillator();
-      osc2.type = 'square';
-      const horn2Gain = ctx.createGain();
-      horn2Gain.gain.setValueAtTime(0.4, now);
-      horn2Gain.gain.setValueAtTime(0.4, now + sirenDuration - 0.08);
-      horn2Gain.gain.exponentialRampToValueAtTime(0.001, now + sirenDuration);
-      osc2.connect(horn2Gain);
-      horn2Gain.connect(masterGain);
+          // Subtle ringing overtone
+          const osc2 = ctx.createOscillator();
+          const g2 = ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(freq * 2, now + time);
+          g2.gain.setValueAtTime(gain * 0.25, now + time);
+          g2.gain.exponentialRampToValueAtTime(0.001, now + time + dur * 0.8);
 
-      // 3 Rapid Police / Ambulance Siren Cycles (Wail & Yelp)
-      // Cycle 1: 0.0s - 0.5s (650Hz -> 1350Hz -> 650Hz)
-      osc1.frequency.setValueAtTime(650, now);
-      osc1.frequency.exponentialRampToValueAtTime(1350, now + 0.25);
-      osc1.frequency.exponentialRampToValueAtTime(650, now + 0.50);
+          g.gain.setValueAtTime(gain, now + time);
+          g.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
 
-      osc2.frequency.setValueAtTime(657, now);
-      osc2.frequency.exponentialRampToValueAtTime(1357, now + 0.25);
-      osc2.frequency.exponentialRampToValueAtTime(657, now + 0.50);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc2.connect(g2);
+          g2.connect(ctx.destination);
 
-      // Cycle 2: 0.5s - 1.0s (650Hz -> 1350Hz -> 650Hz)
-      osc1.frequency.setValueAtTime(650, now + 0.50);
-      osc1.frequency.exponentialRampToValueAtTime(1350, now + 0.75);
-      osc1.frequency.exponentialRampToValueAtTime(650, now + 1.00);
-
-      osc2.frequency.setValueAtTime(657, now + 0.50);
-      osc2.frequency.exponentialRampToValueAtTime(1357, now + 0.75);
-      osc2.frequency.exponentialRampToValueAtTime(657, now + 1.00);
-
-      // Cycle 3: 1.0s - 1.55s (Rapid Yelp 800Hz -> 1450Hz -> 750Hz)
-      osc1.frequency.setValueAtTime(800, now + 1.00);
-      osc1.frequency.exponentialRampToValueAtTime(1450, now + 1.25);
-      osc1.frequency.exponentialRampToValueAtTime(750, now + 1.55);
-
-      osc2.frequency.setValueAtTime(807, now + 1.00);
-      osc2.frequency.exponentialRampToValueAtTime(1457, now + 1.25);
-      osc2.frequency.exponentialRampToValueAtTime(757, now + 1.55);
-
-      osc1.connect(masterGain);
-
-      osc1.start(now);
-      osc2.start(now);
-      osc1.stop(now + sirenDuration);
-      osc2.stop(now + sirenDuration);
+          osc.start(now + time);
+          osc.stop(now + time + dur);
+          osc2.start(now + time);
+          osc2.stop(now + time + dur);
+        });
+      } else if (tone === 'bell') {
+        // 🔔 Deep Resonant Temple / Big Doorbell (Ding - Dong)
+        const dings = [
+          { freq: 987.77, time: 0.0, dur: 0.7, gain: 0.7 },
+          { freq: 659.25, time: 0.35, dur: 1.2, gain: 0.8 }
+        ];
+        dings.forEach(({ freq, time, dur, gain }) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + time);
+          g.gain.setValueAtTime(gain, now + time);
+          g.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(now + time);
+          osc.stop(now + time + dur);
+        });
+      } else if (tone === 'trill') {
+        // 📟 Retail POS Electronic Trill
+        for (let i = 0; i < 4; i++) {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          const t = now + i * 0.16;
+          osc.frequency.setValueAtTime(i % 2 === 0 ? 1200 : 1600, t);
+          g.gain.setValueAtTime(0.65, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + 0.15);
+        }
+      } else {
+        // 🚨 Police Siren
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sawtooth';
+        g.gain.setValueAtTime(0.7, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 1.4);
+        osc.frequency.setValueAtTime(700, now);
+        osc.frequency.exponentialRampToValueAtTime(1300, now + 0.35);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.7);
+        osc.frequency.exponentialRampToValueAtTime(1300, now + 1.05);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 1.4);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.4);
+      }
     } catch (e) {}
   };
 
@@ -306,19 +340,19 @@ export const AdminDashboard: React.FC = () => {
   );
   const isAlarmRinging = !isAlarmSilenced && unconfirmedOrders.length > 0;
 
-  // Sound loop: plays repeatedly every 1.8 seconds while there is an unconfirmed order
+  // Sound loop: plays repeatedly every 2 seconds while there is an unconfirmed order
   useEffect(() => {
     let timer: any = null;
     if (isAlarmRinging) {
-      playPoliceAlarmSound();
+      playOrderAlarmSound();
       timer = setInterval(() => {
-        playPoliceAlarmSound();
-      }, 1800);
+        playOrderAlarmSound();
+      }, 2000);
     }
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isAlarmRinging]);
+  }, [isAlarmRinging, alarmTone]);
 
   // Periodic polling every 5 seconds for new orders
   useEffect(() => {
@@ -672,15 +706,34 @@ export const AdminDashboard: React.FC = () => {
             <span>Sync</span>
           </button>
 
-          <button
-            type="button"
-            onClick={playPoliceAlarmSound}
-            className="px-2.5 py-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 active:scale-95 text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-md"
-            title="Click to test High-Volume Police/Ambulance Alarm Siren"
-          >
-            <BellRing className="w-3.5 h-3.5 text-white animate-bounce" />
-            <span>Test Siren 🚨</span>
-          </button>
+          {/* Sound Tone Selector & Test Button */}
+          <div className="flex items-center gap-1 bg-black/25 px-2 py-1 rounded-xl border border-white/20">
+            <span className="text-[10px] uppercase font-bold text-amber-200 hidden sm:inline">Alert Tone:</span>
+            <select
+              value={alarmTone}
+              onChange={(e) => {
+                const newTone = e.target.value as any;
+                setAlarmTone(newTone);
+                playOrderAlarmSound(newTone);
+              }}
+              className="bg-transparent text-white font-bold text-xs py-1 px-1 focus:outline-none cursor-pointer"
+              title="Select incoming order alert sound"
+            >
+              <option value="chime" className="text-charcoal bg-white">🎵 Store Chime (Zomato/Blinkit)</option>
+              <option value="bell" className="text-charcoal bg-white">🔔 Resonant Bell / Ding-Dong</option>
+              <option value="trill" className="text-charcoal bg-white">📟 POS Electronic Trill</option>
+              <option value="siren" className="text-charcoal bg-white">🚨 Emergency Siren</option>
+            </select>
+            <button
+              type="button"
+              onClick={() => playOrderAlarmSound(alarmTone)}
+              className="px-2 py-1 bg-amber-400 hover:bg-amber-300 active:scale-95 text-forest-dark font-black rounded-lg text-xs flex items-center gap-1 transition-all shadow-sm"
+              title="Click to test selected sound"
+            >
+              <Volume2 className="w-3.5 h-3.5" />
+              <span>Test 🔊</span>
+            </button>
+          </div>
 
           <button
             onClick={() => setCurrentView('home')}
@@ -714,7 +767,7 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                   <span className="text-xs font-bold text-amber-200 flex items-center gap-1">
                     <Radio className="w-3.5 h-3.5 animate-ping" />
-                    <span>{isAlarmRinging ? '🚨 Police Siren Ringing (High Volume)...' : '🔇 Alarm Silenced'}</span>
+                    <span>{isAlarmRinging ? '🔊 New Order Alert Ringing...' : '🔇 Alarm Silenced'}</span>
                   </span>
                 </div>
                 <h3 className="font-heading font-black text-base sm:text-lg text-white mt-1">

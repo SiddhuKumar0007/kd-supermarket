@@ -171,6 +171,10 @@ export const CheckoutPage: React.FC = () => {
       };
 
       const createdOrder = await api.createOrder(orderPayload);
+      try {
+        localStorage.setItem('kd_latest_order_id', createdOrder.id);
+        localStorage.setItem('kd_latest_order_phone', createdOrder.customerPhone);
+      } catch (e) {}
 
       clearCart();
       showToast(`Order ${createdOrder.id} created successfully!`, 'success');

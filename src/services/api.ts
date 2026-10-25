@@ -456,13 +456,20 @@ export const api = {
   },
 
   async getOrderById(id: string): Promise<Order | null> {
+    const q = id.trim();
+    if (!q) return null;
     try {
-      const res = await fetch(`${API_BASE}/orders/${id}`);
+      const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(q)}`);
       if (res.ok) return await res.json();
     } catch (err) {}
 
     const orders = getLocalOrders();
-    return orders.find(o => o.id === id) || null;
+    const cleanQ = q.toLowerCase();
+    const numQ = q.replace(/[^0-9]/g, '');
+    return orders.find(o => 
+      o.id.toLowerCase() === cleanQ || 
+      (numQ.length >= 4 && o.customerPhone.replace(/[^0-9]/g, '').includes(numQ))
+    ) || null;
   },
 
   async updateOrderStatus(id: string, status: string, note?: string, paymentStatus?: string): Promise<Order> {

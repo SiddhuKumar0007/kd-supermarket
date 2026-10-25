@@ -335,6 +335,21 @@ export default async function handler(req, res) {
       }
     }
 
+    // 8.1 Single Order by ID or Phone (GET)
+    const singleOrderMatch = pathname.match(/^\/api\/orders\/([^/]+)$/);
+    if (singleOrderMatch && method === 'GET') {
+      const col = db.collection('orders');
+      const param = decodeURIComponent(singleOrderMatch[1]).trim();
+      const ord = await col.findOne({
+        $or: [
+          { id: { $regex: `^${param}$`, $options: 'i' } },
+          { customerPhone: { $regex: param } }
+        ]
+      });
+      if (!ord) return sendJson(res, 404, { error: 'Order not found' });
+      return sendJson(res, 200, ord);
+    }
+
     // 9. Order Status Update
     const orderStatusMatch = pathname.match(/^\/api\/orders\/([^/]+)\/status$/);
     if (orderStatusMatch && (method === 'PATCH' || method === 'PUT')) {

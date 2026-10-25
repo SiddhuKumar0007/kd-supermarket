@@ -20,30 +20,41 @@ import { Order } from '../types';
 
 export const TrackOrderPage: React.FC = () => {
   const { viewParam, settings, showToast } = useStore();
-  const [searchId, setSearchId] = useState<string>(
-    typeof viewParam === 'string' ? viewParam : viewParam?.id || 'KD-847211-1021'
-  );
+  
+  const getInitialId = () => {
+    if (typeof viewParam === 'string' && viewParam.trim()) return viewParam.trim();
+    if (viewParam?.id) return viewParam.id;
+    try {
+      const saved = localStorage.getItem('kd_latest_order_id');
+      if (saved) return saved;
+    } catch (e) {}
+    return '';
+  };
+
+  const [searchId, setSearchId] = useState<string>(getInitialId());
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isCancelling, setIsCancelling] = useState(false);
 
-  const fetchOrder = async (id: string) => {
+  const fetchOrder = async (id: string, silent = false) => {
     if (!id.trim()) return;
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setErrorMsg('');
       const data = await api.getOrderById(id.trim());
       if (data) {
         setOrder(data);
       } else {
-        setOrder(null);
-        setErrorMsg(`No order found matching ID "${id}". Please check your order reference number.`);
+        if (!silent) {
+          setOrder(null);
+          setErrorMsg(`No order found matching "${id}". Please check your Order ID (e.g. KD-847211-xxxx) or 10-digit mobile number.`);
+        }
       }
     } catch (err) {
-      setErrorMsg('Failed to fetch order status. Please check your connection.');
+      if (!silent) setErrorMsg('Failed to fetch order status. Please check your connection.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -52,6 +63,15 @@ export const TrackOrderPage: React.FC = () => {
       fetchOrder(searchId);
     }
   }, []);
+
+  // Live Auto-Sync: Polls every 4 seconds so customer sees admin updates in real-time
+  useEffect(() => {
+    if (!order || order.orderStatus === 'Delivered' || order.orderStatus === 'Cancelled') return;
+    const interval = setInterval(() => {
+      fetchOrder(order.id, true);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [order?.id, order?.orderStatus]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,10 +118,10 @@ export const TrackOrderPage: React.FC = () => {
           LIVE ORDER TRACKER
         </span>
         <h1 className="font-heading font-extrabold text-2xl md:text-3xl text-charcoal">
-          Track Your Supermarket Delivery
+          Live Order Tracking
         </h1>
         <p className="text-xs text-charcoal-muted max-w-md mx-auto">
-          Enter your Order ID (e.g. <strong>KD-847211-1021</strong>) to view live preparation and delivery status in Madhubani.
+          Apna Order ID (e.g. <strong>KD-847211-xxxx</strong>) ya 10-digit Mobile Number daalkar live tracking dekhein.
         </p>
 
         {/* Search input */}
@@ -110,7 +130,7 @@ export const TrackOrderPage: React.FC = () => {
             <input
               type="text"
               required
-              placeholder="e.g. KD-847211-1021"
+              placeholder="Enter Order ID or Mobile Number"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
               className="w-full pl-9 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-charcoal focus:outline-none focus:border-forest shadow-sm"
@@ -122,24 +142,13 @@ export const TrackOrderPage: React.FC = () => {
             disabled={loading}
             className="px-5 py-2.5 bg-forest hover:bg-forest-dark text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
           >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Track</span>}
+            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <span>Track Order</span>}
           </button>
         </form>
 
-        {/* Demo order quick links */}
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-charcoal-muted">
-          <span>Quick Demo Orders:</span>
-          <button onClick={() => { setSearchId('KD-847211-1021'); fetchOrder('KD-847211-1021'); }} className="text-forest font-bold hover:underline">
-            KD-847211-1021 (Out for Delivery)
-          </button>
-          <span>•</span>
-          <button onClick={() => { setSearchId('KD-847211-1022'); fetchOrder('KD-847211-1022'); }} className="text-forest font-bold hover:underline">
-            KD-847211-1022 (Preparing)
-          </button>
-          <span>•</span>
-          <button onClick={() => { setSearchId('KD-847211-1020'); fetchOrder('KD-847211-1020'); }} className="text-forest font-bold hover:underline">
-            KD-847211-1020 (Delivered)
-          </button>
+        <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-charcoal-muted">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+          <span>Real-time status synced directly with KD Supermarket desk</span>
         </div>
       </div>
 
@@ -193,6 +202,19 @@ export const TrackOrderPage: React.FC = () => {
               </a>
             </div>
           </div>
+
+          {/* Delivered Banner */}
+          {order.orderStatus === 'Delivered' && (
+            <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl text-white shadow-lg flex items-center gap-3">
+              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 text-white animate-bounce" />
+              <div>
+                <p className="font-heading font-black text-sm sm:text-base">Order Delivered Successfully! 🎉</p>
+                <p className="text-xs text-white/90 mt-0.5">
+                  Aapka order poora ho chuka hai aur aapke pate par deliver ho gaya hai. KD Supermarket Madhubani se shopping karne ke liye shukriya!
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Visual Progress Timeline */}
           {isCancelled ? (
@@ -272,13 +294,33 @@ export const TrackOrderPage: React.FC = () => {
                 <MapPin className="w-3.5 h-3.5 text-forest" />
                 <span>Delivery Destination</span>
               </h4>
-              <div className="p-3 bg-ivory-50 rounded-xl border border-gray-100 text-charcoal space-y-1">
-                <p className="font-bold">{order.address.fullName}</p>
-                <p className="text-charcoal-muted">Phone: {order.customerPhone}</p>
-                <p className="text-charcoal-muted">{order.address.street}, {order.address.locality}</p>
-                <p className="text-charcoal-muted">Landmark: {order.address.landmark}</p>
-                <p className="text-charcoal-muted">Madhubani, Bihar {order.address.pinCode}</p>
-                <p className="text-forest font-semibold mt-1">Slot: {order.deliverySlot}</p>
+              <div className="p-3.5 bg-ivory-50 rounded-2xl border border-gray-100 text-charcoal space-y-1.5">
+                <p className="font-bold text-sm text-charcoal">{order.address.fullName || order.customerName}</p>
+                <p className="text-charcoal-muted flex items-center gap-2">
+                  <span>📞 {order.customerPhone}</span>
+                  {order.address?.alternatePhone && <span>| Alt: {order.address.alternatePhone}</span>}
+                </p>
+                <p className="text-charcoal font-medium leading-relaxed">
+                  {order.address.fullAddressText || [
+                    order.address.houseNo ? `House/Flat: ${order.address.houseNo}` : null,
+                    order.address.street,
+                    order.address.locality,
+                    `Madhubani, Bihar - ${order.address.pinCode || '847211'}`
+                  ].filter(Boolean).join(', ')}
+                </p>
+                {order.address.landmark && (
+                  <p className="text-charcoal-muted text-[11px]">
+                    <strong className="text-charcoal">Landmark:</strong> {order.address.landmark}
+                  </p>
+                )}
+                {order.deliverySlot && (
+                  <p className="text-forest font-semibold mt-1">🕒 Slot: {order.deliverySlot}</p>
+                )}
+                {order.instructions && (
+                  <p className="text-amber-800 bg-amber-50 p-1.5 rounded-lg text-[10px] italic border border-amber-200">
+                    📝 Note: {order.instructions}
+                  </p>
+                )}
               </div>
             </div>
 
