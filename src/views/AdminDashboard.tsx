@@ -541,6 +541,20 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Helper to format comprehensive Madhubani delivery address
+  const getFullAddress = (addr: any) => {
+    if (!addr) return 'Address not available';
+    if (addr.fullAddressText) return addr.fullAddressText;
+    const parts = [
+      addr.houseNo ? `House/Flat No: ${addr.houseNo}` : null,
+      addr.street ? `Street/Gali: ${addr.street}` : null,
+      addr.landmark ? `Landmark: ${addr.landmark}` : null,
+      addr.locality ? `Locality: ${addr.locality}` : null,
+      `${addr.city || 'Madhubani'}, ${addr.state || 'Bihar'} - ${addr.pinCode || '847211'}`
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'Madhubani, Bihar';
+  };
+
   // Filter orders
   const filteredOrders = orders.filter(o => {
     if (orderStatusFilter !== 'all' && o.orderStatus !== orderStatusFilter) return false;
@@ -663,9 +677,23 @@ export const AdminDashboard: React.FC = () => {
                 <h3 className="font-heading font-black text-base sm:text-lg text-white mt-1">
                   Order #{unconfirmedOrders[0].id} • ₹{unconfirmedOrders[0].total} ({unconfirmedOrders[0].customerName})
                 </h3>
-                <p className="text-xs text-white/90">
-                  {unconfirmedOrders[0].customerPhone} • {unconfirmedOrders[0].address?.street}, {unconfirmedOrders[0].address?.locality}
-                </p>
+                <div className="text-xs text-white/95 mt-1 space-y-1">
+                  <p className="font-semibold flex items-center gap-2">
+                    <span>📞 {unconfirmedOrders[0].customerPhone}</span>
+                    {unconfirmedOrders[0].address?.alternatePhone && (
+                      <span className="text-amber-200">| Alt: {unconfirmedOrders[0].address.alternatePhone}</span>
+                    )}
+                  </p>
+                  <p className="flex items-start gap-1.5 bg-black/25 p-2 rounded-xl border border-white/20 text-amber-50">
+                    <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-300" />
+                    <span><strong>Delivery Pata:</strong> {getFullAddress(unconfirmedOrders[0].address)}</span>
+                  </p>
+                  {unconfirmedOrders[0].instructions && (
+                    <p className="text-[11px] text-amber-200 italic">
+                      Note: "{unconfirmedOrders[0].instructions}"
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -794,8 +822,11 @@ export const AdminDashboard: React.FC = () => {
                     <span className="text-charcoal-muted ml-2 font-semibold">
                       {o.customerName} ({o.customerPhone})
                     </span>
-                    <p className="text-[11px] text-charcoal-muted mt-0.5">
-                      {o.address.locality}, Madhubani • {o.items.length} items • ₹{o.total} ({o.paymentMethod})
+                    <p className="text-[11px] text-charcoal font-medium mt-0.5">
+                      📍 {getFullAddress(o.address)}
+                    </p>
+                    <p className="text-[10px] text-charcoal-muted">
+                      {o.items.length} items • ₹{o.total} ({o.paymentMethod})
                     </p>
                   </div>
 
@@ -886,10 +917,68 @@ export const AdminDashboard: React.FC = () => {
                         {new Date(ord.createdAt).toLocaleDateString('en-IN')}
                       </span>
                     </td>
-                    <td className="p-3">
-                      <p className="font-bold text-charcoal">{ord.customerName}</p>
-                      <p className="text-[11px] text-charcoal-muted">{ord.customerPhone}</p>
-                      <p className="text-[10px] text-charcoal-muted">{ord.address.locality}, PIN {ord.address.pinCode}</p>
+                    <td className="p-3 max-w-sm">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="font-bold text-charcoal text-xs">{ord.customerName}</p>
+                        <div className="flex items-center gap-1">
+                          <a
+                            href={`tel:${ord.customerPhone}`}
+                            title="Call Customer"
+                            className="p-1 bg-ivory-100 hover:bg-forest hover:text-white text-forest border border-forest/20 rounded-lg transition-colors"
+                          >
+                            <Phone className="w-3 h-3" />
+                          </a>
+                          <a
+                            href={`https://wa.me/91${ord.customerPhone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(ord.customerName)},%20update%20regarding%20your%20KD%20Supermarket%20Order%20${ord.id}:`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="WhatsApp Customer"
+                            className="p-1 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border border-emerald-200 rounded-lg transition-colors"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                          </a>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getFullAddress(ord.address))}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Open Google Maps Location"
+                            className="px-1.5 py-0.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 border border-blue-200 rounded-lg transition-colors flex items-center gap-0.5 text-[9px] font-bold"
+                          >
+                            <MapPin className="w-3 h-3" />
+                            <span>Map</span>
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <p className="text-[11px] text-charcoal font-semibold mt-0.5">
+                        📞 {ord.customerPhone}
+                        {ord.address?.alternatePhone && (
+                          <span className="text-charcoal-muted font-normal ml-1">
+                            (Alt: {ord.address.alternatePhone})
+                          </span>
+                        )}
+                      </p>
+
+                      <div className="mt-1.5 p-2 bg-ivory-50 border border-gray-200 rounded-xl space-y-1 text-[11px]">
+                        <p className="text-charcoal font-medium leading-relaxed">
+                          <strong className="text-forest">Delivery Address:</strong> {getFullAddress(ord.address)}
+                        </p>
+                        {ord.address?.landmark && (
+                          <p className="text-charcoal-muted">
+                            <strong className="text-charcoal">Landmark:</strong> {ord.address.landmark}
+                          </p>
+                        )}
+                        {ord.deliverySlot && (
+                          <p className="text-forest font-semibold text-[10px]">
+                            🕒 Slot: {ord.deliverySlot}
+                          </p>
+                        )}
+                        {ord.instructions && (
+                          <p className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] italic border border-amber-200">
+                            📝 Note: {ord.instructions}
+                          </p>
+                        )}
+                      </div>
                     </td>
                     <td className="p-3">
                       <span className="font-semibold text-charcoal">{ord.items.length} items</span>
@@ -1104,13 +1193,23 @@ export const AdminDashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="bg-ivory-50 p-2.5 rounded-xl space-y-1.5">
+                  <div className="bg-ivory-50 p-3 rounded-2xl border border-gray-200 space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="font-bold text-xs text-charcoal">{ord.customerName}</p>
+                      <div>
+                        <p className="font-bold text-xs text-charcoal">{ord.customerName}</p>
+                        <p className="text-[11px] font-semibold text-charcoal">
+                          📞 {ord.customerPhone}
+                          {ord.address?.alternatePhone && (
+                            <span className="text-charcoal-muted font-normal text-[10px] ml-1">
+                              (Alt: {ord.address.alternatePhone})
+                            </span>
+                          )}
+                        </p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <a
                           href={`tel:${ord.customerPhone}`}
-                          className="px-2 py-0.5 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-charcoal flex items-center gap-1 shadow-xs"
+                          className="px-2 py-1 bg-white border border-gray-200 rounded-lg text-[10px] font-bold text-charcoal flex items-center gap-1 shadow-xs"
                         >
                           <Phone className="w-3 h-3 text-forest" />
                           <span>Call</span>
@@ -1119,14 +1218,45 @@ export const AdminDashboard: React.FC = () => {
                           href={`https://wa.me/91${ord.customerPhone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(ord.customerName)},%20update%20regarding%20your%20KD%20Supermarket%20Order%20${ord.id}:`}
                           target="_blank"
                           rel="noreferrer"
-                          className="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs"
+                          className="px-2 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs"
                         >
                           <MessageCircle className="w-3 h-3 text-emerald-600" />
                           <span>WA</span>
                         </a>
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(getFullAddress(ord.address))}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-1 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-xs"
+                        >
+                          <MapPin className="w-3 h-3 text-blue-600" />
+                          <span>Map</span>
+                        </a>
                       </div>
                     </div>
-                    <p className="text-[11px] text-charcoal-muted">{ord.address.locality}, PIN {ord.address.pinCode}</p>
+
+                    {/* Complete Full Address Card */}
+                    <div className="p-2.5 bg-white rounded-xl border border-gray-200 text-[11px] space-y-1">
+                      <p className="text-charcoal font-medium leading-snug">
+                        <strong className="text-forest">Delivery Pata:</strong><br />
+                        {getFullAddress(ord.address)}
+                      </p>
+                      {ord.address?.landmark && (
+                        <p className="text-charcoal-muted text-[10px]">
+                          <strong>Landmark:</strong> {ord.address.landmark}
+                        </p>
+                      )}
+                      {ord.deliverySlot && (
+                        <p className="text-forest font-semibold text-[10px]">
+                          🕒 Slot: {ord.deliverySlot}
+                        </p>
+                      )}
+                      {ord.instructions && (
+                        <p className="text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded text-[10px] italic border border-amber-200">
+                          📝 {ord.instructions}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs pt-1">

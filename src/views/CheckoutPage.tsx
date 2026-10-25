@@ -31,14 +31,16 @@ export const CheckoutPage: React.FC = () => {
     showToast 
   } = useStore();
 
-  // Form Fields
+  // Form Fields (Comprehensive Madhubani Address)
   const [fullName, setFullName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '+91 ');
+  const [alternatePhone, setAlternatePhone] = useState('');
   const [email, setEmail] = useState(user?.email || '');
+  const [houseNo, setHouseNo] = useState('');
   const [street, setStreet] = useState('');
   const [locality, setLocality] = useState(selectedLocation.replace(', Madhubani (847211)', ''));
+  const [landmark, setLandmark] = useState('');
   const [pinCode, setPinCode] = useState('847211');
-  const [landmark, setLandmark] = useState('Near State Bank More');
   const [deliverySlot, setDeliverySlot] = useState('Today: 4:00 PM – 8:00 PM (Evening)');
   const [instructions, setInstructions] = useState('');
 
@@ -111,8 +113,8 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (!fullName.trim() || !phone.trim() || !street.trim()) {
-      showToast('Please provide your name, mobile number, and full address.', 'error');
+    if (!fullName.trim() || !phone.trim() || !houseNo.trim() || !street.trim() || !locality.trim()) {
+      showToast('Kripya apna poora pata (House No., Gali/Road, Locality, Name aur Mobile) bharein.', 'error');
       return;
     }
 
@@ -122,20 +124,32 @@ export const CheckoutPage: React.FC = () => {
       // Cash on Delivery Order Creation
       const paymentStatus: 'PENDING' = 'PENDING';
 
+      // Build structured full address text for delivery boys and invoice
+      const fullAddressText = [
+        houseNo.trim() ? `House/Flat No: ${houseNo.trim()}` : '',
+        street.trim() ? `Street/Gali: ${street.trim()}` : '',
+        landmark.trim() ? `Landmark: ${landmark.trim()}` : '',
+        locality.trim() ? `Locality: ${locality.trim()}` : '',
+        `Madhubani, Bihar - ${pinCode.trim() || '847211'}`
+      ].filter(Boolean).join(', ');
+
       // 2. Create the real server order via backend API
       const orderPayload = {
-        customerName: fullName,
-        customerPhone: phone,
-        customerEmail: email,
+        customerName: fullName.trim(),
+        customerPhone: phone.trim(),
+        customerEmail: email.trim(),
         address: {
-          fullName,
-          phone,
-          street,
-          locality,
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          alternatePhone: alternatePhone.trim() || undefined,
+          houseNo: houseNo.trim(),
+          street: street.trim(),
+          locality: locality.trim(),
+          landmark: landmark.trim(),
           city: 'Madhubani',
           state: 'Bihar',
-          pinCode,
-          landmark
+          pinCode: pinCode.trim() || '847211',
+          fullAddressText
         },
         items: cart.map(item => ({
           productId: item.productId,
@@ -228,7 +242,7 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-charcoal mb-1">Mobile Number (WhatsApp) *</label>
+                  <label className="block font-bold text-charcoal mb-1">Primary Mobile (WhatsApp) *</label>
                   <input
                     type="tel"
                     required
@@ -239,8 +253,19 @@ export const CheckoutPage: React.FC = () => {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
-                  <label className="block font-bold text-charcoal mb-1">Email Address (Optional for receipt)</label>
+                <div>
+                  <label className="block font-bold text-charcoal mb-1">Alternate Phone (Calling - Optional)</label>
+                  <input
+                    type="tel"
+                    placeholder="e.g. 9811340853"
+                    value={alternatePhone}
+                    onChange={(e) => setAlternatePhone(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-charcoal mb-1">Email Address (Optional for invoice)</label>
                   <input
                     type="email"
                     placeholder="rameshwar.jha@example.com"
@@ -260,12 +285,24 @@ export const CheckoutPage: React.FC = () => {
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="sm:col-span-2">
-                  <label className="block font-bold text-charcoal mb-1">Street Address / House No. / Building *</label>
+                <div>
+                  <label className="block font-bold text-charcoal mb-1">Flat / House No. / Building / Floor *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. House No. 12, Behind Watson High School"
+                    placeholder="e.g. House No. 24, 2nd Floor, Jha Niwas"
+                    value={houseNo}
+                    onChange={(e) => setHouseNo(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-charcoal mb-1">Street / Gali / Road / Mohalla *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Gali No. 3, Near Old Water Tank Road"
                     value={street}
                     onChange={(e) => setStreet(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
@@ -273,11 +310,11 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-charcoal mb-1">Locality / Colony in Madhubani *</label>
+                  <label className="block font-bold text-charcoal mb-1">Colony / Locality / Ward in Madhubani *</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Tirhut Colony / State Bank More"
+                    placeholder="e.g. Tirhut Colony / State Bank More / Suratganj"
                     value={locality}
                     onChange={(e) => setLocality(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
@@ -288,7 +325,8 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block font-bold text-charcoal mb-1">Prominent Landmark *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Opposite Durga Mandir / Near SBI Branch"
+                    required
+                    placeholder="e.g. Near Watson High School / Opposite Durga Mandir"
                     value={landmark}
                     onChange={(e) => setLandmark(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
@@ -306,7 +344,7 @@ export const CheckoutPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-charcoal mb-1">Postal PIN Code</label>
+                  <label className="block font-bold text-charcoal mb-1">Postal PIN Code *</label>
                   <input
                     type="text"
                     required

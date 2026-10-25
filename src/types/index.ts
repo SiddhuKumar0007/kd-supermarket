@@ -58,12 +58,15 @@ export interface Address {
   id?: string;
   fullName: string;
   phone: string;
+  alternatePhone?: string;
+  houseNo?: string;
   street: string;
   locality: string;
   city: string;
   state: string;
   pinCode: string;
   landmark?: string;
+  fullAddressText?: string;
   isDefault?: boolean;
 }
 
