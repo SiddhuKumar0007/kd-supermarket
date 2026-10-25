@@ -51,8 +51,9 @@ export const HomePage: React.FC = () => {
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const nextMuted = !videoRef.current.muted;
+      videoRef.current.muted = nextMuted;
+      setIsMuted(nextMuted);
     }
   };
 
@@ -300,7 +301,7 @@ export const HomePage: React.FC = () => {
                         src="/videos/kd-store-intro.mp4"
                         autoPlay
                         loop
-                        muted={isMuted}
+                        muted
                         playsInline
                         onPlay={() => setIsPlaying(true)}
                         onPause={() => setIsPlaying(false)}
