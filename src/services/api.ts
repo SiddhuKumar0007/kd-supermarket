@@ -3,6 +3,14 @@ import initialStoreData from '../data/initialStoreData.json';
 
 const API_BASE = '/api';
 
+export function getAuthHeaders(): Record<string, string> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('kd_token') : null;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+}
+
 // --- Local Resilient Storage Helpers ---
 function getLocalCategories(): Category[] {
   try {
@@ -300,7 +308,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(newProduct),
       });
       if (res.ok) {
@@ -321,7 +329,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
       if (res.ok) {
@@ -352,6 +360,7 @@ export const api = {
     try {
       await fetch(`${API_BASE}/products/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
     } catch (e) {}
 
@@ -438,7 +447,9 @@ export const api = {
       if (filter?.email) query.append('email', filter.email);
       if (filter?.phone) query.append('phone', filter.phone);
 
-      const res = await fetch(`${API_BASE}/orders?${query.toString()}`);
+      const res = await fetch(`${API_BASE}/orders?${query.toString()}`, {
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) return data;
@@ -476,7 +487,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/orders/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status, note, paymentStatus }),
       });
       if (res.ok) {
@@ -522,7 +533,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/settings`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
       if (res.ok) {
@@ -541,7 +552,9 @@ export const api = {
   // Admin Stats
   async getAdminStats(): Promise<any> {
     try {
-      const res = await fetch(`${API_BASE}/admin/stats`);
+      const res = await fetch(`${API_BASE}/admin/stats`, {
+        headers: getAuthHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         if (data && data.totalOrders !== undefined) return data;
@@ -606,7 +619,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/coupons`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(newCoupon),
       });
       if (res.ok) {
@@ -627,7 +640,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/coupons/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(updates),
       });
       if (res.ok) {
@@ -654,6 +667,7 @@ export const api = {
     try {
       await fetch(`${API_BASE}/coupons/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
     } catch (e) {}
 
@@ -700,6 +714,26 @@ export const api = {
   // Authentication
   async login(email: string, password?: string): Promise<{ token: string; user: User }> {
     const normalizedEmail = (email || '').toLowerCase().trim();
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizedEmail, password })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          localStorage.setItem('kd_token', data.token);
+          return data;
+        }
+      } else {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Authentication failed');
+      }
+    } catch (e: any) {
+      if (e.message && !e.message.includes('fetch')) throw e;
+    }
+
     const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
     const isAdmin = ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123');
 
@@ -727,15 +761,31 @@ export const api = {
       phone: phone || '+91 98113 40853',
       savedAddresses: []
     };
-    return { token: `token-${newUser.id}`, user: newUser };
+    const token = `cust-token-${Date.now()}`;
+    localStorage.setItem('kd_token', token);
+    return { token, user: newUser };
   },
 
   async loginWithGoogle(payload: { email?: string; name?: string; avatar?: string; googleId?: string; credential?: string }): Promise<{ token: string; user: User }> {
+    try {
+      const res = await fetch(`${API_BASE}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.token) {
+          localStorage.setItem('kd_token', data.token);
+          return data;
+        }
+      }
+    } catch (err) {}
+
     let email = payload.email;
     let name = payload.name;
     let avatar = payload.avatar;
 
-    // 1. Direct Google JWT Decode from official Google Identity Services
     if (payload.credential) {
       const decoded = parseGoogleJwt(payload.credential);
       if (decoded) {
@@ -768,16 +818,7 @@ export const api = {
     };
 
     const token = `token-${user.id}-${Date.now()}`;
-
-    // Async sync to server if running on localhost dev server
-    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-      fetch(`${API_BASE}/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
-
+    localStorage.setItem('kd_token', token);
     return { token, user };
   },
 

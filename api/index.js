@@ -1,4 +1,132 @@
+import crypto from 'crypto';
 import { getDb } from '../server/db.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'kdsm_jwt_default_secret_847211_secure';
+const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
+
+// --- Security Helper: Base64URL & JWT ---
+function base64UrlEncode(str) {
+  return Buffer.from(str).toString('base64').replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+
+function base64UrlDecode(str) {
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) base64 += '=';
+  return Buffer.from(base64, 'base64').toString('utf8');
+}
+
+function createJwt(payload, expiresInMs = 7 * 24 * 60 * 60 * 1000) {
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const exp = Math.floor((Date.now() + expiresInMs) / 1000);
+  const fullPayload = { ...payload, exp };
+  
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
+  
+  const signature = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${encodedHeader}.${encodedPayload}`)
+    .digest('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+    
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+}
+
+function verifyJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+  
+  const [headerB64, payloadB64, signatureB64] = parts;
+  const expectedSig = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${headerB64}.${payloadB64}`)
+    .digest('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+    
+  const sigBuf = Buffer.from(signatureB64);
+  const expBuf = Buffer.from(expectedSig);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+    return null;
+  }
+  
+  try {
+    const payload = JSON.parse(base64UrlDecode(payloadB64));
+    if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getAuthUser(req) {
+  const authHeader = req.headers?.authorization || req.headers?.Authorization || '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7).trim();
+  return verifyJwt(token);
+}
+
+function requireAdmin(req, res) {
+  const user = getAuthUser(req);
+  if (!user || user.role !== 'admin') {
+    sendJson(res, 401, { error: 'Unauthorized: Admin privileges required.' });
+    return null;
+  }
+  return user;
+}
+
+// --- Rate Limiting (In-Memory IP Bucket) ---
+const ipRequestLogs = new Map();
+function isRateLimited(ip, maxPerMinute = 40) {
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  let timestamps = ipRequestLogs.get(ip) || [];
+  timestamps = timestamps.filter(t => now - t < windowMs);
+  if (timestamps.length >= maxPerMinute) {
+    ipRequestLogs.set(ip, timestamps);
+    return true;
+  }
+  timestamps.push(now);
+  ipRequestLogs.set(ip, timestamps);
+  return false;
+}
+
+// --- Regex Sanitizer ---
+function escapeRegex(str) {
+  return typeof str === 'string' ? str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+}
+
+// --- CORS & Security Headers ---
+function applyCorsAndHeaders(req, res) {
+  const origin = req.headers?.origin || '';
+  const allowedOrigins = [
+    'https://kdsm.in',
+    'https://www.kdsm.in',
+    'https://kd-supermarket.vercel.app',
+    'https://kd-supermarket-8rtd.vercel.app'
+  ];
+  
+  const isLocalhost = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+  if (allowedOrigins.includes(origin) || isLocalhost) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://kdsm.in');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+}
 
 function sendJson(res, statusCode, data) {
   if (typeof res.status === 'function') {
@@ -7,9 +135,7 @@ function sendJson(res, statusCode, data) {
     res.statusCode = statusCode;
   }
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCorsAndHeaders({ headers: {} }, res);
 
   if (typeof res.json === 'function') {
     res.json(data);
@@ -43,11 +169,10 @@ async function parseBody(req) {
 }
 
 export default async function handler(req, res) {
+  applyCorsAndHeaders(req, res);
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (typeof res.status === 'function') {
       return res.status(204).end();
     }
@@ -55,25 +180,36 @@ export default async function handler(req, res) {
     return res.end();
   }
 
+  const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = urlObj.pathname;
   const method = req.method;
 
+  // 1. Health check (No DB connection required)
+  if (pathname === '/api/health') {
+    return sendJson(res, 200, {
+      status: 'online',
+      storeName: 'KD SUPERMARKET',
+      location: 'Madhubani, Bihar 847211',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Early route authorization gates
+  if ((pathname === '/api/settings' || pathname === '/api/admin/settings') && (method === 'PUT' || method === 'POST')) {
+    if (!requireAdmin(req, res)) return;
+  }
+  if (pathname === '/api/products' && method === 'POST') {
+    if (!requireAdmin(req, res)) return;
+  }
+  if (pathname === '/api/admin/stats') {
+    if (!requireAdmin(req, res)) return;
+  }
+
   try {
     const db = await getDb();
 
-    // 1. Health check
-    if (pathname === '/api/health') {
-      return sendJson(res, 200, {
-        status: 'online',
-        database: 'MongoDB Atlas',
-        storeName: 'KD SUPERMARKET',
-        location: 'Madhubani, Bihar 847211',
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // 2. Settings
+    // 2. Settings (GET: Public, PUT/POST: Admin Only)
     if (pathname === '/api/settings' || pathname === '/api/admin/settings') {
       const col = db.collection('settings');
       if (method === 'GET') {
@@ -81,6 +217,7 @@ export default async function handler(req, res) {
         return sendJson(res, 200, doc || {});
       }
       if (method === 'PUT' || method === 'POST') {
+        if (!requireAdmin(req, res)) return;
         const updates = await parseBody(req);
         delete updates._id;
         await col.updateOne(
@@ -93,7 +230,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. Categories
+    // 3. Categories (GET: Public, POST: Admin Only)
     if (pathname === '/api/categories') {
       const col = db.collection('categories');
       if (method === 'GET') {
@@ -101,6 +238,7 @@ export default async function handler(req, res) {
         return sendJson(res, 200, items);
       }
       if (method === 'POST') {
+        if (!requireAdmin(req, res)) return;
         const body = await parseBody(req);
         const newCat = {
           ...body,
@@ -112,16 +250,19 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4. Coupons
+    // 4. Coupons (GET: Public active only, or Admin all)
     if (pathname === '/api/coupons' || pathname === '/api/admin/coupons') {
       const col = db.collection('coupons');
       if (method === 'GET') {
         const all = urlObj.searchParams.get('all') === 'true';
-        const query = all ? {} : { isActive: { $ne: false } };
+        const authUser = getAuthUser(req);
+        const isAdmin = authUser && authUser.role === 'admin';
+        const query = (all && isAdmin) ? {} : { isActive: { $ne: false } };
         const coupons = await col.find(query).toArray();
         return sendJson(res, 200, coupons);
       }
       if (method === 'POST') {
+        if (!requireAdmin(req, res)) return;
         const body = await parseBody(req);
         if (!body.code) return sendJson(res, 400, { error: 'Coupon code is required' });
         const cleanCode = body.code.trim().toUpperCase();
@@ -145,7 +286,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4b. Single Coupon Edit / Delete
+    // 4b. Single Coupon Edit / Delete (Admin Only)
     const couponMatch = pathname.match(/^\/api\/(?:admin\/)?coupons\/([^/]+)$/);
     if (couponMatch && couponMatch[1] !== 'validate') {
       const col = db.collection('coupons');
@@ -153,6 +294,7 @@ export default async function handler(req, res) {
       const query = { $or: [{ id: couponId }, { code: couponId.toUpperCase() }] };
 
       if (method === 'PUT' || method === 'PATCH') {
+        if (!requireAdmin(req, res)) return;
         const updates = await parseBody(req);
         delete updates._id;
         if (updates.code) updates.code = updates.code.trim().toUpperCase();
@@ -161,6 +303,7 @@ export default async function handler(req, res) {
         return sendJson(res, 200, updated);
       }
       if (method === 'DELETE') {
+        if (!requireAdmin(req, res)) return;
         const doc = await col.findOne(query);
         if (!doc) return sendJson(res, 404, { error: 'Coupon not found' });
         await col.deleteOne(query);
@@ -168,7 +311,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // 4c. Validate coupon
+    // 4c. Validate coupon (Public)
     if (pathname === '/api/coupons/validate' && method === 'POST') {
       const col = db.collection('coupons');
       const { code, subtotal } = await parseBody(req);
@@ -202,7 +345,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. Products List
+    // 5. Products List (Public with safe regex escaping)
     if (pathname === '/api/products' && method === 'GET') {
       const col = db.collection('products');
       const category = urlObj.searchParams.get('category');
@@ -212,11 +355,12 @@ export default async function handler(req, res) {
       if (category && category !== 'All') {
         filter.$or = [{ category }, { categoryId: category }];
       }
-      if (search) {
+      if (search && search.trim()) {
+        const safeSearch = escapeRegex(search.trim());
         filter.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { brand: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } }
+          { name: { $regex: safeSearch, $options: 'i' } },
+          { brand: { $regex: safeSearch, $options: 'i' } },
+          { description: { $regex: safeSearch, $options: 'i' } }
         ];
       }
 
@@ -230,7 +374,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, products);
     }
 
-    // 6. Single Product (GET, PUT, DELETE)
+    // 6. Single Product (GET: Public, PUT/DELETE: Admin Only)
     const productMatch = pathname.match(/^\/api\/products\/([^/]+)$/);
     if (productMatch) {
       const col = db.collection('products');
@@ -244,6 +388,7 @@ export default async function handler(req, res) {
       }
 
       if (method === 'PUT') {
+        if (!requireAdmin(req, res)) return;
         const updates = await parseBody(req);
         delete updates._id;
         await col.updateOne({ id }, { $set: updates });
@@ -252,6 +397,7 @@ export default async function handler(req, res) {
       }
 
       if (method === 'DELETE') {
+        if (!requireAdmin(req, res)) return;
         const doc = await col.findOne({ id });
         if (!doc) return sendJson(res, 404, { error: 'Product not found' });
         await col.deleteOne({ id });
@@ -259,8 +405,9 @@ export default async function handler(req, res) {
       }
     }
 
-    // 7. Add Product
+    // 7. Add Product (Admin Only)
     if (pathname === '/api/products' && method === 'POST') {
+      if (!requireAdmin(req, res)) return;
       const col = db.collection('products');
       const body = await parseBody(req);
       const newProduct = {
@@ -290,20 +437,41 @@ export default async function handler(req, res) {
       return sendJson(res, 201, newProduct);
     }
 
-    // 8. Orders (GET, POST)
+    // 8. Orders (GET: Authenticated Only; POST: Rate-limited with Server-side pricing)
     if (pathname === '/api/orders') {
       const col = db.collection('orders');
+
       if (method === 'GET') {
+        const authUser = getAuthUser(req);
+        if (!authUser) {
+          return sendJson(res, 401, { error: 'Authentication required to view orders.' });
+        }
+
         const email = urlObj.searchParams.get('email');
         const phone = urlObj.searchParams.get('phone');
         const query = {};
-        if (email) query.customerEmail = { $regex: `^${email}$`, $options: 'i' };
-        if (phone) query.customerPhone = { $regex: phone };
+
+        if (authUser.role === 'admin') {
+          // Admin can filter by any customer or view all
+          if (email) query.customerEmail = { $regex: `^${escapeRegex(email)}$`, $options: 'i' };
+          if (phone) query.customerPhone = { $regex: escapeRegex(phone.replace(/[^\d+]/g, '')) };
+        } else {
+          // Normal customer can ONLY see their own orders
+          query.$or = [
+            { customerEmail: authUser.email },
+            { customerPhone: authUser.phone || '__none__' }
+          ];
+        }
+
         const orders = await col.find(query).sort({ _id: -1 }).toArray();
         return sendJson(res, 200, orders);
       }
 
       if (method === 'POST') {
+        if (isRateLimited(clientIp, 10)) {
+          return sendJson(res, 429, { error: 'Too many order requests. Please wait a few moments before trying again.' });
+        }
+
         const settingsCol = db.collection('settings');
         const currentSettings = await settingsCol.findOne({ _id: 'global_settings' });
         if (currentSettings && currentSettings.acceptingOrders === false) {
@@ -311,48 +479,175 @@ export default async function handler(req, res) {
         }
 
         const body = await parseBody(req);
-        if (!body.items || body.items.length === 0) {
+        if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
           return sendJson(res, 400, { error: 'Order must contain items' });
         }
 
+        const productsCol = db.collection('products');
+        const couponsCol = db.collection('coupons');
+        
+        let calculatedSubtotal = 0;
+        const verifiedItems = [];
+
+        // Server-side Price & Stock Calculation
+        for (const item of body.items) {
+          const qty = Math.max(1, Math.min(99, parseInt(item.quantity, 10) || 1));
+          const prod = await productsCol.findOne({ id: item.id });
+          if (!prod) {
+            return sendJson(res, 400, { error: `Product "${item.name || item.id}" is no longer available in the store catalog.` });
+          }
+
+          let itemPrice = Number(prod.price) || 0;
+          let variantName = prod.packSize || '1 Unit';
+          if (item.variantId && Array.isArray(prod.variants)) {
+            const v = prod.variants.find(vr => vr.id === item.variantId);
+            if (v && v.price) {
+              itemPrice = Number(v.price);
+              variantName = v.size || variantName;
+            }
+          }
+
+          const currentStock = Number(prod.stock) || 0;
+          if (currentStock < qty) {
+            return sendJson(res, 400, { 
+              error: `Insufficient stock for "${prod.name}". Available: ${currentStock}, Requested: ${qty}` 
+            });
+          }
+
+          const lineTotal = itemPrice * qty;
+          calculatedSubtotal += lineTotal;
+
+          verifiedItems.push({
+            id: prod.id,
+            name: prod.name,
+            brand: prod.brand || '',
+            category: prod.category || '',
+            image: prod.image || '',
+            variantId: item.variantId || null,
+            packSize: variantName,
+            price: itemPrice,
+            quantity: qty,
+            total: lineTotal
+          });
+        }
+
+        // Server-side Coupon validation
+        let verifiedDiscount = 0;
+        let appliedCouponCode = null;
+        const requestedCode = (body.couponCode || body.appliedCoupon?.code || '').trim().toUpperCase();
+        if (requestedCode) {
+          const coupon = await couponsCol.findOne({ code: requestedCode, isActive: true });
+          if (coupon && (!coupon.minOrderValue || calculatedSubtotal >= coupon.minOrderValue)) {
+            if (coupon.discountType === 'percentage') {
+              verifiedDiscount = Math.round((calculatedSubtotal * coupon.discountValue) / 100);
+              if (coupon.maxDiscount && verifiedDiscount > coupon.maxDiscount) {
+                verifiedDiscount = coupon.maxDiscount;
+              }
+            } else {
+              verifiedDiscount = Number(coupon.discountValue) || 0;
+            }
+            verifiedDiscount = Math.min(verifiedDiscount, calculatedSubtotal);
+            appliedCouponCode = coupon.code;
+          }
+        }
+
+        // Server-side Delivery fee calculation
+        const freeThreshold = Number(currentSettings?.freeDeliveryThreshold) || 499;
+        const defaultFee = Number(currentSettings?.deliveryFee) || 30;
+        const calculatedDeliveryFee = calculatedSubtotal >= freeThreshold ? 0 : defaultFee;
+        const calculatedTotal = Math.max(0, calculatedSubtotal + calculatedDeliveryFee - verifiedDiscount);
+
         const orderNumber = Math.floor(1000 + Math.random() * 9000);
+        const orderId = body.id || `KD-847211-${orderNumber}`;
         const newOrder = {
-          ...body,
-          id: body.id || `KD-847211-${orderNumber}`,
+          id: orderId,
           createdAt: new Date().toISOString(),
-          orderStatus: body.orderStatus || 'Order Placed',
-          paymentStatus: body.paymentStatus || (body.paymentMethod === 'Cash on Delivery' ? 'PENDING' : 'PAID'),
+          customerName: String(body.customerName || body.address?.fullName || 'Customer').slice(0, 100),
+          customerPhone: String(body.customerPhone || body.address?.phone || '').replace(/[^\d+]/g, '').slice(0, 15),
+          customerEmail: String(body.customerEmail || '').trim().toLowerCase().slice(0, 100),
+          address: body.address || {},
+          deliverySlot: body.deliverySlot || 'Today: 4:00 PM – 8:00 PM',
+          instructions: String(body.instructions || body.deliveryInstructions || '').slice(0, 300),
+          items: verifiedItems,
+          subtotal: calculatedSubtotal,
+          deliveryFee: calculatedDeliveryFee,
+          discountAmount: verifiedDiscount,
+          couponCode: appliedCouponCode,
+          total: calculatedTotal,
+          paymentMethod: 'Cash on Delivery',
+          paymentStatus: 'PENDING',
+          orderStatus: 'Order Placed',
           statusHistory: [
             {
               status: 'Order Placed',
               timestamp: new Date().toISOString(),
-              note: `Order placed successfully via ${body.paymentMethod || 'Cash on Delivery'}`
+              note: 'Order placed successfully via Cash on Delivery'
             }
           ]
         };
+
         await col.insertOne(newOrder);
+
+        // Atomic Inventory Deduction
+        for (const item of verifiedItems) {
+          await productsCol.updateOne(
+            { id: item.id },
+            { $inc: { stock: -item.quantity } }
+          );
+        }
+
         return sendJson(res, 201, newOrder);
       }
     }
 
-    // 8.1 Single Order by ID or Phone (GET)
+    // 8.1 Single Order by ID or Phone (Safe lookup & PII protection)
     const singleOrderMatch = pathname.match(/^\/api\/orders\/([^/]+)$/);
     if (singleOrderMatch && method === 'GET') {
       const col = db.collection('orders');
       const param = decodeURIComponent(singleOrderMatch[1]).trim();
+      const safeParam = escapeRegex(param);
+      
       const ord = await col.findOne({
         $or: [
-          { id: { $regex: `^${param}$`, $options: 'i' } },
-          { customerPhone: { $regex: param } }
+          { id: { $regex: `^${safeParam}$`, $options: 'i' } },
+          { customerPhone: safeParam }
         ]
       });
+
       if (!ord) return sendJson(res, 404, { error: 'Order not found' });
-      return sendJson(res, 200, ord);
+
+      // Check if caller is admin or provides matching phone verification
+      const authUser = getAuthUser(req);
+      const queryPhone = (urlObj.searchParams.get('phone') || '').replace(/[^\d]/g, '');
+      const orderPhoneDigits = (ord.customerPhone || '').replace(/[^\d]/g, '');
+      const isOwner = queryPhone && orderPhoneDigits && (queryPhone === orderPhoneDigits || orderPhoneDigits.endsWith(queryPhone));
+      const isAdmin = authUser && authUser.role === 'admin';
+
+      if (isAdmin || isOwner) {
+        return sendJson(res, 200, ord);
+      }
+
+      // Return sanitized tracking view to protect customer PII against mass scraping
+      const sanitizedOrder = {
+        id: ord.id,
+        orderStatus: ord.orderStatus,
+        paymentStatus: ord.paymentStatus,
+        paymentMethod: ord.paymentMethod,
+        createdAt: ord.createdAt,
+        statusHistory: ord.statusHistory,
+        items: (ord.items || []).map(i => ({ name: i.name, packSize: i.packSize, quantity: i.quantity })),
+        total: ord.total,
+        deliverySlot: ord.deliverySlot,
+        deliveryArea: ord.address?.locality || ord.address?.city || 'Madhubani'
+      };
+
+      return sendJson(res, 200, sanitizedOrder);
     }
 
-    // 9. Order Status Update
+    // 9. Order Status Update (Admin Only)
     const orderStatusMatch = pathname.match(/^\/api\/orders\/([^/]+)\/status$/);
     if (orderStatusMatch && (method === 'PATCH' || method === 'PUT')) {
+      if (!requireAdmin(req, res)) return;
       const col = db.collection('orders');
       const id = orderStatusMatch[1];
       const body = await parseBody(req);
@@ -378,8 +673,9 @@ export default async function handler(req, res) {
       return sendJson(res, 200, updated);
     }
 
-    // 10. Admin Stats
+    // 10. Admin Stats (Admin Only)
     if (pathname === '/api/admin/stats') {
+      if (!requireAdmin(req, res)) return;
       const ordersCol = db.collection('orders');
       const productsCol = db.collection('products');
       const categoriesCol = db.collection('categories');
@@ -414,48 +710,59 @@ export default async function handler(req, res) {
       });
     }
 
-    // 11. Auth
+    // 11. Auth (Login & Google)
     if (pathname === '/api/auth/login' && method === 'POST') {
+      if (isRateLimited(clientIp, 15)) {
+        return sendJson(res, 429, { error: 'Too many login attempts. Please wait.' });
+      }
       const { email, password } = await parseBody(req);
       const normalizedEmail = (email || '').toLowerCase().trim();
-      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
-      if (ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123')) {
+      const isAdmin = ADMIN_EMAILS.includes(normalizedEmail) || normalizedEmail === 'admin@kdsupermarket.com';
+
+      if (isAdmin) {
+        // Enforce password verification for administrative accounts
+        const configuredAdminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'kdadmin123';
+        if (!password || password !== configuredAdminPassword) {
+          return sendJson(res, 401, { error: 'Invalid admin credentials' });
+        }
         const adminDisplayName = normalizedEmail === 'kdsuperm@gmail.com'
           ? 'KD Supermarket Desk (Admin)'
           : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)');
-        return sendJson(res, 200, {
-          token: `admin-token-${normalizedEmail.split('@')[0]}`,
-          user: {
-            id: `admin-${normalizedEmail.split('@')[0]}`,
-            name: adminDisplayName,
-            email: normalizedEmail,
-            role: 'admin',
-            phone: '+91 98113 40853'
-          }
-        });
+        const adminUser = {
+          id: `admin-${normalizedEmail.split('@')[0]}`,
+          name: adminDisplayName,
+          email: normalizedEmail,
+          role: 'admin',
+          phone: '+91 98113 40853'
+        };
+        const token = createJwt(adminUser);
+        return sendJson(res, 200, { token, user: adminUser });
       }
 
-      return sendJson(res, 200, {
-        token: `cust-token-${Date.now()}`,
-        user: {
-          id: `usr-${Date.now()}`,
-          name: email.split('@')[0],
-          email,
-          role: 'customer',
-          phone: '+91 98350 21980'
-        }
-      });
+      // Customer account
+      const custUser = {
+        id: `usr-${Date.now()}`,
+        name: email.split('@')[0],
+        email: normalizedEmail,
+        role: 'customer',
+        phone: '+91 98350 21980'
+      };
+      const token = createJwt(custUser);
+      return sendJson(res, 200, { token, user: custUser });
     }
 
     if (pathname === '/api/auth/google' && method === 'POST') {
       const body = await parseBody(req);
       let { email, name, avatar, credential } = body;
 
-      if (credential && !email) {
+      if (credential) {
         try {
           const parts = credential.split('.');
           if (parts.length === 3) {
             const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+            if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) {
+              return sendJson(res, 401, { error: 'Google session expired. Please sign in again.' });
+            }
             email = payload.email;
             name = payload.name;
             avatar = payload.picture;
@@ -466,7 +773,6 @@ export default async function handler(req, res) {
       if (!email) return sendJson(res, 400, { error: 'Valid Google account email is required' });
 
       const normalizedEmail = email.toLowerCase().trim();
-      const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
       const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
       const displayName = isAdmin 
         ? (normalizedEmail === 'kdsuperm@gmail.com' ? 'KD Supermarket Desk (Admin)' : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)'))
@@ -485,10 +791,8 @@ export default async function handler(req, res) {
       const usersCol = db.collection('users');
       await usersCol.updateOne({ email: normalizedEmail }, { $set: user }, { upsert: true });
 
-      return sendJson(res, 200, {
-        token: `google-token-${user.id}`,
-        user
-      });
+      const token = createJwt(user);
+      return sendJson(res, 200, { token, user });
     }
 
     // 404 for unhandled route

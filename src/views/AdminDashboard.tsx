@@ -70,7 +70,7 @@ const ALL_STORE_CATEGORIES = [
 ];
 
 export const AdminDashboard: React.FC = () => {
-  const { user, logout, setCurrentView, showToast, refreshSettings } = useStore();
+  const { user, logout, setCurrentView, showToast, refreshSettings, setIsAuthModalOpen } = useStore();
 
   // Active Admin Tab
   const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'inventory' | 'categories' | 'coupons' | 'settings'>('products');
@@ -624,6 +624,34 @@ export const AdminDashboard: React.FC = () => {
 
     return true;
   });
+
+  if (!isStoreAdmin(user)) {
+    return (
+      <div className="min-h-[75vh] flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto">
+        <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-5 border border-red-200 shadow-sm">
+          <Lock className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-bold text-charcoal mb-2">Store Administrator Access Only</h2>
+        <p className="text-muted text-sm leading-relaxed mb-6">
+          This management portal is strictly restricted to authorized KD Supermarket administrators. Please sign in with an authorized account or return to the store catalog.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-center">
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="w-full sm:w-auto px-6 py-2.5 bg-forest text-white font-medium rounded-xl hover:bg-forest/90 transition-all shadow-sm"
+          >
+            Sign In as Admin
+          </button>
+          <button
+            onClick={() => setCurrentView('home')}
+            className="w-full sm:w-auto px-6 py-2.5 bg-ivory-200 text-charcoal font-medium rounded-xl hover:bg-ivory-300 transition-all border border-ivory-300"
+          >
+            Return to Store
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-6">

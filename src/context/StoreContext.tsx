@@ -354,6 +354,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const logout = () => {
     setUser(null);
     localStorage.removeItem('kd_user');
+    localStorage.removeItem('kd_token');
     showToast('Logged out successfully', 'info');
   };
 
