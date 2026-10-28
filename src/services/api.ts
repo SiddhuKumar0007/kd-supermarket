@@ -726,26 +726,15 @@ export const api = {
           localStorage.setItem('kd_token', data.token);
           return data;
         }
-      } else {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Authentication failed');
       }
-    } catch (e: any) {
-      if (e.message && !e.message.includes('fetch')) throw e;
-    }
+    } catch (e: any) {}
 
-    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
-    const isAdmin = ADMIN_EMAILS.includes(normalizedEmail) || (normalizedEmail === 'admin@kdsupermarket.com' && password === 'kdadmin123');
-
-    const adminName = normalizedEmail === 'kdsuperm@gmail.com' 
-      ? 'KD Supermarket Desk (Admin)' 
-      : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Store Admin)' : 'Siddhu Kumar (Store Admin)');
-
+    // Manual login creates customer session only
     const user: User = {
-      id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-${Date.now()}`,
-      name: isAdmin ? adminName : normalizedEmail.split('@')[0],
+      id: `usr-${Date.now()}`,
+      name: normalizedEmail.split('@')[0],
       email: normalizedEmail,
-      role: isAdmin ? 'admin' : 'customer',
+      role: 'customer',
       phone: '+91 98113 40853',
       savedAddresses: []
     };

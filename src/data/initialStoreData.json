@@ -1987,8 +1987,8 @@
   "users": [
     {
       "id": "usr-admin",
-      "name": "KD Supermarket Manager",
-      "email": "admin@kdsupermarket.com",
+      "name": "KD Supermarket Desk (Admin)",
+      "email": "kdsuperm@gmail.com",
       "role": "admin",
       "phone": "+91 98113 40853"
     },

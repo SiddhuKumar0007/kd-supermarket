@@ -715,34 +715,14 @@ export default async function handler(req, res) {
       if (isRateLimited(clientIp, 15)) {
         return sendJson(res, 429, { error: 'Too many login attempts. Please wait.' });
       }
-      const { email, password } = await parseBody(req);
+      const { email } = await parseBody(req);
       const normalizedEmail = (email || '').toLowerCase().trim();
-      const isAdmin = ADMIN_EMAILS.includes(normalizedEmail) || normalizedEmail === 'admin@kdsupermarket.com';
 
-      if (isAdmin) {
-        // Enforce password verification for administrative accounts
-        const configuredAdminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'kdadmin123';
-        if (!password || password !== configuredAdminPassword) {
-          return sendJson(res, 401, { error: 'Invalid admin credentials' });
-        }
-        const adminDisplayName = normalizedEmail === 'kdsuperm@gmail.com'
-          ? 'KD Supermarket Desk (Admin)'
-          : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)');
-        const adminUser = {
-          id: `admin-${normalizedEmail.split('@')[0]}`,
-          name: adminDisplayName,
-          email: normalizedEmail,
-          role: 'admin',
-          phone: '+91 98113 40853'
-        };
-        const token = createJwt(adminUser);
-        return sendJson(res, 200, { token, user: adminUser });
-      }
-
-      // Customer account
+      // Manual email/password login NEVER grants admin privileges.
+      // Admin access is exclusively reserved for verified Google accounts.
       const custUser = {
         id: `usr-${Date.now()}`,
-        name: email.split('@')[0],
+        name: (email || 'Customer').split('@')[0],
         email: normalizedEmail,
         role: 'customer',
         phone: '+91 98350 21980'
