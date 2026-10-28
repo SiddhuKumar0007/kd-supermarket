@@ -1,8 +1,18 @@
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import { getDb } from '../server/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'kdsm_jwt_default_secret_847211_secure';
 const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
+const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.trim().length < 16) {
+    throw new Error('Server security error: JWT_SECRET environment variable is missing or insecure.');
+  }
+  return secret.trim();
+}
 
 // --- Security Helper: Base64URL & JWT ---
 function base64UrlEncode(str) {
@@ -24,7 +34,7 @@ function createJwt(payload, expiresInMs = 7 * 24 * 60 * 60 * 1000) {
   const encodedPayload = base64UrlEncode(JSON.stringify(fullPayload));
   
   const signature = crypto
-    .createHmac('sha256', JWT_SECRET)
+    .createHmac('sha256', getJwtSecret())
     .update(`${encodedHeader}.${encodedPayload}`)
     .digest('base64')
     .replace(/=/g, '')
@@ -40,14 +50,19 @@ function verifyJwt(token) {
   if (parts.length !== 3) return null;
   
   const [headerB64, payloadB64, signatureB64] = parts;
-  const expectedSig = crypto
-    .createHmac('sha256', JWT_SECRET)
-    .update(`${headerB64}.${payloadB64}`)
-    .digest('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-    
+  let expectedSig;
+  try {
+    expectedSig = crypto
+      .createHmac('sha256', getJwtSecret())
+      .update(`${headerB64}.${payloadB64}`)
+      .digest('base64')
+      .replace(/=/g, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+  } catch {
+    return null;
+  }
+  
   const sigBuf = Buffer.from(signatureB64);
   const expBuf = Buffer.from(expectedSig);
   if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
@@ -586,14 +601,60 @@ export default async function handler(req, res) {
           ]
         };
 
-        await col.insertOne(newOrder);
+        // 1. Idempotency Check: Prevent duplicate order submission within 45s
+        const recentDuplicate = await col.findOne({
+          customerPhone: newOrder.customerPhone,
+          total: calculatedTotal,
+          createdAt: { $gte: new Date(Date.now() - 45000).toISOString() }
+        });
+        if (recentDuplicate) {
+          return sendJson(res, 200, recentDuplicate);
+        }
 
-        // Atomic Inventory Deduction
+        // 2. Conditional Atomic Stock Deduction with Rollback Compensation
+        const successfullyDeducted = [];
+        let stockFailed = false;
+        let failedItemName = '';
+
         for (const item of verifiedItems) {
-          await productsCol.updateOne(
-            { id: item.id },
+          // Conditional atomic update: strictly checks stock >= quantity
+          const result = await productsCol.updateOne(
+            { id: item.id, stock: { $gte: item.quantity } },
             { $inc: { stock: -item.quantity } }
           );
+
+          if (result.modifiedCount === 0) {
+            stockFailed = true;
+            failedItemName = item.name;
+            break;
+          }
+          successfullyDeducted.push(item);
+        }
+
+        if (stockFailed) {
+          // Compensate / Roll back all items that were successfully deducted
+          for (const item of successfullyDeducted) {
+            await productsCol.updateOne(
+              { id: item.id },
+              { $inc: { stock: item.quantity } }
+            );
+          }
+          return sendJson(res, 400, {
+            error: `Inventory for "${failedItemName}" was just reserved by another order. Please adjust your quantity.`
+          });
+        }
+
+        // 3. Insert Order Document with Rollback on DB Error
+        try {
+          await col.insertOne(newOrder);
+        } catch (dbErr) {
+          for (const item of successfullyDeducted) {
+            await productsCol.updateOne(
+              { id: item.id },
+              { $inc: { stock: item.quantity } }
+            );
+          }
+          throw dbErr;
         }
 
         return sendJson(res, 201, newOrder);
@@ -733,30 +794,37 @@ export default async function handler(req, res) {
 
     if (pathname === '/api/auth/google' && method === 'POST') {
       const body = await parseBody(req);
-      let { email, name, avatar, credential } = body;
+      const { credential } = body;
 
-      if (credential) {
-        try {
-          const parts = credential.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
-            if (payload.exp && Math.floor(Date.now() / 1000) > payload.exp) {
-              return sendJson(res, 401, { error: 'Google session expired. Please sign in again.' });
-            }
-            email = payload.email;
-            name = payload.name;
-            avatar = payload.picture;
-          }
-        } catch {}
+      if (!credential || typeof credential !== 'string') {
+        return sendJson(res, 400, { error: 'Valid Google credential token is required' });
       }
 
-      if (!email) return sendJson(res, 400, { error: 'Valid Google account email is required' });
+      let googlePayload;
+      try {
+        const ticket = await googleClient.verifyIdToken({
+          idToken: credential,
+          audience: GOOGLE_CLIENT_ID
+        });
+        googlePayload = ticket.getPayload();
+      } catch (authErr) {
+        return sendJson(res, 401, { error: 'Cryptographic Google token verification failed.', details: authErr.message });
+      }
 
-      const normalizedEmail = email.toLowerCase().trim();
+      if (!googlePayload || !googlePayload.email || googlePayload.email_verified === false) {
+        return sendJson(res, 401, { error: 'Google account email is unverified.' });
+      }
+
+      const validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
+      if (!validIssuers.includes(googlePayload.iss)) {
+        return sendJson(res, 401, { error: 'Invalid Google token issuer.' });
+      }
+
+      const normalizedEmail = googlePayload.email.toLowerCase().trim();
       const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
       const displayName = isAdmin 
         ? (normalizedEmail === 'kdsuperm@gmail.com' ? 'KD Supermarket Desk (Admin)' : (normalizedEmail === 'vyapaarwebs@gmail.com' ? 'Vyapaar Webs (Admin)' : 'Siddhu Kumar (Admin)'))
-        : (name || email.split('@')[0]);
+        : (googlePayload.name || normalizedEmail.split('@')[0]);
 
       const user = {
         id: isAdmin ? `admin-${normalizedEmail.split('@')[0]}` : `usr-g-${Date.now()}`,
@@ -764,7 +832,7 @@ export default async function handler(req, res) {
         email: normalizedEmail,
         role: isAdmin ? 'admin' : 'customer',
         phone: '+91 98113 40853',
-        avatar: avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
+        avatar: googlePayload.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
         provider: 'google'
       };
 
