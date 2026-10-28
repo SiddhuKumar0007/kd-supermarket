@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { getDb } from '../server/db.js';
 
 const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
-const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 function getJwtSecret() {
@@ -601,7 +601,25 @@ export default async function handler(req, res) {
           ]
         };
 
-        // 1. Idempotency Check: Prevent duplicate order submission within 45s
+        const idempotencyKey = String(
+          body.idempotencyKey || 
+          req.headers['x-idempotency-key'] || 
+          orderId
+        ).trim();
+        newOrder.idempotencyKey = idempotencyKey;
+
+        // 1. Idempotency Check: Return existing order if same idempotencyKey or ID was already processed
+        const existingOrder = await col.findOne({
+          $or: [
+            { idempotencyKey },
+            { id: orderId }
+          ]
+        });
+        if (existingOrder) {
+          return sendJson(res, 200, existingOrder);
+        }
+
+        // Also prevent rapid duplicate double-clicks from same phone and exact total within 45s
         const recentDuplicate = await col.findOne({
           customerPhone: newOrder.customerPhone,
           total: calculatedTotal,
@@ -611,53 +629,111 @@ export default async function handler(req, res) {
           return sendJson(res, 200, recentDuplicate);
         }
 
-        // 2. Conditional Atomic Stock Deduction with Rollback Compensation
-        const successfullyDeducted = [];
-        let stockFailed = false;
-        let failedItemName = '';
-
-        for (const item of verifiedItems) {
-          // Conditional atomic update: strictly checks stock >= quantity
-          const result = await productsCol.updateOne(
-            { id: item.id, stock: { $gte: item.quantity } },
-            { $inc: { stock: -item.quantity } }
-          );
-
-          if (result.modifiedCount === 0) {
-            stockFailed = true;
-            failedItemName = item.name;
-            break;
-          }
-          successfullyDeducted.push(item);
-        }
-
-        if (stockFailed) {
-          // Compensate / Roll back all items that were successfully deducted
-          for (const item of successfullyDeducted) {
-            await productsCol.updateOne(
-              { id: item.id },
-              { $inc: { stock: item.quantity } }
-            );
-          }
-          return sendJson(res, 400, {
-            error: `Inventory for "${failedItemName}" was just reserved by another order. Please adjust your quantity.`
-          });
-        }
-
-        // 3. Insert Order Document with Rollback on DB Error
+        // 2. Coordinated Execution: Multi-Document Transaction across products and orders
+        let session = null;
         try {
-          await col.insertOne(newOrder);
-        } catch (dbErr) {
-          for (const item of successfullyDeducted) {
-            await productsCol.updateOne(
-              { id: item.id },
-              { $inc: { stock: item.quantity } }
-            );
+          if (db.client?.startSession) {
+            session = db.client.startSession();
           }
-          throw dbErr;
+        } catch (sErr) {
+          console.warn('MongoDB session init warning:', sErr.message);
         }
 
-        return sendJson(res, 201, newOrder);
+        if (session) {
+          let committedOrder = null;
+          try {
+            await session.withTransaction(async () => {
+              // Re-verify idempotency within atomic transaction boundary
+              const insideExisting = await col.findOne({
+                $or: [{ idempotencyKey }, { id: orderId }]
+              }, { session });
+              if (insideExisting) {
+                committedOrder = insideExisting;
+                return;
+              }
+
+              // Atomically verify and deduct stock for each verified item
+              for (const item of verifiedItems) {
+                const stockResult = await productsCol.updateOne(
+                  { id: item.id, stock: { $gte: item.quantity } },
+                  { $inc: { stock: -item.quantity } },
+                  { session }
+                );
+
+                if (stockResult.modifiedCount === 0) {
+                  throw new Error(`INSUFFICIENT_STOCK:${item.name}`);
+                }
+              }
+
+              // Insert order document within the same atomic transaction
+              await col.insertOne(newOrder, { session });
+              committedOrder = newOrder;
+            });
+
+            return sendJson(res, 201, committedOrder);
+          } catch (txErr) {
+            if (txErr.message?.startsWith('INSUFFICIENT_STOCK:')) {
+              const itemName = txErr.message.slice(19);
+              return sendJson(res, 400, {
+                error: `Inventory for "${itemName}" was just reserved by another order. Please adjust your quantity.`
+              });
+            }
+            if (txErr.code === 11000) {
+              const existing = await col.findOne({
+                $or: [{ idempotencyKey }, { id: orderId }]
+              });
+              if (existing) return sendJson(res, 200, existing);
+            }
+            throw txErr;
+          } finally {
+            await session.endSession();
+          }
+        } else {
+          // Fallback for non-transactional/standalone topologies: conditional atomic update with rollback
+          const successfullyDeducted = [];
+          let stockFailed = false;
+          let failedItemName = '';
+
+          for (const item of verifiedItems) {
+            const result = await productsCol.updateOne(
+              { id: item.id, stock: { $gte: item.quantity } },
+              { $inc: { stock: -item.quantity } }
+            );
+
+            if (result.modifiedCount === 0) {
+              stockFailed = true;
+              failedItemName = item.name;
+              break;
+            }
+            successfullyDeducted.push(item);
+          }
+
+          if (stockFailed) {
+            for (const item of successfullyDeducted) {
+              await productsCol.updateOne({ id: item.id }, { $inc: { stock: item.quantity } });
+            }
+            return sendJson(res, 400, {
+              error: `Inventory for "${failedItemName}" was just reserved by another order. Please adjust your quantity.`
+            });
+          }
+
+          try {
+            await col.insertOne(newOrder);
+          } catch (dbErr) {
+            for (const item of successfullyDeducted) {
+              await productsCol.updateOne({ id: item.id }, { $inc: { stock: item.quantity } });
+            }
+            if (dbErr.code === 11000) {
+              const existing = await col.findOne({
+                $or: [{ idempotencyKey }, { id: orderId }]
+              });
+              if (existing) return sendJson(res, 200, existing);
+            }
+            throw dbErr;
+          }
+
+          return sendJson(res, 201, newOrder);
+        }
       }
     }
 

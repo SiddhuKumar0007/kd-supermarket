@@ -78,6 +78,7 @@ export interface StatusHistoryItem {
 
 export interface Order {
   id: string;
+  idempotencyKey?: string;
   customerName: string;
   customerPhone: string;
   customerEmail?: string;

@@ -133,8 +133,14 @@ export const CheckoutPage: React.FC = () => {
         `Madhubani, Bihar - ${pinCode.trim() || '847211'}`
       ].filter(Boolean).join(', ');
 
-      // 2. Create the real server order via backend API
+      // 2. Generate a client-side idempotency key for this order attempt
+      const idempotencyKey = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `kd_idem_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // 3. Create the real server order via backend API
       const orderPayload = {
+        idempotencyKey,
         customerName: fullName.trim(),
         customerPhone: phone.trim(),
         customerEmail: email.trim(),

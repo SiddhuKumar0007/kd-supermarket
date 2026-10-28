@@ -387,8 +387,11 @@ export const api = {
 
   // Orders
   async createOrder(orderPayload: any): Promise<Order> {
+    const orderId = orderPayload.id || `KD-${Math.floor(100000 + Math.random() * 900000)}`;
+    const idempotencyKey = orderPayload.idempotencyKey || `kd_idem_${orderId}`;
     const newOrder: Order = {
-      id: orderPayload.id || `KD-${Math.floor(100000 + Math.random() * 900000)}`,
+      id: orderId,
+      idempotencyKey,
       createdAt: new Date().toISOString(),
       orderStatus: 'Order Placed',
       paymentStatus: orderPayload.paymentMethod === 'Cash on Delivery' ? 'PENDING' : 'PAID',
@@ -424,7 +427,10 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Idempotency-Key': idempotencyKey
+        },
         body: JSON.stringify(newOrder),
       });
       if (res.ok) {
