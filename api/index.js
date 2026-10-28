@@ -630,109 +630,62 @@ export default async function handler(req, res) {
         }
 
         // 2. Coordinated Execution: Multi-Document Transaction across products and orders
-        let session = null;
-        try {
-          if (db.client?.startSession) {
-            session = db.client.startSession();
-          }
-        } catch (sErr) {
-          console.warn('MongoDB session init warning:', sErr.message);
+        // Strictly fail-secure: Transactions are mandatory for ACID stock deduction & order creation
+        if (!db.client || typeof db.client.startSession !== 'function') {
+          console.error('CRITICAL: MongoDB transactions unsupported or client session unavailable.');
+          return sendJson(res, 500, { error: 'Order processing halted: Database transaction session is unavailable.' });
         }
 
-        if (session) {
-          let committedOrder = null;
-          try {
-            await session.withTransaction(async () => {
-              // Re-verify idempotency within atomic transaction boundary
-              const insideExisting = await col.findOne({
-                $or: [{ idempotencyKey }, { id: orderId }]
-              }, { session });
-              if (insideExisting) {
-                committedOrder = insideExisting;
-                return;
+        const session = db.client.startSession();
+        let committedOrder = null;
+        try {
+          await session.withTransaction(async () => {
+            // Re-verify idempotency within atomic transaction boundary
+            const insideExisting = await col.findOne({
+              $or: [{ idempotencyKey }, { id: orderId }]
+            }, { session });
+            if (insideExisting) {
+              committedOrder = insideExisting;
+              return;
+            }
+
+            // Atomically verify and deduct stock for each verified item
+            for (const item of verifiedItems) {
+              const stockResult = await productsCol.updateOne(
+                { id: item.id, stock: { $gte: item.quantity } },
+                { $inc: { stock: -item.quantity } },
+                { session }
+              );
+
+              if (stockResult.modifiedCount === 0) {
+                throw new Error(`INSUFFICIENT_STOCK:${item.name}`);
               }
-
-              // Atomically verify and deduct stock for each verified item
-              for (const item of verifiedItems) {
-                const stockResult = await productsCol.updateOne(
-                  { id: item.id, stock: { $gte: item.quantity } },
-                  { $inc: { stock: -item.quantity } },
-                  { session }
-                );
-
-                if (stockResult.modifiedCount === 0) {
-                  throw new Error(`INSUFFICIENT_STOCK:${item.name}`);
-                }
-              }
-
-              // Insert order document within the same atomic transaction
-              await col.insertOne(newOrder, { session });
-              committedOrder = newOrder;
-            });
-
-            return sendJson(res, 201, committedOrder);
-          } catch (txErr) {
-            if (txErr.message?.startsWith('INSUFFICIENT_STOCK:')) {
-              const itemName = txErr.message.slice(19);
-              return sendJson(res, 400, {
-                error: `Inventory for "${itemName}" was just reserved by another order. Please adjust your quantity.`
-              });
             }
-            if (txErr.code === 11000) {
-              const existing = await col.findOne({
-                $or: [{ idempotencyKey }, { id: orderId }]
-              });
-              if (existing) return sendJson(res, 200, existing);
-            }
-            throw txErr;
-          } finally {
-            await session.endSession();
-          }
-        } else {
-          // Fallback for non-transactional/standalone topologies: conditional atomic update with rollback
-          const successfullyDeducted = [];
-          let stockFailed = false;
-          let failedItemName = '';
 
-          for (const item of verifiedItems) {
-            const result = await productsCol.updateOne(
-              { id: item.id, stock: { $gte: item.quantity } },
-              { $inc: { stock: -item.quantity } }
-            );
+            // Insert order document within the same atomic transaction
+            await col.insertOne(newOrder, { session });
+            committedOrder = newOrder;
+          });
 
-            if (result.modifiedCount === 0) {
-              stockFailed = true;
-              failedItemName = item.name;
-              break;
-            }
-            successfullyDeducted.push(item);
-          }
-
-          if (stockFailed) {
-            for (const item of successfullyDeducted) {
-              await productsCol.updateOne({ id: item.id }, { $inc: { stock: item.quantity } });
-            }
+          return sendJson(res, 201, committedOrder);
+        } catch (txErr) {
+          if (txErr.message?.startsWith('INSUFFICIENT_STOCK:')) {
+            const itemName = txErr.message.slice(19);
             return sendJson(res, 400, {
-              error: `Inventory for "${failedItemName}" was just reserved by another order. Please adjust your quantity.`
+              error: `Inventory for "${itemName}" was just reserved by another order. Please adjust your quantity.`
             });
           }
-
-          try {
-            await col.insertOne(newOrder);
-          } catch (dbErr) {
-            for (const item of successfullyDeducted) {
-              await productsCol.updateOne({ id: item.id }, { $inc: { stock: item.quantity } });
-            }
-            if (dbErr.code === 11000) {
-              const existing = await col.findOne({
-                $or: [{ idempotencyKey }, { id: orderId }]
-              });
-              if (existing) return sendJson(res, 200, existing);
-            }
-            throw dbErr;
+          if (txErr.code === 11000) {
+            // Database-level uniqueness constraint hit (concurrent race)
+            const existing = await col.findOne({
+              $or: [{ idempotencyKey }, { id: orderId }]
+            });
+            if (existing) return sendJson(res, 200, existing);
           }
-
-          return sendJson(res, 201, newOrder);
+          console.error('Order transaction aborted safely:', txErr.message);
+          return sendJson(res, 500, { error: 'Order placement failed and was safely rolled back. Please try again.' });
+        } finally {
+          await session.endSession();
         }
       }
     }
