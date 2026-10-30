@@ -58,7 +58,7 @@ function getLocalCoupons(): PromoCode[] {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
   } catch (e) {}
-  const coupons = (initialStoreData as any).promoCodes || [];
+  const coupons = (initialStoreData as any).coupons || (initialStoreData as any).promoCodes || [];
   try {
     localStorage.setItem('kd_cached_coupons', JSON.stringify(coupons));
   } catch (e) {}
@@ -597,7 +597,7 @@ export const api = {
   // Promo Codes / Coupons
   async getCoupons(all: boolean = false): Promise<PromoCode[]> {
     try {
-      const res = await fetch(`${API_BASE}/coupons${all ? '?all=true' : ''}`);
+      const res = await fetch(`${API_BASE}/coupons${all ? '?all=true' : ''}`, { headers: getAuthHeaders() });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) return data;
@@ -619,7 +619,8 @@ export const api = {
       minOrderValue: Number(couponData.minOrderValue) || 0,
       maxDiscount: couponData.discountType === 'free_delivery' ? 0 : (Number(couponData.maxDiscount) || 50),
       isActive: couponData.isActive !== false,
-      expiryDate: couponData.expiryDate || '2027-12-31'
+      expiryDate: couponData.expiryDate || '2027-12-31',
+      isPublic: couponData.isPublic !== false
     };
 
     try {

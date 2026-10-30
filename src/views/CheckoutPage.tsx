@@ -564,7 +564,8 @@ export const CheckoutPage: React.FC = () => {
                         </div>
                         <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                           {availableCoupons.map((c) => {
-                            const isApplicable = !c.minOrderValue || subtotal >= c.minOrderValue;
+                            const minReq = Number(c.minOrderValue || (c as any).minOrderAmount || 0);
+                            const isApplicable = minReq === 0 || subtotal >= minReq;
                             return (
                               <div
                                 key={c.id || c.code}
@@ -588,7 +589,7 @@ export const CheckoutPage: React.FC = () => {
                                     </span>
                                   </div>
                                   <p className="text-[10px] text-charcoal-muted mt-0.5 truncate">
-                                    {c.minOrderValue ? `Min cart ₹${c.minOrderValue}` : 'No minimum cart'}
+                                    {minReq > 0 ? `Min cart ₹${minReq}` : 'No minimum cart'}
                                     {c.description ? ` • ${c.description}` : ''}
                                   </p>
                                 </div>
@@ -603,7 +604,7 @@ export const CheckoutPage: React.FC = () => {
                                       : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                   }`}
                                 >
-                                  {isApplicable ? 'Apply Code' : `Add ₹${(c.minOrderValue || 0) - subtotal}`}
+                                  {isApplicable ? 'Apply Code' : `Add ₹${minReq - subtotal}`}
                                 </button>
                               </div>
                             );

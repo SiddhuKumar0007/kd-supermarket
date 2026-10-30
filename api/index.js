@@ -337,8 +337,9 @@ export default async function handler(req, res) {
       if (coupon.isActive === false) return sendJson(res, 400, { valid: false, message: `Promo code '${cleanCode}' is inactive` });
       
       const orderSubtotal = Number(subtotal) || 0;
-      if (coupon.minOrderValue && orderSubtotal < coupon.minOrderValue) {
-        return sendJson(res, 400, { valid: false, message: `Cart total must be at least ₹${coupon.minOrderValue} (Current: ₹${orderSubtotal})` });
+      const minRequired = Number(coupon.minOrderValue || coupon.minOrderAmount || 0);
+      if (minRequired > 0 && orderSubtotal < minRequired) {
+        return sendJson(res, 400, { valid: false, message: `Cart total must be at least ₹${minRequired} (Current: ₹${orderSubtotal})` });
       }
 
       const isFreeDelivery = coupon.discountType === 'free_delivery';
@@ -559,7 +560,8 @@ export default async function handler(req, res) {
         const requestedCode = (body.couponCode || body.appliedCoupon?.code || '').trim().toUpperCase();
         if (requestedCode) {
           const coupon = await couponsCol.findOne({ code: requestedCode, isActive: true });
-          if (coupon && (!coupon.minOrderValue || calculatedSubtotal >= coupon.minOrderValue)) {
+          const minRequired = Number(coupon.minOrderValue || coupon.minOrderAmount || 0);
+          if (coupon && (minRequired === 0 || calculatedSubtotal >= minRequired)) {
             if (coupon.discountType === 'free_delivery') {
               isFreeDeliveryCoupon = true;
               verifiedDiscount = 0;
