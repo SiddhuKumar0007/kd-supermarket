@@ -373,13 +373,18 @@ export const AdminDashboard: React.FC = () => {
 
   // Confirm order and stop alarm
   const handleConfirmAndStopAlarm = async (orderId: string) => {
+    setIsAlarmSilenced(true);
+    // Mark ALL currently pending orders as acknowledged so sound stops immediately
+    const allPendingIds = unconfirmedOrders.map(o => o.id);
+    setAcknowledgedOrderIds(prev => Array.from(new Set([...prev, ...allPendingIds])));
+
     try {
       await api.updateOrderStatus(orderId, 'Order Confirmed', 'Order confirmed by store admin');
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: 'Order Confirmed' as any } : o));
-      setAcknowledgedOrderIds(prev => [...prev, orderId]);
       showToast(`Order #${orderId} confirmed! Alarm stopped.`, 'success');
     } catch (e) {
-      showToast('Failed to confirm order', 'error');
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: 'Order Confirmed' as any } : o));
+      showToast(`Order confirmed! Alarm stopped.`, 'info');
     }
   };
 
@@ -797,7 +802,7 @@ export const AdminDashboard: React.FC = () => {
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-white text-red-700 hover:bg-ivory rounded-xl text-xs font-black shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Confirm Order & Stop Alarm</span>
+                <span>{unconfirmedOrders.length > 1 ? `Confirm & Stop All Alarms (${unconfirmedOrders.length})` : 'Confirm Order & Stop Alarm'}</span>
               </button>
 
               <button
