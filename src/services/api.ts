@@ -609,18 +609,20 @@ export const api = {
   },
 
   async addCoupon(couponData: Partial<PromoCode>): Promise<PromoCode> {
+    const cleanCode = (couponData.code || 'KD50').toUpperCase().trim();
+    const isFree = couponData.discountType === 'free_delivery';
     const newCoupon: PromoCode = {
-      id: `c-${Date.now()}`,
-      code: (couponData.code || 'KD50').toUpperCase().trim(),
-      title: couponData.title || (couponData.discountType === 'free_delivery' ? 'Free Delivery Offer' : 'Special Discount'),
-      description: couponData.description || (couponData.discountType === 'free_delivery' ? 'Free home delivery on your order' : 'Supermarket savings coupon'),
+      id: `cpn-${Date.now()}`,
+      code: cleanCode,
+      title: couponData.title || (isFree ? 'Free Delivery Offer' : `${cleanCode} Special Offer`),
+      description: couponData.description || (isFree ? 'Free home delivery on your order' : ''),
       discountType: couponData.discountType || 'flat',
-      discountValue: couponData.discountType === 'free_delivery' ? 0 : (Number(couponData.discountValue) || 50),
+      discountValue: isFree ? 0 : (Number(couponData.discountValue) || 10),
       minOrderValue: Number(couponData.minOrderValue) || 0,
-      maxDiscount: couponData.discountType === 'free_delivery' ? 0 : (Number(couponData.maxDiscount) || 50),
+      maxDiscount: isFree ? 0 : (Number(couponData.maxDiscount) || 100),
       isActive: couponData.isActive !== false,
-      expiryDate: couponData.expiryDate || '2027-12-31',
-      isPublic: couponData.isPublic !== false
+      isPublic: couponData.isPublic !== false,
+      expiryDate: couponData.expiryDate || '2027-12-31'
     };
 
     try {
@@ -631,16 +633,16 @@ export const api = {
       });
       if (res.ok) {
         const saved = await res.json();
-        const coupons = getLocalCoupons().filter(c => c.id !== saved.id);
+        const coupons = getLocalCoupons().filter(c => c.id !== saved.id && c.code !== saved.code);
         saveLocalCoupons([saved, ...coupons]);
         return saved;
       }
-    } catch (e) {}
-
-    const coupons = getLocalCoupons();
-    const updated = [newCoupon, ...coupons];
-    saveLocalCoupons(updated);
-    return newCoupon;
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.error || err?.message || `Server returned ${res.status}: Failed to save coupon to database`);
+    } catch (e: any) {
+      console.error('Error adding coupon:', e);
+      throw e;
+    }
   },
 
   async updateCoupon(id: string, updates: Partial<PromoCode>): Promise<PromoCode> {
@@ -658,29 +660,31 @@ export const api = {
         saveLocalCoupons(coupons);
         return saved;
       }
-    } catch (e) {}
-
-    const coupons = getLocalCoupons();
-    const idx = coupons.findIndex(c => c.id === id);
-    if (idx !== -1) {
-      coupons[idx] = { ...coupons[idx], ...updates };
-      saveLocalCoupons(coupons);
-      return coupons[idx];
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.error || err?.message || `Failed to update coupon`);
+    } catch (e: any) {
+      console.error('Error updating coupon:', e);
+      throw e;
     }
-    return { id, ...updates } as PromoCode;
   },
 
   async deleteCoupon(id: string): Promise<boolean> {
     try {
-      await fetch(`${API_BASE}/coupons/${id}`, {
+      const res = await fetch(`${API_BASE}/coupons/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
-    } catch (e) {}
-
-    const coupons = getLocalCoupons().filter(c => c.id !== id);
-    saveLocalCoupons(coupons);
-    return true;
+      if (res.ok) {
+        const coupons = getLocalCoupons().filter(c => c.id !== id);
+        saveLocalCoupons(coupons);
+        return true;
+      }
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.error || err?.message || `Failed to delete coupon`);
+    } catch (e: any) {
+      console.error('Error deleting coupon:', e);
+      throw e;
+    }
   },
 
   async validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discountAmount: number; isFreeDelivery?: boolean; coupon?: any; message: string }> {
@@ -818,7 +822,7 @@ export const api = {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'siddhujha2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
     const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
     const defaultAdminName = normalizedEmail === 'kdsuperm@gmail.com'
       ? 'KD Supermarket Desk (Admin)'

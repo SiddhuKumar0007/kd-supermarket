@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { getDb } from '../server/db.js';
 
-const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
+const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'siddhujha2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '976550764058-rjdm7lbg89d2aemkjlsaaegsi3at7ngb.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
