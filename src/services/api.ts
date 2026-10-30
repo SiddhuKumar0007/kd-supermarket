@@ -822,7 +822,7 @@ export const api = {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'siddhujha2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
+    const ADMIN_EMAILS = ['siddhukumar2006@gmail.com', 'vyapaarwebs@gmail.com', 'kdsuperm@gmail.com'];
     const isAdmin = ADMIN_EMAILS.includes(normalizedEmail);
     const defaultAdminName = normalizedEmail === 'kdsuperm@gmail.com'
       ? 'KD Supermarket Desk (Admin)'
