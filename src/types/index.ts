@@ -168,6 +168,7 @@ export interface PromoCode {
   minOrderValue: number;
   maxDiscount?: number;
   isActive: boolean;
+  isPublic?: boolean; // Show in public list at checkout & offers page
   expiryDate?: string;
   usageCount?: number;
 }

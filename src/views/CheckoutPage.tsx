@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -11,11 +11,13 @@ import {
   MessageCircle,
   QrCode,
   Lock,
-  ChevronRight
+  ChevronRight,
+  Tag,
+  Sparkles
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
-import { Order } from '../types';
+import { Order, PromoCode } from '../types';
 
 export const CheckoutPage: React.FC = () => {
   const { 
@@ -71,21 +73,34 @@ export const CheckoutPage: React.FC = () => {
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isFreeDeliveryUnlocked, setIsFreeDeliveryUnlocked] = useState(false);
+  const [availableCoupons, setAvailableCoupons] = useState<PromoCode[]>([]);
 
-  const applyCoupon = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!couponCode.trim()) {
+  useEffect(() => {
+    async function loadPublicCoupons() {
+      try {
+        const list = await api.getCoupons();
+        setAvailableCoupons(list.filter(c => c.isActive && c.isPublic !== false));
+      } catch (e) {
+        console.warn('Could not load public coupons', e);
+      }
+    }
+    loadPublicCoupons();
+  }, []);
+
+  const executeApplyCoupon = async (codeToApply: string) => {
+    if (!codeToApply.trim()) {
       showToast('Please enter a coupon code', 'error');
       return;
     }
     setIsApplyingCoupon(true);
     try {
-      const res = await api.validateCoupon(couponCode, subtotal);
+      const res = await api.validateCoupon(codeToApply, subtotal);
       if (res.valid) {
         const isFree = res.isFreeDelivery || res.coupon?.discountType === 'free_delivery';
         setIsFreeDeliveryUnlocked(isFree);
         setDiscountAmount(res.discountAmount || 0);
         setAppliedCoupon(res.coupon);
+        setCouponCode(res.coupon?.code || codeToApply);
         showToast(res.message, 'success');
       } else {
         setIsFreeDeliveryUnlocked(false);
@@ -98,6 +113,11 @@ export const CheckoutPage: React.FC = () => {
     } finally {
       setIsApplyingCoupon(false);
     }
+  };
+
+  const applyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await executeApplyCoupon(couponCode);
   };
 
   const removeCoupon = () => {
@@ -520,7 +540,7 @@ export const CheckoutPage: React.FC = () => {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Enter Promo Code (e.g. KD50)"
+                        placeholder="Enter Promo Code (e.g. FREEDELIVERY)"
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
                         className="flex-1 px-3 py-2 bg-ivory-50 border border-gray-200 rounded-xl text-xs uppercase font-bold focus:outline-none focus:border-forest"
@@ -529,14 +549,68 @@ export const CheckoutPage: React.FC = () => {
                         type="button"
                         disabled={isApplyingCoupon}
                         onClick={applyCoupon}
-                        className="px-3.5 py-2 bg-forest hover:bg-forest-dark disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors"
+                        className="px-3.5 py-2 bg-forest hover:bg-forest-dark disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors shadow-xs"
                       >
                         {isApplyingCoupon ? 'Verifying...' : 'Apply'}
                       </button>
                     </div>
-                    <p className="text-[10px] text-charcoal-muted mt-1">
-                      Check <strong>Special Offers</strong> page for active supermarket promo codes.
-                    </p>
+
+                    {/* Available Public Coupons for 1-Click Apply */}
+                    {availableCoupons.length > 0 && (
+                      <div className="mt-2.5 pt-2 border-t border-dashed border-gray-200">
+                        <div className="flex items-center gap-1 text-[11px] font-bold text-forest mb-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-warmYellow" />
+                          <span>Available Supermarket Offers ({availableCoupons.length}):</span>
+                        </div>
+                        <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                          {availableCoupons.map((c) => {
+                            const isApplicable = !c.minOrderValue || subtotal >= c.minOrderValue;
+                            return (
+                              <div
+                                key={c.id || c.code}
+                                className={`p-2 rounded-xl border text-xs flex items-center justify-between gap-2 transition-all ${
+                                  isApplicable 
+                                    ? 'bg-emerald-50/70 border-emerald-200 hover:border-forest' 
+                                    : 'bg-gray-50 border-gray-200 opacity-60'
+                                }`}
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono font-black text-xs text-forest px-1.5 py-0.5 rounded bg-white border border-forest/20">
+                                      {c.code}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-charcoal truncate">
+                                      {c.discountType === 'free_delivery' 
+                                        ? '🚚 Free Delivery' 
+                                        : c.discountType === 'flat' 
+                                        ? `₹${c.discountValue} OFF` 
+                                        : `${c.discountValue}% OFF`}
+                                    </span>
+                                  </div>
+                                  <p className="text-[10px] text-charcoal-muted mt-0.5 truncate">
+                                    {c.minOrderValue ? `Min cart ₹${c.minOrderValue}` : 'No minimum cart'}
+                                    {c.description ? ` • ${c.description}` : ''}
+                                  </p>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  disabled={!isApplicable || isApplyingCoupon}
+                                  onClick={() => executeApplyCoupon(c.code)}
+                                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all shadow-xs flex-shrink-0 ${
+                                    isApplicable 
+                                      ? 'bg-forest text-white hover:bg-forest-dark cursor-pointer' 
+                                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                  }`}
+                                >
+                                  {isApplicable ? 'Apply Code' : `Add ₹${(c.minOrderValue || 0) - subtotal}`}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

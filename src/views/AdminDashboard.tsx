@@ -102,6 +102,7 @@ export const AdminDashboard: React.FC = () => {
     minOrderValue: number;
     maxDiscount: number;
     isActive: boolean;
+    isPublic: boolean;
     expiryDate: string;
   }>({
     code: '',
@@ -112,6 +113,7 @@ export const AdminDashboard: React.FC = () => {
     minOrderValue: 499,
     maxDiscount: 50,
     isActive: true,
+    isPublic: true,
     expiryDate: '2027-12-31'
   });
 
@@ -1890,6 +1892,7 @@ export const AdminDashboard: React.FC = () => {
                   minOrderValue: 499,
                   maxDiscount: 50,
                   isActive: true,
+                  isPublic: true,
                   expiryDate: '2027-12-31'
                 });
                 setIsCouponModalOpen(true);
@@ -1980,19 +1983,28 @@ export const AdminDashboard: React.FC = () => {
                         </button>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleToggleCouponStatus(coupon)}
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors flex items-center gap-1 ${
-                          coupon.isActive !== false
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${coupon.isActive !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                        <span>{coupon.isActive !== false ? 'Active' : 'Inactive'}</span>
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                          coupon.isPublic !== false 
+                            ? 'bg-blue-50 text-blue-700 border border-blue-200' 
+                            : 'bg-purple-50 text-purple-700 border border-purple-200'
+                        }`}>
+                          {coupon.isPublic !== false ? '🌐 Public' : '🔒 Secret'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleCouponStatus(coupon)}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors flex items-center gap-1 ${
+                            coupon.isActive !== false
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                          }`}
+                          title="Click to toggle status"
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${coupon.isActive !== false ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                          <span>{coupon.isActive !== false ? 'Active' : 'Inactive'}</span>
+                        </button>
+                      </div>
                     </div>
 
                     {/* Title & Description */}
@@ -2053,6 +2065,7 @@ export const AdminDashboard: React.FC = () => {
                           minOrderValue: coupon.minOrderValue || 0,
                           maxDiscount: coupon.maxDiscount || 0,
                           isActive: coupon.isActive !== false,
+                          isPublic: coupon.isPublic !== false,
                           expiryDate: coupon.expiryDate || '2027-12-31'
                         });
                         setIsCouponModalOpen(true);
@@ -2607,6 +2620,50 @@ export const AdminDashboard: React.FC = () => {
                   onChange={(e) => setCouponForm({ ...couponForm, expiryDate: e.target.value })}
                   className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:border-forest bg-white"
                 />
+              </div>
+
+              {/* Public Visibility Toggle */}
+              <div className="p-3.5 bg-ivory-50 rounded-xl border border-gray-200 space-y-2">
+                <div>
+                  <span className="font-bold text-xs text-charcoal block">Public Promo Code (Show to Customers?)</span>
+                  <span className="text-[10px] text-charcoal-muted">Kya is promo code ko checkout aur offers list me sabhi customers ko dikhana hai?</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                  <label className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                    couponForm.isPublic 
+                      ? 'bg-emerald-50 border-emerald-400 text-forest font-bold shadow-xs' 
+                      : 'bg-white border-gray-200 text-charcoal'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="isPublic"
+                      checked={couponForm.isPublic === true}
+                      onChange={() => setCouponForm({ ...couponForm, isPublic: true })}
+                      className="text-forest cursor-pointer"
+                    />
+                    <span>✅ Yes (Public List)</span>
+                  </label>
+
+                  <label className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                    !couponForm.isPublic 
+                      ? 'bg-purple-50 border-purple-400 text-purple-900 font-bold shadow-xs' 
+                      : 'bg-white border-gray-200 text-charcoal'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="isPublic"
+                      checked={couponForm.isPublic === false}
+                      onChange={() => setCouponForm({ ...couponForm, isPublic: false })}
+                      className="text-purple-600 cursor-pointer"
+                    />
+                    <span>🔒 No (Secret Code)</span>
+                  </label>
+                </div>
+                <p className="text-[10px] text-charcoal-muted mt-1 leading-normal">
+                  {couponForm.isPublic 
+                    ? '👉 Customers checkout par Available Coupons list se directly 1-click me apply kar payenge.' 
+                    : '👉 Customer jab tak khud exact code type karke "Apply" nahi dabayega, tab tak kisi ko list me nahi dikhega.'}
+                </p>
               </div>
 
               {/* Active Toggle */}

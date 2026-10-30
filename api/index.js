@@ -272,7 +272,8 @@ export default async function handler(req, res) {
         const all = urlObj.searchParams.get('all') === 'true';
         const authUser = getAuthUser(req);
         const isAdmin = authUser && authUser.role === 'admin';
-        const query = (all && isAdmin) ? {} : { isActive: { $ne: false } };
+        // Admin gets all coupons; Public gets only active AND public coupons (isPublic !== false)
+        const query = (all && isAdmin) ? {} : { isActive: { $ne: false }, isPublic: { $ne: false } };
         const coupons = await col.find(query).toArray();
         return sendJson(res, 200, coupons);
       }
@@ -294,6 +295,7 @@ export default async function handler(req, res) {
           minOrderValue: Number(body.minOrderValue) || 0,
           maxDiscount: isFreeDelivery ? 0 : (Number(body.maxDiscount) || 100),
           isActive: body.isActive !== false,
+          isPublic: body.isPublic !== false, // Yes: Show in list; No: Secret / manual only
           expiryDate: body.expiryDate || '2027-12-31',
           usageCount: 0
         };
