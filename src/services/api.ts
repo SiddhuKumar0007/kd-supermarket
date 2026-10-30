@@ -612,12 +612,12 @@ export const api = {
     const newCoupon: PromoCode = {
       id: `c-${Date.now()}`,
       code: (couponData.code || 'KD50').toUpperCase().trim(),
-      title: couponData.title || 'Special Discount',
-      description: couponData.description || 'Supermarket savings coupon',
+      title: couponData.title || (couponData.discountType === 'free_delivery' ? 'Free Delivery Offer' : 'Special Discount'),
+      description: couponData.description || (couponData.discountType === 'free_delivery' ? 'Free home delivery on your order' : 'Supermarket savings coupon'),
       discountType: couponData.discountType || 'flat',
-      discountValue: Number(couponData.discountValue) || 50,
-      minOrderValue: Number(couponData.minOrderValue) || 499,
-      maxDiscount: Number(couponData.maxDiscount) || 50,
+      discountValue: couponData.discountType === 'free_delivery' ? 0 : (Number(couponData.discountValue) || 50),
+      minOrderValue: Number(couponData.minOrderValue) || 0,
+      maxDiscount: couponData.discountType === 'free_delivery' ? 0 : (Number(couponData.maxDiscount) || 50),
       isActive: couponData.isActive !== false,
       expiryDate: couponData.expiryDate || '2027-12-31'
     };
@@ -682,7 +682,23 @@ export const api = {
     return true;
   },
 
-  async validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discountAmount: number; coupon?: any; message: string }> {
+  async validateCoupon(code: string, subtotal: number): Promise<{ valid: boolean; discountAmount: number; isFreeDelivery?: boolean; coupon?: any; message: string }> {
+    try {
+      const res = await fetch(`${API_BASE}/coupons/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: (code || '').trim().toUpperCase(), subtotal })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data;
+      }
+      const errData = await res.json().catch(() => null);
+      if (errData && errData.message) {
+        return { valid: false, discountAmount: 0, message: errData.message };
+      }
+    } catch (e) {}
+
     const coupons = getLocalCoupons();
     const cleanCode = (code || '').toUpperCase().trim();
     const found = coupons.find(c => c.code.toUpperCase() === cleanCode && c.isActive);
@@ -699,8 +715,11 @@ export const api = {
       };
     }
 
+    const isFreeDelivery = found.discountType === 'free_delivery';
     let discount = 0;
-    if (found.discountType === 'percentage') {
+    if (isFreeDelivery) {
+      discount = 0;
+    } else if (found.discountType === 'percentage') {
       discount = Math.round((subtotal * found.discountValue) / 100);
       if (found.maxDiscount && discount > found.maxDiscount) {
         discount = found.maxDiscount;
@@ -712,8 +731,11 @@ export const api = {
     return {
       valid: true,
       discountAmount: Math.min(discount, subtotal),
+      isFreeDelivery,
       coupon: found,
-      message: `Coupon ${found.code} applied! You save ₹${discount}`
+      message: isFreeDelivery 
+        ? `Coupon ${found.code} applied! Free Delivery unlocked.`
+        : `Coupon ${found.code} applied! You save ₹${discount}`
     };
   },
 

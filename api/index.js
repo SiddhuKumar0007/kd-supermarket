@@ -283,15 +283,16 @@ export default async function handler(req, res) {
         const cleanCode = body.code.trim().toUpperCase();
         const existing = await col.findOne({ code: cleanCode });
         if (existing) return sendJson(res, 409, { error: `Coupon ${cleanCode} already exists` });
+        const isFreeDelivery = body.discountType === 'free_delivery';
         const newCoupon = {
           id: `cpn-${Date.now()}`,
           code: cleanCode,
-          title: body.title || `${cleanCode} Special Offer`,
-          description: body.description || '',
+          title: body.title || (isFreeDelivery ? 'Free Delivery Offer' : `${cleanCode} Special Offer`),
+          description: body.description || (isFreeDelivery ? 'Free home delivery on your order' : ''),
           discountType: body.discountType || 'percentage',
-          discountValue: Number(body.discountValue) || 10,
+          discountValue: isFreeDelivery ? 0 : (Number(body.discountValue) || 10),
           minOrderValue: Number(body.minOrderValue) || 0,
-          maxDiscount: Number(body.maxDiscount) || 100,
+          maxDiscount: isFreeDelivery ? 0 : (Number(body.maxDiscount) || 100),
           isActive: body.isActive !== false,
           expiryDate: body.expiryDate || '2027-12-31',
           usageCount: 0
@@ -341,8 +342,11 @@ export default async function handler(req, res) {
         return sendJson(res, 400, { valid: false, message: `Cart total must be at least ₹${coupon.minOrderValue} (Current: ₹${orderSubtotal})` });
       }
 
+      const isFreeDelivery = coupon.discountType === 'free_delivery';
       let discount = 0;
-      if (coupon.discountType === 'fixed' || coupon.discountType === 'flat') {
+      if (isFreeDelivery) {
+        discount = 0; // Delivery fee is waived to 0
+      } else if (coupon.discountType === 'fixed' || coupon.discountType === 'flat') {
         discount = coupon.discountValue;
       } else {
         discount = Math.round((orderSubtotal * coupon.discountValue) / 100);
@@ -356,7 +360,10 @@ export default async function handler(req, res) {
         valid: true,
         discountAmount: discount,
         coupon,
-        message: `Coupon '${coupon.code}' applied! ₹${discount} savings added.`
+        isFreeDelivery,
+        message: isFreeDelivery 
+          ? `Coupon '${coupon.code}' applied! Free Delivery unlocked.`
+          : `Coupon '${coupon.code}' applied! ₹${discount} savings added.`
       });
     }
 
@@ -549,11 +556,15 @@ export default async function handler(req, res) {
         // Server-side Coupon validation
         let verifiedDiscount = 0;
         let appliedCouponCode = null;
+        let isFreeDeliveryCoupon = false;
         const requestedCode = (body.couponCode || body.appliedCoupon?.code || '').trim().toUpperCase();
         if (requestedCode) {
           const coupon = await couponsCol.findOne({ code: requestedCode, isActive: true });
           if (coupon && (!coupon.minOrderValue || calculatedSubtotal >= coupon.minOrderValue)) {
-            if (coupon.discountType === 'percentage') {
+            if (coupon.discountType === 'free_delivery') {
+              isFreeDeliveryCoupon = true;
+              verifiedDiscount = 0;
+            } else if (coupon.discountType === 'percentage') {
               verifiedDiscount = Math.round((calculatedSubtotal * coupon.discountValue) / 100);
               if (coupon.maxDiscount && verifiedDiscount > coupon.maxDiscount) {
                 verifiedDiscount = coupon.maxDiscount;
@@ -569,7 +580,10 @@ export default async function handler(req, res) {
         // Server-side Delivery fee calculation
         const freeThreshold = Number(currentSettings?.freeDeliveryThreshold) || 499;
         const defaultFee = Number(currentSettings?.deliveryFee) || 30;
-        const calculatedDeliveryFee = calculatedSubtotal >= freeThreshold ? 0 : defaultFee;
+        let calculatedDeliveryFee = calculatedSubtotal >= freeThreshold ? 0 : defaultFee;
+        if (isFreeDeliveryCoupon) {
+          calculatedDeliveryFee = 0; // Waived by coupon!
+        }
         const calculatedTotal = Math.max(0, calculatedSubtotal + calculatedDeliveryFee - verifiedDiscount);
 
         const orderNumber = Math.floor(1000 + Math.random() * 9000);

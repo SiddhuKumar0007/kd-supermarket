@@ -163,7 +163,7 @@ export interface PromoCode {
   code: string;
   title: string;
   description: string;
-  discountType: 'percentage' | 'flat';
+  discountType: 'percentage' | 'flat' | 'free_delivery';
   discountValue: number;
   minOrderValue: number;
   maxDiscount?: number;

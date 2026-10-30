@@ -70,6 +70,7 @@ export const CheckoutPage: React.FC = () => {
 
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [isFreeDeliveryUnlocked, setIsFreeDeliveryUnlocked] = useState(false);
 
   const applyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +82,13 @@ export const CheckoutPage: React.FC = () => {
     try {
       const res = await api.validateCoupon(couponCode, subtotal);
       if (res.valid) {
-        setDiscountAmount(res.discountAmount);
+        const isFree = res.isFreeDelivery || res.coupon?.discountType === 'free_delivery';
+        setIsFreeDeliveryUnlocked(isFree);
+        setDiscountAmount(res.discountAmount || 0);
         setAppliedCoupon(res.coupon);
         showToast(res.message, 'success');
       } else {
+        setIsFreeDeliveryUnlocked(false);
         setDiscountAmount(0);
         setAppliedCoupon(null);
         showToast(res.message || 'Invalid coupon', 'error');
@@ -97,13 +101,15 @@ export const CheckoutPage: React.FC = () => {
   };
 
   const removeCoupon = () => {
+    setIsFreeDeliveryUnlocked(false);
     setDiscountAmount(0);
     setAppliedCoupon(null);
     setCouponCode('');
     showToast('Coupon removed', 'info');
   };
 
-  const grandTotal = Math.max(0, total - discountAmount);
+  const effectiveDeliveryFee = isFreeDeliveryUnlocked ? 0 : deliveryFee;
+  const grandTotal = Math.max(0, subtotal + effectiveDeliveryFee - discountAmount);
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,8 +172,9 @@ export const CheckoutPage: React.FC = () => {
           quantity: item.quantity,
           image: item.image
         })),
+        couponCode: appliedCoupon?.code,
         subtotal,
-        deliveryFee,
+        deliveryFee: effectiveDeliveryFee,
         discountAmount,
         total: grandTotal,
         paymentMethod: 'Cash on Delivery',
@@ -494,7 +501,9 @@ export const CheckoutPage: React.FC = () => {
                       <div className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-forest" />
                         <span className="font-mono font-black text-xs text-forest">{appliedCoupon.code}</span>
-                        <span className="text-[11px] font-bold text-forest">Applied (-₹{discountAmount})</span>
+                        <span className="text-[11px] font-bold text-forest">
+                          {isFreeDeliveryUnlocked ? 'Free Delivery Unlocked 🚚' : ('Applied (-₹' + discountAmount + ')')}
+                        </span>
                       </div>
                       <p className="text-[10px] text-charcoal-muted mt-0.5">{appliedCoupon.title}</p>
                     </div>
@@ -541,10 +550,12 @@ export const CheckoutPage: React.FC = () => {
                 <div className="flex justify-between text-charcoal-muted">
                   <span>Delivery Charges</span>
                   <span>
-                    {deliveryFee === 0 ? (
-                      <span className="text-fresh font-bold uppercase">FREE (Over ₹499)</span>
+                    {effectiveDeliveryFee === 0 ? (
+                      <span className="text-fresh font-bold uppercase">
+                        {isFreeDeliveryUnlocked ? 'FREE (Coupon Applied 🚚)' : 'FREE (Over ₹499)'}
+                      </span>
                     ) : (
-                      `₹${deliveryFee}`
+                      ('₹' + effectiveDeliveryFee)
                     )}
                   </span>
                 </div>

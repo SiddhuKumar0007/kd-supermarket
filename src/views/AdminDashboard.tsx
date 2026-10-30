@@ -97,7 +97,7 @@ export const AdminDashboard: React.FC = () => {
     code: string;
     title: string;
     description: string;
-    discountType: 'percentage' | 'flat';
+    discountType: 'percentage' | 'flat' | 'free_delivery';
     discountValue: number;
     minOrderValue: number;
     maxDiscount: number;
@@ -2010,7 +2010,11 @@ export const AdminDashboard: React.FC = () => {
                       <div className="bg-ivory-50 p-2 rounded-xl">
                         <span className="text-[10px] text-charcoal-muted uppercase block font-semibold">Discount</span>
                         <span className="font-black text-forest text-sm">
-                          {coupon.discountType === 'flat' ? `₹${coupon.discountValue} FLAT` : `${coupon.discountValue}% OFF`}
+                          {coupon.discountType === 'free_delivery'
+                            ? 'FREE DELIVERY'
+                            : coupon.discountType === 'flat'
+                            ? `₹${coupon.discountValue} FLAT`
+                            : `${coupon.discountValue}% OFF`}
                         </span>
                         {coupon.discountType === 'percentage' && coupon.maxDiscount && (
                           <span className="text-[9px] text-charcoal-muted block">Up to ₹{coupon.maxDiscount}</span>
@@ -2527,26 +2531,45 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold mb-1 text-charcoal">Discount Type</label>
                   <select
                     value={couponForm.discountType}
-                    onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value as any })}
+                    onChange={(e) => {
+                      const dt = e.target.value as any;
+                      setCouponForm({
+                        ...couponForm,
+                        discountType: dt,
+                        title: dt === 'free_delivery' && !couponForm.title ? 'Free Home Delivery' : couponForm.title,
+                        discountValue: dt === 'free_delivery' ? 0 : (couponForm.discountValue || 50)
+                      });
+                    }}
                     className="w-full px-3 py-2 border rounded-xl bg-white focus:outline-none focus:border-forest font-semibold"
                   >
                     <option value="flat">Flat Amount (₹)</option>
                     <option value="percentage">Percentage (%)</option>
+                    <option value="free_delivery">🚚 Free Delivery</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block font-bold mb-1 text-charcoal">
-                    {couponForm.discountType === 'flat' ? 'Discount Amount (₹)' : 'Discount Rate (%)'}
+                    {couponForm.discountType === 'free_delivery' 
+                      ? 'Delivery Benefit' 
+                      : couponForm.discountType === 'flat' 
+                      ? 'Discount Amount (₹)' 
+                      : 'Discount Rate (%)'}
                   </label>
-                  <input
-                    type="number"
-                    required
-                    min={1}
-                    value={couponForm.discountValue}
-                    onChange={(e) => setCouponForm({ ...couponForm, discountValue: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:border-forest font-bold"
-                  />
+                  {couponForm.discountType === 'free_delivery' ? (
+                    <div className="w-full px-3 py-2 border rounded-xl bg-gray-50 text-forest font-bold text-xs flex items-center h-[42px]">
+                      100% OFF on Delivery
+                    </div>
+                  ) : (
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      value={couponForm.discountValue}
+                      onChange={(e) => setCouponForm({ ...couponForm, discountValue: Number(e.target.value) })}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:border-forest font-bold"
+                    />
+                  )}
                 </div>
               </div>
 
