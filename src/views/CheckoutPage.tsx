@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -33,18 +33,36 @@ export const CheckoutPage: React.FC = () => {
     showToast 
   } = useStore();
 
-  // Form Fields (Clean initial state - zero auto-fill)
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [alternatePhone, setAlternatePhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [houseNo, setHouseNo] = useState('');
-  const [street, setStreet] = useState('');
-  const [locality, setLocality] = useState('');
-  const [landmark, setLandmark] = useState('');
-  const [pinCode, setPinCode] = useState('847211');
+  // Helper to get saved customer delivery details from local storage
+  const savedDetails = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('kd_saved_customer_details');
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }, []);
+
+  // Form Fields with automatic autofill from saved details or logged-in user profile
+  const [fullName, setFullName] = useState(savedDetails?.fullName || user?.name || '');
+  const [phone, setPhone] = useState(savedDetails?.phone || user?.phone || '');
+  const [alternatePhone, setAlternatePhone] = useState(savedDetails?.alternatePhone || '');
+  const [email, setEmail] = useState(savedDetails?.email || user?.email || '');
+  const [houseNo, setHouseNo] = useState(savedDetails?.houseNo || '');
+  const [street, setStreet] = useState(savedDetails?.street || '');
+  const [locality, setLocality] = useState(savedDetails?.locality || (selectedLocation ? selectedLocation.replace(', Madhubani (847211)', '') : ''));
+  const [landmark, setLandmark] = useState(savedDetails?.landmark || '');
+  const [pinCode, setPinCode] = useState(savedDetails?.pinCode || '847211');
   const [deliverySlot, setDeliverySlot] = useState('Today: 4:00 PM – 8:00 PM (Evening)');
   const [instructions, setInstructions] = useState('');
+
+  // Auto-populate when user signs in with Google
+  useEffect(() => {
+    if (user) {
+      if (!fullName && user.name) setFullName(user.name);
+      if (!phone && user.phone) setPhone(user.phone);
+      if (!email && user.email) setEmail(user.email);
+    }
+  }, [user]);
 
   // Payment State (Locked to Cash on Delivery)
   const [paymentMethod, setPaymentMethod] = useState<'Cash on Delivery'>('Cash on Delivery');
@@ -207,6 +225,17 @@ export const CheckoutPage: React.FC = () => {
       try {
         localStorage.setItem('kd_latest_order_id', createdOrder.id);
         localStorage.setItem('kd_latest_order_phone', createdOrder.customerPhone);
+        localStorage.setItem('kd_saved_customer_details', JSON.stringify({
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          alternatePhone: alternatePhone.trim(),
+          email: email.trim(),
+          houseNo: houseNo.trim(),
+          street: street.trim(),
+          locality: locality.trim(),
+          landmark: landmark.trim(),
+          pinCode: pinCode.trim()
+        }));
       } catch (e) {}
 
       clearCart();
@@ -241,7 +270,7 @@ export const CheckoutPage: React.FC = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmitOrder} autoComplete="off" autoCorrect="off" autoCapitalize="off" data-lpignore="true">
+      <form onSubmit={handleSubmitOrder}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
           {/* Left Column: Delivery Details & Payment */}
           <div className="lg:col-span-7 space-y-4 sm:space-y-6">
@@ -271,8 +300,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_cust_fullname"
-                    autoComplete="off"
+                    name="name"
+                    autoComplete="name"
                     placeholder="e.g. Rameshwar Prasad Jha"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
@@ -285,8 +314,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="tel"
                     required
-                    name="kd_cust_primary_phone"
-                    autoComplete="off"
+                    name="tel"
+                    autoComplete="tel"
                     placeholder="e.g. 9835021980"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -298,8 +327,8 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block font-bold text-charcoal mb-1">Alternate Phone (Calling - Optional)</label>
                   <input
                     type="tel"
-                    name="kd_cust_alt_phone"
-                    autoComplete="off"
+                    name="tel-national"
+                    autoComplete="tel"
                     placeholder="e.g. 9811340853"
                     value={alternatePhone}
                     onChange={(e) => setAlternatePhone(e.target.value)}
@@ -311,8 +340,8 @@ export const CheckoutPage: React.FC = () => {
                   <label className="block font-bold text-charcoal mb-1">Email Address (Optional for invoice)</label>
                   <input
                     type="email"
-                    name="kd_cust_email_addr"
-                    autoComplete="off"
+                    name="email"
+                    autoComplete="email"
                     placeholder="rameshwar.jha@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -335,8 +364,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_addr_house"
-                    autoComplete="off"
+                    name="address-line1"
+                    autoComplete="address-line1"
                     placeholder="e.g. House No. 24, 2nd Floor, Jha Niwas"
                     value={houseNo}
                     onChange={(e) => setHouseNo(e.target.value)}
@@ -349,8 +378,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_addr_street"
-                    autoComplete="off"
+                    name="address-line2"
+                    autoComplete="address-line2"
                     placeholder="e.g. Gali No. 3, Near Old Water Tank Road"
                     value={street}
                     onChange={(e) => setStreet(e.target.value)}
@@ -363,8 +392,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_addr_locality"
-                    autoComplete="off"
+                    name="address-level2"
+                    autoComplete="address-level2"
                     placeholder="e.g. Tirhut Colony / State Bank More / Suratganj"
                     value={locality}
                     onChange={(e) => setLocality(e.target.value)}
@@ -377,7 +406,7 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_addr_landmark"
+                    name="landmark"
                     autoComplete="off"
                     placeholder="e.g. Near Watson High School / Opposite Durga Mandir"
                     value={landmark}
@@ -401,8 +430,8 @@ export const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     required
-                    name="kd_addr_pincode"
-                    autoComplete="off"
+                    name="postal-code"
+                    autoComplete="postal-code"
                     value={pinCode}
                     onChange={(e) => setPinCode(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
