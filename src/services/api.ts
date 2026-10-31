@@ -425,6 +425,9 @@ export const api = {
     };
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: { 
@@ -432,7 +435,10 @@ export const api = {
           'X-Idempotency-Key': idempotencyKey
         },
         body: JSON.stringify(newOrder),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
+
       if (res.ok) {
         const saved = await res.json();
         const orders = getLocalOrders().filter(o => o.id !== saved.id);
