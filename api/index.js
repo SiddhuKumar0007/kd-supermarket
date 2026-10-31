@@ -899,7 +899,7 @@ export default async function handler(req, res) {
         name: displayName,
         email: normalizedEmail,
         role: isAdmin ? 'admin' : 'customer',
-        phone: '+91 98113 40853',
+        phone: isAdmin ? '+91 98113 40853' : '',
         avatar: googlePayload.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}`,
         provider: 'google'
       };

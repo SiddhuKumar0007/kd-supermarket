@@ -111,7 +111,7 @@ export const CustomerAccountPage: React.FC = () => {
     const newAddr: Address = {
       id: `addr-${Date.now()}`,
       fullName: user.name,
-      phone: user.phone || '+91 98113 40853',
+      phone: user.phone || '',
       street: newStreet,
       locality: newLocality,
       city: 'Madhubani',
@@ -149,7 +149,7 @@ export const CustomerAccountPage: React.FC = () => {
                 </span>
               )}
             </div>
-            <p className="text-xs text-ivory-100">{user.email} • {user.phone || '+91 98113 40853'}</p>
+            <p className="text-xs text-ivory-100">{user.email} • {user.phone || 'Not added'}</p>
             <p className="text-[11px] text-warmYellow mt-0.5">Madhubani, Bihar (PIN 847211)</p>
           </div>
         </div>
@@ -410,7 +410,7 @@ export const CustomerAccountPage: React.FC = () => {
             </div>
             <div>
               <label className="block font-bold text-charcoal mb-1">Phone</label>
-              <input type="text" disabled value={user.phone || '+91 98113 40853'} className="w-full px-3 py-2 bg-gray-50 border rounded-xl" />
+              <input type="text" disabled value={user.phone || 'Not added'} className="w-full px-3 py-2 bg-gray-50 border rounded-xl" />
             </div>
           </div>
         </div>

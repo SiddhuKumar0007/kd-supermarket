@@ -774,7 +774,7 @@ export const api = {
       name: normalizedEmail.split('@')[0],
       email: normalizedEmail,
       role: 'customer',
-      phone: '+91 98113 40853',
+      phone: '',
       savedAddresses: []
     };
     return { token: `token-${user.id}`, user };
@@ -786,7 +786,7 @@ export const api = {
       name: name || 'Customer',
       email: email,
       role: 'customer',
-      phone: phone || '+91 98113 40853',
+      phone: phone || '',
       savedAddresses: []
     };
     const token = `cust-token-${Date.now()}`;
@@ -839,7 +839,7 @@ export const api = {
       name: isAdmin ? (name || defaultAdminName) : (name || email.split('@')[0]),
       email: normalizedEmail,
       role: isAdmin ? 'admin' : 'customer',
-      phone: '+91 98113 40853',
+      phone: isAdmin ? '+91 98113 40853' : '',
       avatar: avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name || email)}`,
       provider: 'google',
       savedAddresses: []

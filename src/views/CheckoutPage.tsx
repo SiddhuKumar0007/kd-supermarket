@@ -44,7 +44,15 @@ export const CheckoutPage: React.FC = () => {
 
   // Form Fields with automatic autofill from saved details or logged-in user profile
   const [fullName, setFullName] = useState(savedDetails?.fullName || user?.name || '');
-  const [phone, setPhone] = useState(savedDetails?.phone || user?.phone || '');
+  // Avoid auto-filling store owner's phone number for customers
+  const initialPhone = (() => {
+    const candidate = savedDetails?.phone || user?.phone || '';
+    if (candidate.replace(/\D/g, '') === '9811340853' && !user?.email?.includes('vyapaarwebs') && !user?.email?.includes('kdsuperm')) {
+      return '';
+    }
+    return candidate;
+  })();
+  const [phone, setPhone] = useState(initialPhone);
   const [alternatePhone, setAlternatePhone] = useState(savedDetails?.alternatePhone || '');
   const [email, setEmail] = useState(savedDetails?.email || user?.email || '');
   const [houseNo, setHouseNo] = useState(savedDetails?.houseNo || '');
@@ -340,7 +348,7 @@ export const CheckoutPage: React.FC = () => {
                     type="tel"
                     name="tel-national"
                     autoComplete="tel"
-                    placeholder="e.g. 9811340853"
+                    placeholder="e.g. 9835012345"
                     value={alternatePhone}
                     onChange={(e) => setAlternatePhone(e.target.value)}
                     className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
