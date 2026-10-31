@@ -120,6 +120,8 @@ export const AdminDashboard: React.FC = () => {
   // Order Filters & Search
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [orderTimeFilter, setOrderTimeFilter] = useState<'today' | 'this_month' | 'all' | 'custom_month'>('today');
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>('');
 
   // Product Filters & Search (In/Out, Weight, Stock, Search)
   const [productSearch, setProductSearch] = useState('');
@@ -642,9 +644,122 @@ export const AdminDashboard: React.FC = () => {
     return parts.length > 0 ? parts.join(', ') : 'Madhubani, Bihar';
   };
 
-  // Filter orders
+  // IST Date Formatting Helper (Asia/Kolkata)
+  const getISTDate = (dateStr?: string) => {
+    try {
+      const d = dateStr ? new Date(dateStr) : new Date();
+      return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(d); // 'YYYY-MM-DD'
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const todayIST = getISTDate();
+  const currentMonthIST = todayIST.slice(0, 7); // 'YYYY-MM'
+  const currentMonthLabel = (() => {
+    try {
+      return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', month: 'long', year: 'numeric' }).format(new Date());
+    } catch (e) {
+      return 'Current Month';
+    }
+  })();
+
+  // Month-by-month completed archive & breakdown across all orders
+  const availableMonths = React.useMemo(() => {
+    const map: Record<string, {
+      monthKey: string;
+      monthLabel: string;
+      count: number;
+      revenue: number;
+      delivered: number;
+      cancelled: number;
+      isCurrent: boolean;
+    }> = {};
+
+    orders.forEach(o => {
+      if (!o.createdAt) return;
+      try {
+        const mKey = getISTDate(o.createdAt).slice(0, 7);
+        const mLabel = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', month: 'long', year: 'numeric' }).format(new Date(o.createdAt));
+        if (!map[mKey]) {
+          map[mKey] = {
+            monthKey: mKey,
+            monthLabel: mLabel,
+            count: 0,
+            revenue: 0,
+            delivered: 0,
+            cancelled: 0,
+            isCurrent: mKey === currentMonthIST
+          };
+        }
+        map[mKey].count += 1;
+        if (o.orderStatus === 'Delivered') map[mKey].delivered += 1;
+        if (o.orderStatus === 'Cancelled') map[mKey].cancelled += 1;
+        if (o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED') {
+          map[mKey].revenue += (o.total || 0);
+        }
+      } catch (e) {}
+    });
+
+    if (!map[currentMonthIST]) {
+      map[currentMonthIST] = {
+        monthKey: currentMonthIST,
+        monthLabel: currentMonthLabel,
+        count: 0,
+        revenue: 0,
+        delivered: 0,
+        cancelled: 0,
+        isCurrent: true
+      };
+    }
+
+    return Object.values(map).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
+  }, [orders, currentMonthIST, currentMonthLabel]);
+
+  // Today's orders list & sales
+  const todayOrdersList = React.useMemo(() => {
+    return orders.filter(o => o.createdAt && getISTDate(o.createdAt) === todayIST);
+  }, [orders, todayIST]);
+
+  const todayRevenue = React.useMemo(() => {
+    return todayOrdersList
+      .filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED')
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+  }, [todayOrdersList]);
+
+  // Current Month's orders list & sales
+  const thisMonthOrdersList = React.useMemo(() => {
+    return orders.filter(o => o.createdAt && getISTDate(o.createdAt).slice(0, 7) === currentMonthIST);
+  }, [orders, currentMonthIST]);
+
+  const thisMonthRevenue = React.useMemo(() => {
+    return thisMonthOrdersList
+      .filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED')
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+  }, [thisMonthOrdersList]);
+
+  // Total All-Time Revenue
+  const allTimeRevenue = React.useMemo(() => {
+    return orders
+      .filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED')
+      .reduce((sum, o) => sum + (o.total || 0), 0);
+  }, [orders]);
+
+  // Filter orders by Time/Month, Status, and Search query (Newest First)
   const filteredOrders = orders.filter(o => {
+    // 1. Time / Period Filter
+    if (orderTimeFilter === 'today') {
+      if (!o.createdAt || getISTDate(o.createdAt) !== todayIST) return false;
+    } else if (orderTimeFilter === 'this_month') {
+      if (!o.createdAt || getISTDate(o.createdAt).slice(0, 7) !== currentMonthIST) return false;
+    } else if (orderTimeFilter === 'custom_month' && selectedMonthKey) {
+      if (!o.createdAt || getISTDate(o.createdAt).slice(0, 7) !== selectedMonthKey) return false;
+    }
+
+    // 2. Status Filter
     if (orderStatusFilter !== 'all' && o.orderStatus !== orderStatusFilter) return false;
+
+    // 3. Search query
     if (orderSearch) {
       const q = orderSearch.toLowerCase();
       return (
@@ -654,7 +769,7 @@ export const AdminDashboard: React.FC = () => {
       );
     }
     return true;
-  });
+  }).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
   // Filter products by search, category, in/out of stock
   const filteredProducts = products.filter(p => {
@@ -908,39 +1023,126 @@ export const AdminDashboard: React.FC = () => {
           {/* Key Metrics Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Total Orders</span>
-              <p className="text-2xl font-black text-forest mt-1">{stats.totalOrders}</p>
-              <span className="text-[10px] text-fresh font-semibold">Today: {stats.todayOrders}</span>
+              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Total Orders (All Time)</span>
+              <p className="text-2xl font-black text-forest mt-1">{orders.length}</p>
+              <span className="text-[10px] text-fresh font-bold">₹{allTimeRevenue.toLocaleString('en-IN')} Total Sales</span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-amber-200 bg-amber-50/20 shadow-card ring-1 ring-amber-300">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-amber-900 uppercase">Today's Orders</span>
+                <span className="px-1.5 py-0.2 bg-warmYellow text-charcoal text-[9px] font-black rounded">LIVE</span>
+              </div>
+              <p className="text-2xl font-black text-amber-700 mt-1">{todayOrdersList.length}</p>
+              <span className="text-[10px] text-amber-800 font-bold">₹{todayRevenue.toLocaleString('en-IN')} Today's Sales</span>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-emerald-200 bg-emerald-50/20 shadow-card">
+              <span className="text-[11px] font-bold text-emerald-900 uppercase">This Month</span>
+              <p className="text-2xl font-black text-forest mt-1">{thisMonthOrdersList.length}</p>
+              <span className="text-[10px] text-forest font-bold">₹{thisMonthRevenue.toLocaleString('en-IN')} Month Sales</span>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Gross Revenue</span>
-              <p className="text-2xl font-black text-forest mt-1">₹{stats.totalRevenue}</p>
-              <span className="text-[10px] text-charcoal-muted">Paid/Confirmed</span>
+              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Delivered</span>
+              <p className="text-2xl font-black text-fresh-dark mt-1">
+                {orders.filter(o => o.orderStatus === 'Delivered').length}
+              </p>
+              <span className="text-[10px] text-charcoal-muted">Doorsteps Completed</span>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">New Orders</span>
-              <p className="text-2xl font-black text-amber-600 mt-1">{stats.pendingCount}</p>
-              <span className="text-[10px] text-charcoal-muted">Needs Attention</span>
+              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Needs Attention</span>
+              <p className="text-2xl font-black text-blue-600 mt-1">
+                {orders.filter(o => o.orderStatus === 'Order Placed' || o.orderStatus === 'Preparing Your Order' || o.orderStatus === 'Order Confirmed').length}
+              </p>
+              <span className="text-[10px] text-blue-500 font-semibold">Pending / Packing</span>
             </div>
 
             <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Preparing</span>
-              <p className="text-2xl font-black text-blue-600 mt-1">{stats.preparingCount}</p>
-              <span className="text-[10px] text-charcoal-muted">Being Packed</span>
+              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Cancelled</span>
+              <p className="text-2xl font-black text-red-600 mt-1">
+                {orders.filter(o => o.orderStatus === 'Cancelled').length}
+              </p>
+              <span className="text-[10px] text-red-400">Void / Rejected</span>
+            </div>
+          </div>
+
+          {/* Month-by-Month Order Breakdown & Completed Month Archive */}
+          <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-card space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-black text-forest flex items-center gap-2">
+                  <span>📅 Monthly Order Summary & Performance</span>
+                  <span className="px-2 py-0.5 bg-forest/10 text-forest text-xs font-bold rounded-full">Archive</span>
+                </h3>
+                <p className="text-xs text-charcoal-muted mt-0.5">
+                  Month-by-month order counts, delivered orders, completion rates, and gross sales
+                </p>
+              </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Dispatched</span>
-              <p className="text-2xl font-black text-purple-600 mt-1">{stats.outForDeliveryCount}</p>
-              <span className="text-[10px] text-charcoal-muted">Out for Delivery</span>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-card">
-              <span className="text-[11px] font-bold text-charcoal-muted uppercase">Low Stock Alerts</span>
-              <p className="text-2xl font-black text-red-600 mt-1">{stats.lowStockCount}</p>
-              <span className="text-[10px] text-red-500 font-semibold">Below 15 Units</span>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100 text-[11px] font-bold text-charcoal-muted uppercase tracking-wider">
+                    <th className="pb-2.5">Month</th>
+                    <th className="pb-2.5">Status</th>
+                    <th className="pb-2.5 text-center">Total Orders</th>
+                    <th className="pb-2.5 text-center">Delivered</th>
+                    <th className="pb-2.5 text-center">Cancelled</th>
+                    <th className="pb-2.5 text-right">Revenue</th>
+                    <th className="pb-2.5 text-right">Avg. Order Value</th>
+                    <th className="pb-2.5 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {availableMonths.map((m) => {
+                    const avgVal = m.count > 0 ? Math.round(m.revenue / (m.count - m.cancelled || 1)) : 0;
+                    return (
+                      <tr key={m.monthKey} className="hover:bg-sand/30 transition-colors">
+                        <td className="py-3 font-bold text-forest text-sm flex items-center gap-2">
+                          <span>{m.monthLabel}</span>
+                          {m.isCurrent && (
+                            <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded">
+                              Ongoing
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3">
+                          {m.isCurrent ? (
+                            <span className="px-2 py-0.5 bg-warmYellow/30 text-amber-900 text-[10px] font-black rounded-full border border-warmYellow">
+                              Active Month
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-gray-100 text-charcoal-muted text-[10px] font-bold rounded-full">
+                              Completed Month
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 text-center font-black text-forest">{m.count}</td>
+                        <td className="py-3 text-center font-bold text-fresh">{m.delivered}</td>
+                        <td className="py-3 text-center font-bold text-red-500">{m.cancelled}</td>
+                        <td className="py-3 text-right font-black text-forest">₹{m.revenue.toLocaleString('en-IN')}</td>
+                        <td className="py-3 text-right text-charcoal-muted font-mono">₹{avgVal}</td>
+                        <td className="py-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTab('orders');
+                              setSelectedMonthKey(m.monthKey);
+                              setOrderTimeFilter('custom_month');
+                            }}
+                            className="px-2.5 py-1 bg-forest/10 hover:bg-forest text-forest hover:text-white rounded-lg text-[11px] font-bold transition-all shadow-xs"
+                          >
+                            View Orders ➔
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -1039,6 +1241,159 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Quick Order Period Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              type="button"
+              onClick={() => setOrderTimeFilter('today')}
+              className={`p-3.5 rounded-2xl text-left border transition-all ${
+                orderTimeFilter === 'today'
+                  ? 'bg-amber-500/10 border-warmYellow shadow-sm ring-2 ring-warmYellow/50'
+                  : 'bg-white border-gray-200 hover:border-warmYellow/50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase text-amber-900">Today's Orders</span>
+                <span className="px-2 py-0.5 bg-warmYellow text-charcoal text-[10px] font-black rounded-full">
+                  ⚡ TODAY
+                </span>
+              </div>
+              <p className="text-2xl font-black text-amber-800 mt-1">{todayOrdersList.length}</p>
+              <span className="text-[11px] text-amber-700 font-bold">₹{todayRevenue.toLocaleString('en-IN')} placed today</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOrderTimeFilter('this_month')}
+              className={`p-3.5 rounded-2xl text-left border transition-all ${
+                orderTimeFilter === 'this_month'
+                  ? 'bg-emerald-500/10 border-emerald-500 shadow-sm ring-2 ring-emerald-500/50'
+                  : 'bg-white border-gray-200 hover:border-emerald-300'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-extrabold uppercase text-emerald-900">This Month</span>
+                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full">
+                  {currentMonthLabel}
+                </span>
+              </div>
+              <p className="text-2xl font-black text-forest mt-1">{thisMonthOrdersList.length}</p>
+              <span className="text-[11px] text-forest font-bold">₹{thisMonthRevenue.toLocaleString('en-IN')} this month</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOrderTimeFilter('all')}
+              className={`p-3.5 rounded-2xl text-left border transition-all ${
+                orderTimeFilter === 'all'
+                  ? 'bg-charcoal text-white shadow-sm ring-2 ring-charcoal'
+                  : 'bg-white border-gray-200 hover:border-charcoal/30'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-extrabold uppercase ${orderTimeFilter === 'all' ? 'text-gray-200' : 'text-charcoal-muted'}`}>
+                  All Time Total
+                </span>
+                <span className={`px-2 py-0.5 text-[10px] font-black rounded-full ${orderTimeFilter === 'all' ? 'bg-white/20 text-white' : 'bg-gray-100 text-charcoal'}`}>
+                  LIFETIME
+                </span>
+              </div>
+              <p className={`text-2xl font-black mt-1 ${orderTimeFilter === 'all' ? 'text-white' : 'text-forest'}`}>
+                {orders.length}
+              </p>
+              <span className={`text-[11px] font-bold ${orderTimeFilter === 'all' ? 'text-fresh' : 'text-charcoal-muted'}`}>
+                ₹{allTimeRevenue.toLocaleString('en-IN')} total store sales
+              </span>
+            </button>
+          </div>
+
+          {/* Time Navigation Filter Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 p-2 bg-sand/30 border border-sand-dark/20 rounded-2xl">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setOrderTimeFilter('today')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                  orderTimeFilter === 'today'
+                    ? 'bg-warmYellow text-charcoal shadow-sm'
+                    : 'bg-white text-charcoal-muted hover:text-charcoal'
+                }`}
+              >
+                <span>⚡ Today ({todayOrdersList.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOrderTimeFilter('this_month')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                  orderTimeFilter === 'this_month'
+                    ? 'bg-forest text-white shadow-sm'
+                    : 'bg-white text-charcoal-muted hover:text-charcoal'
+                }`}
+              >
+                <span>🗓️ This Month ({thisMonthOrdersList.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setOrderTimeFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                  orderTimeFilter === 'all'
+                    ? 'bg-charcoal text-white shadow-sm'
+                    : 'bg-white text-charcoal-muted hover:text-charcoal'
+                }`}
+              >
+                <span>📦 All Time ({orders.length})</span>
+              </button>
+            </div>
+
+            {/* Completed Months Dropdown */}
+            <div className="flex items-center gap-1.5 ml-auto">
+              <span className="text-[11px] font-bold text-charcoal-muted">Month Archive:</span>
+              <select
+                value={orderTimeFilter === 'custom_month' ? selectedMonthKey : ''}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSelectedMonthKey(e.target.value);
+                    setOrderTimeFilter('custom_month');
+                  }
+                }}
+                className="py-1.5 px-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-forest focus:outline-none"
+              >
+                <option value="">Select Month ▾</option>
+                {availableMonths.map((m) => (
+                  <option key={m.monthKey} value={m.monthKey}>
+                    {m.monthLabel + (m.isCurrent ? ' (Active)' : ' (' + m.count + ' Orders)')}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Active View Informative Banner */}
+          <div className="p-3 rounded-2xl bg-forest/5 border border-forest/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-forest animate-ping" />
+              <span className="font-bold text-charcoal">
+                {orderTimeFilter === 'today' && (
+                  <>Showing <strong>Today's Orders ({filteredOrders.length})</strong> • Placed today on {new Date().toLocaleDateString('en-IN')}</>
+                )}
+                {orderTimeFilter === 'this_month' && (
+                  <>Showing <strong>This Month's Orders ({filteredOrders.length})</strong> • {currentMonthLabel}</>
+                )}
+                {orderTimeFilter === 'all' && (
+                  <>Showing <strong>All Time Orders ({filteredOrders.length})</strong> • Total store order history</>
+                )}
+                {orderTimeFilter === 'custom_month' && (
+                  <>Showing <strong>{availableMonths.find(m => m.monthKey === selectedMonthKey)?.monthLabel || selectedMonthKey} ({filteredOrders.length} Orders)</strong></>
+                )}
+              </span>
+            </div>
+            <div className="font-extrabold text-forest">
+              Total in this view: ₹{filteredOrders.filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED').reduce((sum, o) => sum + (o.total || 0), 0).toLocaleString('en-IN')}
+            </div>
+          </div>
+
           {/* Orders Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -1056,7 +1411,14 @@ export const AdminDashboard: React.FC = () => {
                 {filteredOrders.map((ord) => (
                   <tr key={ord.id} className="hover:bg-ivory-50 transition-colors">
                     <td className="p-3 font-mono font-bold text-forest">
-                      {ord.id}
+                      <div className="flex items-center gap-1.5">
+                        <span>{ord.id}</span>
+                        {ord.createdAt && getISTDate(ord.createdAt) === todayIST && (
+                          <span className="px-1.5 py-0.2 bg-warmYellow text-charcoal text-[9px] font-black rounded-md shadow-xs animate-pulse">
+                            ⚡ TODAY
+                          </span>
+                        )}
+                      </div>
                       <span className="block text-[10px] text-charcoal-muted font-normal">
                         {new Date(ord.createdAt).toLocaleDateString('en-IN')}
                       </span>
@@ -1193,7 +1555,14 @@ export const AdminDashboard: React.FC = () => {
                 <div key={ord.id} className="p-4 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-3">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="font-mono font-black text-xs text-forest">{ord.id}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-black text-xs text-forest">{ord.id}</span>
+                        {ord.createdAt && getISTDate(ord.createdAt) === todayIST && (
+                          <span className="px-1.5 py-0.2 bg-warmYellow text-charcoal text-[9px] font-black rounded-md shadow-xs">
+                            ⚡ TODAY
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-charcoal-muted">
                         {new Date(ord.createdAt).toLocaleDateString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                       </p>

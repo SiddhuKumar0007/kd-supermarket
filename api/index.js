@@ -813,9 +813,41 @@ export default async function handler(req, res) {
       const totalProducts = await productsCol.countDocuments({});
       const totalCategories = await categoriesCol.countDocuments({});
 
-      const totalOrders = orders.length;
-      const today = new Date().toISOString().slice(0, 10);
-      const todayOrders = orders.filter(o => o.createdAt && o.createdAt.startsWith(today)).length;
+            const totalOrders = orders.length;
+      
+      // IST-aware date strings (YYYY-MM-DD)
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+      const currentMonthStr = todayStr.slice(0, 7); // 'YYYY-MM'
+
+      // Today's Orders & Revenue
+      const todayOrdersList = orders.filter(o => {
+        if (!o.createdAt) return false;
+        try {
+          return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(o.createdAt)) === todayStr;
+        } catch (e) {
+          return false;
+        }
+      });
+      const todayOrders = todayOrdersList.length;
+      const todayRevenue = todayOrdersList
+        .filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED')
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+
+      // Current Month's Orders & Revenue
+      const monthOrdersList = orders.filter(o => {
+        if (!o.createdAt) return false;
+        try {
+          return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date(o.createdAt)).slice(0, 7) === currentMonthStr;
+        } catch (e) {
+          return false;
+        }
+      });
+      const monthOrders = monthOrdersList.length;
+      const monthRevenue = monthOrdersList
+        .filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED')
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+
+      // Total All-Time Revenue
       const validOrders = orders.filter(o => o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED');
       const totalRevenue = validOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
@@ -825,9 +857,41 @@ export default async function handler(req, res) {
       const deliveredCount = orders.filter(o => o.orderStatus === 'Delivered').length;
       const lowStockCount = await productsCol.countDocuments({ stock: { $lte: 15 } });
 
+      // Month-by-Month Archive & Completed Breakdown
+      const monthlyMap = {};
+      for (const o of orders) {
+        if (!o.createdAt) continue;
+        try {
+          const d = new Date(o.createdAt);
+          const mKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(d).slice(0, 7);
+          const mLabel = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', month: 'long', year: 'numeric' }).format(d);
+          if (!monthlyMap[mKey]) {
+            monthlyMap[mKey] = {
+              monthKey: mKey,
+              monthLabel: mLabel,
+              totalOrders: 0,
+              totalRevenue: 0,
+              deliveredOrders: 0,
+              cancelledOrders: 0,
+              isCurrentMonth: mKey === currentMonthStr
+            };
+          }
+          monthlyMap[mKey].totalOrders += 1;
+          if (o.orderStatus === 'Delivered') monthlyMap[mKey].deliveredOrders += 1;
+          if (o.orderStatus === 'Cancelled') monthlyMap[mKey].cancelledOrders += 1;
+          if (o.orderStatus !== 'Cancelled' && o.paymentStatus !== 'FAILED') {
+            monthlyMap[mKey].totalRevenue += Number(o.total || 0);
+          }
+        } catch(e) {}
+      }
+      const monthlyBreakdown = Object.values(monthlyMap).sort((a, b) => b.monthKey.localeCompare(a.monthKey));
+
       return sendJson(res, 200, {
         totalOrders,
         todayOrders,
+        todayRevenue,
+        monthOrders,
+        monthRevenue,
         totalRevenue,
         pendingCount,
         preparingCount,
@@ -835,7 +899,8 @@ export default async function handler(req, res) {
         deliveredCount,
         lowStockCount,
         totalProducts,
-        totalCategories
+        totalCategories,
+        monthlyBreakdown
       });
     }
 
