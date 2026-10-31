@@ -141,8 +141,13 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (!fullName.trim() || !phone.trim() || !houseNo.trim() || !street.trim() || !locality.trim()) {
+        if (!fullName.trim() || !phone.trim() || !houseNo.trim() || !street.trim() || !locality.trim()) {
       showToast('Kripya apna poora pata (House No., Gali/Road, Locality, Name aur Mobile) bharein.', 'error');
+      return;
+    }
+
+    if (pinCode.trim() !== '847211') {
+      showToast('KD Supermarket delivery currently sirf PIN code 847211 (Madhubani Town) ke liye available hai.', 'error');
       return;
     }
 
@@ -356,12 +361,26 @@ export const CheckoutPage: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Madhubani Delivery Address */}
+                        {/* 2. Madhubani Delivery Address */}
             <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-200 shadow-card space-y-4">
-              <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">2</span>
-                <span>Delivery Address (Madhubani, Bihar)</span>
-              </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                <h3 className="font-heading font-bold text-base text-charcoal flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-forest text-white text-xs flex items-center justify-center font-bold">2</span>
+                  <span>Delivery Address (Madhubani, Bihar)</span>
+                </h3>
+                <span className="inline-flex items-center gap-1 text-[11px] font-black text-forest bg-forest/10 px-2.5 py-1 rounded-full w-fit">
+                  <MapPin className="w-3.5 h-3.5 text-forest" />
+                  <span>Only PIN Code 847211 Serviceable</span>
+                </span>
+              </div>
+
+              {/* Serviceable Pincode Info Banner */}
+              <div className="bg-emerald-50 border border-emerald-200 text-forest-dark p-3 rounded-2xl text-xs flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-forest flex-shrink-0" />
+                <div className="text-[11px] leading-relaxed">
+                  <span className="font-extrabold text-forest">Exclusive Delivery Service:</span> Currently available <strong>ONLY for PIN code 847211</strong> (All neighbourhoods across Madhubani town).
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
@@ -430,17 +449,43 @@ export const CheckoutPage: React.FC = () => {
                   />
                 </div>
 
-                <div>
-                  <label className="block font-bold text-charcoal mb-1">Postal PIN Code *</label>
-                  <input
-                    type="text"
-                    required
-                    name="postal-code"
-                    autoComplete="postal-code"
-                    value={pinCode}
-                    onChange={(e) => setPinCode(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs text-charcoal focus:outline-none focus:border-forest"
-                  />
+                                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-charcoal">Postal PIN Code *</label>
+                    <span className="text-[10px] font-black text-forest bg-forest/15 px-1.5 py-0.5 rounded-md">
+                      Serviceable: 847211 Only
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      required
+                      name="postal-code"
+                      autoComplete="postal-code"
+                      maxLength={6}
+                      value={pinCode}
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setPinCode(clean);
+                      }}
+                      placeholder="847211"
+                      className={`w-full px-3 py-2.5 bg-ivory-50 border rounded-xl text-xs font-bold focus:outline-none transition-colors ${
+                        pinCode.trim() === '847211'
+                          ? 'border-emerald-300 text-charcoal focus:border-forest'
+                          : 'border-red-400 text-red-600 focus:border-red-500 bg-red-50/50'
+                      }`}
+                    />
+                    {pinCode.trim() === '847211' && (
+                      <span className="absolute right-3 top-2.5 text-[11px] font-black text-fresh flex items-center gap-0.5">
+                        ✓ Serviceable
+                      </span>
+                    )}
+                  </div>
+                  {pinCode.trim() && pinCode.trim() !== '847211' && (
+                    <p className="text-[11px] font-bold text-red-600 mt-1.5 flex items-center gap-1 bg-red-50 p-2 rounded-lg border border-red-200">
+                      <span>⚠️ Delivery currently sirf PIN code <strong>847211</strong> (Madhubani Town) ke liye available hai. Kripya 847211 darj karein.</span>
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -501,6 +501,15 @@ export default async function handler(req, res) {
         }
 
         const body = await parseBody(req);
+
+        // Strict PIN Code Restriction: 847211 Only
+        const submittedPin = String(body.address?.pinCode || '').trim();
+        if (submittedPin && submittedPin !== '847211') {
+          return sendJson(res, 400, { 
+            error: 'Delivery is currently only available for PIN code 847211 (Madhubani Town).' 
+          });
+        }
+
         if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
           return sendJson(res, 400, { error: 'Order must contain items' });
         }
