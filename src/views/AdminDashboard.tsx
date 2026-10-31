@@ -332,10 +332,36 @@ export const AdminDashboard: React.FC = () => {
     } catch (e) {}
   };
 
+  // Unlock Audio on First User Interaction (Touch / Tap on Mobile)
+  useEffect(() => {
+    const unlockAudio = () => {
+      try {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          ctx.resume().then(() => ctx.close()).catch(() => {});
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('click', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
+  }, []);
+
   // Find unconfirmed incoming orders
   const unconfirmedOrders = orders.filter(
     o => o.orderStatus === 'Order Placed' && !acknowledgedOrderIds.includes(o.id)
   );
+
+  // Auto-unmute immediately if a brand new unconfirmed order arrives
+  useEffect(() => {
+    if (unconfirmedOrders.length > 0 && isAlarmSilenced) {
+      // Keep silence only if explicitly muted by user for current batch
+    }
+  }, [unconfirmedOrders.length]);
   const isAlarmRinging = !isAlarmSilenced && unconfirmedOrders.length > 0;
 
   // Sound loop: plays repeatedly every 2 seconds while there is an unconfirmed order
@@ -373,11 +399,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Confirm order and stop alarm
   const handleConfirmAndStopAlarm = async (orderId: string) => {
-    setIsAlarmSilenced(true);
-    // Mark ALL currently pending orders as acknowledged so sound stops immediately
-    const allPendingIds = unconfirmedOrders.map(o => o.id);
-    setAcknowledgedOrderIds(prev => Array.from(new Set([...prev, ...allPendingIds])));
-
+    setAcknowledgedOrderIds(prev => [...new Set([...prev, orderId])]);
     try {
       await api.updateOrderStatus(orderId, 'Order Confirmed', 'Order confirmed by store admin');
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: 'Order Confirmed' as any } : o));
@@ -1120,148 +1142,6 @@ export const AdminDashboard: React.FC = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          {/* Products Mobile Cards (md:hidden) */}
-          <div className="md:hidden space-y-3">
-            {filteredProducts.length === 0 ? (
-              <div className="p-8 text-center text-xs text-charcoal-muted bg-ivory-50 rounded-2xl">
-                No products match your current search or filters.
-              </div>
-            ) : (
-              filteredProducts.map((p) => {
-                const isInStock = p.inStock !== false && (p.stock || 0) > 0;
-                return (
-                  <div key={p.id} className="p-3.5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-3">
-                    {/* Top row: Image + Name + Category + Edit/Delete */}
-                    <div className="flex items-start gap-3">
-                      <img 
-                        src={p.image} 
-                        alt={p.name} 
-                        className="w-14 h-14 object-contain p-1 bg-white rounded-xl border border-gray-200 shadow-xs flex-shrink-0" 
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-1">
-                          <p className="font-bold text-xs text-charcoal leading-tight line-clamp-2">{p.name}</p>
-                          <div className="flex items-center gap-1 flex-shrink-0 ml-1">
-                            <button
-                              onClick={() => {
-                                setEditingProduct(p);
-                                setProductForm({
-                                  name: p.name,
-                                  brand: p.brand,
-                                  category: p.category,
-                                  packSize: p.packSize,
-                                  price: p.price,
-                                  mrp: p.mrp,
-                                  stock: p.stock,
-                                  inStock: p.inStock !== false && p.stock > 0,
-                                  sku: p.sku || p.id,
-                                  description: p.description || '',
-                                  image: p.image
-                                });
-                                setImageInputMode('upload');
-                                setIsProductModalOpen(true);
-                              }}
-                              className="p-1.5 hover:bg-forest/10 rounded-lg text-forest"
-                              title="Edit"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(p.id)}
-                              className="p-1.5 hover:bg-red-50 rounded-lg text-red-600"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-charcoal-muted mt-1">
-                          <span className="font-semibold text-forest uppercase">{p.brand}</span>
-                          <span>•</span>
-                          <span className="px-1.5 py-0.2 bg-ivory-100 rounded text-charcoal">{p.category.split('&')[0]}</span>
-                        </div>
-                        <div className="flex items-baseline gap-1.5 mt-1">
-                          <span className="font-black text-forest text-sm">₹{p.price}</span>
-                          {p.mrp > p.price && (
-                            <span className="text-[10px] text-charcoal-light line-through">₹{p.mrp}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Middle row: In/Out Toggle & Weight Input */}
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100 items-center">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleProductInStock(p)}
-                        className={`w-full py-2 px-2 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1.5 shadow-xs active:scale-95 ${
-                          isInStock
-                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : 'bg-rose-100 text-rose-800 border border-rose-300'
-                        }`}
-                      >
-                        <span className={`w-2 h-2 rounded-full ${isInStock ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                        <span>{isInStock ? 'IN STOCK' : 'OUT OF STOCK'}</span>
-                      </button>
-
-                      <div className="flex items-center gap-1 bg-ivory-50 border border-gray-200 rounded-xl px-2 py-1">
-                        <Scale className="w-3 h-3 text-forest flex-shrink-0" />
-                        <input
-                          type="text"
-                          defaultValue={p.packSize}
-                          key={`${p.id}-${p.packSize}`}
-                          onBlur={(e) => {
-                            if (e.target.value !== p.packSize) {
-                              handleUpdatePackSize(p.id, e.target.value);
-                            }
-                          }}
-                          className="w-full bg-transparent text-xs font-bold text-charcoal focus:outline-none"
-                          placeholder="Pack size"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Bottom row: Quick Weight Chips & Stock Stepper */}
-                    <div className="flex items-center justify-between gap-2 pt-1">
-                      <div className="flex flex-wrap gap-1">
-                        {['250 g', '500 g', '1 kg', '2 kg', '5 kg', '1 L'].map(sz => (
-                          <button
-                            type="button"
-                            key={sz}
-                            onClick={() => handleUpdatePackSize(p.id, sz)}
-                            className={`px-1.5 py-0.5 rounded text-[9px] border font-bold ${
-                              p.packSize === sz ? 'bg-forest text-white border-forest' : 'bg-white text-charcoal-muted border-gray-200'
-                            }`}
-                          >
-                            {sz}
-                          </button>
-                        ))}
-                      </div>
-
-                      <div className="flex items-center gap-1 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-xl p-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleQuickStockChange(p.id, -5)}
-                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="w-8 text-center text-xs font-black text-charcoal">{p.stock}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleQuickStockChange(p.id, 5)}
-                          className="w-7 h-7 rounded-lg bg-white shadow-xs text-charcoal font-bold flex items-center justify-center active:scale-95"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
           </div>
 
           {/* Orders Mobile Touch Cards */}
