@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KD Supermarket - Store QR Standee</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .print-btn {
+      margin-bottom: 20px;
+      padding: 12px 28px;
+      background: #0A6847;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(10, 104, 71, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .print-btn:hover { background: #085238; }
+    
+    .card {
+      width: 420px;
+      background: #ffffff;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+      border: 3px solid #0A6847;
+      text-align: center;
+      position: relative;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0A6847 0%, #064e3b 100%);
+      color: #ffffff;
+      padding: 28px 20px 20px;
+      position: relative;
+    }
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #F59E0B;
+      color: #111827;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .brand-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+    .brand-subtitle {
+      font-size: 13px;
+      color: #d1fae5;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .location-tag {
+      font-size: 11px;
+      color: #fef3c7;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    .qr-container {
+      padding: 24px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #ffffff;
+    }
+    .scan-pill {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1.5px solid #a7f3d0;
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .qr-frame {
+      padding: 14px;
+      background: #ffffff;
+      border: 3px dashed #0A6847;
+      border-radius: 22px;
+      box-shadow: 0 8px 24px rgba(10, 104, 71, 0.08);
+      position: relative;
+    }
+    .qr-frame img {
+      width: 250px;
+      height: 250px;
+      display: block;
+      border-radius: 12px;
+    }
+    .url-display {
+      margin-top: 14px;
+      font-size: 22px;
+      font-weight: 900;
+      color: #0A6847;
+      letter-spacing: 0.5px;
+    }
+    .url-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .features {
+      display: flex;
+      justify-content: space-around;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      gap: 2px;
+    }
+    .feature-icon {
+      font-size: 16px;
+    }
+
+    .footer {
+      background: #ffffff;
+      padding: 14px 20px;
+      font-size: 12px;
+      color: #475569;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+    .whatsapp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #059669;
+      font-weight: 800;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; justify-content: flex-start; }
+      .print-btn { display: none; }
+      .card { box-shadow: none; border: 3px solid #0A6847; margin: 0 auto; page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Print / Save as PDF (Standee)</button>
+
+  <div class="card">
+    <div class="header">
+      <div class="logo-badge">🛒 OFFICIAL STORE</div>
+      <div class="brand-title">KD SUPERMARKET</div>
+      <div class="brand-subtitle">Fresh Groceries & Everyday Essentials</div>
+      <div class="location-tag">📍 State Bank More, Madhubani (847211)</div>
+    </div>
+
+    <div class="qr-container">
+      <div class="scan-pill">📱 CAMERA SE SCAN KAREIN</div>
+      <div class="qr-frame">
+        <img src="data:image/png;base64,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" alt="Scan kdsm.in QR Code" />
+      </div>
+      <div class="url-display">kdsm.in</div>
+      <div class="url-sub">Ghar Baithe Fresh Groceries Order Karein</div>
+    </div>
+
+    <div class="features">
+      <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <span>Fast Delivery</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">💵</span>
+        <span>Pay on Delivery</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">💯</span>
+        <span>Best Local Rates</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Order Helpline / Support:</span>
+      <span class="whatsapp-badge">📞 +91 98113 40853</span>
+    </div>
+  </div>
+
+</body>
+</html>
