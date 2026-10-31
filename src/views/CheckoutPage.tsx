@@ -146,8 +146,9 @@ export const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (pinCode.trim() !== '847211') {
-      showToast('KD Supermarket delivery currently sirf PIN code 847211 (Madhubani Town) ke liye available hai.', 'error');
+    const cleanPin = pinCode.replace(/\D/g, '').trim();
+    if (cleanPin !== '847211') {
+      showToast('Order Rejected: Delivery sirf PIN code 847211 (Madhubani Town) ke liye available hai. Dusra koi bhi PIN code accept nahi hoga.', 'error');
       return;
     }
 
@@ -725,13 +726,15 @@ export const CheckoutPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
+                            {/* Submit Button with Strict PIN Code 847211 Enforcement */}
               <button
                 type="submit"
-                disabled={isSubmitting || settings.acceptingOrders === false}
+                disabled={isSubmitting || settings.acceptingOrders === false || pinCode.replace(/\D/g, '').trim() !== '847211'}
                 className={`w-full py-3.5 rounded-xl text-sm font-extrabold transition-all shadow-md flex items-center justify-center gap-2 group ${
                   settings.acceptingOrders === false
                     ? 'bg-gray-400 text-white cursor-not-allowed opacity-80'
+                    : pinCode.replace(/\D/g, '').trim() !== '847211'
+                    ? 'bg-red-600 hover:bg-red-700 text-white cursor-not-allowed opacity-90'
                     : 'bg-forest hover:bg-forest-dark disabled:opacity-50 text-white active:scale-95'
                 }`}
               >
@@ -739,6 +742,8 @@ export const CheckoutPage: React.FC = () => {
                   <span>Processing Order...</span>
                 ) : settings.acceptingOrders === false ? (
                   <span>Store Paused — Orders Disabled</span>
+                ) : pinCode.replace(/\D/g, '').trim() !== '847211' ? (
+                  <span>❌ PIN Code {pinCode.trim() || 'Required'} Not Serviceable (Only 847211 Accepted)</span>
                 ) : (
                   <>
                     <Truck className="w-4 h-4 text-warmYellow" />
@@ -747,6 +752,13 @@ export const CheckoutPage: React.FC = () => {
                   </>
                 )}
               </button>
+
+              {pinCode.replace(/\D/g, '').trim() !== '847211' && (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-center text-xs font-bold space-y-1">
+                  <p>⚠️ Is PIN code ({pinCode || 'Blank'}) par order accept nahi hoga.</p>
+                  <p className="text-[11px] font-medium text-red-600">KD Supermarket delivery exclusively <strong>PIN Code 847211 (Madhubani Town)</strong> ke liye hi uplabdh hai.</p>
+                </div>
+              )}
 
               <div className="text-center">
                 <p className="text-[11px] text-charcoal-muted flex items-center justify-center gap-1">

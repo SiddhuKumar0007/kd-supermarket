@@ -502,11 +502,11 @@ export default async function handler(req, res) {
 
         const body = await parseBody(req);
 
-        // Strict PIN Code Restriction: 847211 Only
-        const submittedPin = String(body.address?.pinCode || '').trim();
-        if (submittedPin && submittedPin !== '847211') {
+        // Strict PIN Code Restriction: 847211 ONLY - Reject everything else
+        const submittedPin = String(body.address?.pinCode || '').replace(/\D/g, '').trim();
+        if (submittedPin !== '847211') {
           return sendJson(res, 400, { 
-            error: 'Delivery is currently only available for PIN code 847211 (Madhubani Town).' 
+            error: 'Order Not Accepted: KD Supermarket delivers EXCLUSIVELY to PIN code 847211 (Madhubani Town). Orders for any other PIN code cannot be accepted.' 
           });
         }
 
