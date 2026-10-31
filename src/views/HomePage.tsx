@@ -64,7 +64,7 @@ export const HomePage: React.FC = () => {
       title: "Fresh Groceries at Fair Store Rates",
       subtitle: "Atta, pulses, edible oils, spices & fresh pantry items",
       tag: "Fresh Produce & Staples",
-      promo: "Free Delivery Above ₹499"
+      promo: "Free Delivery Above ₹999"
     },
     {
       image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1200&q=80",
@@ -473,6 +473,7 @@ export const HomePage: React.FC = () => {
                   src={cat.image}
                   alt={cat.name}
                   loading="lazy"
+                  onError={(e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"; }}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
@@ -545,7 +546,7 @@ export const HomePage: React.FC = () => {
             <div className="md:col-span-4 flex justify-center md:justify-end">
               <div className="p-3 sm:p-4 bg-white/10 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/20 text-center w-full max-w-xs space-y-0.5 sm:space-y-1">
                 <p className="text-[10px] sm:text-[11px] text-warmYellow font-bold uppercase">Free Home Delivery</p>
-                <p className="text-base sm:text-xl font-black text-white">Orders Above ₹499</p>
+                <p className="text-base sm:text-xl font-black text-white">Orders Above ₹999</p>
                 <p className="text-[9px] sm:text-[10px] text-ivory-200">Across Madhubani Town (PIN 847211)</p>
               </div>
             </div>

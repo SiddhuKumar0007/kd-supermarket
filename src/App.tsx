@@ -1,3 +1,4 @@
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import React from 'react';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { Header } from './components/common/Header';
@@ -86,9 +87,11 @@ const MainRouter: React.FC = () => {
 
 export function App() {
   return (
-    <StoreProvider>
-      <MainRouter />
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <MainRouter />
+      </StoreProvider>
+    </ErrorBoundary>
   );
 }
 

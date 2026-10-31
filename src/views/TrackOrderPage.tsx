@@ -295,17 +295,17 @@ export const TrackOrderPage: React.FC = () => {
                 <span>Delivery Destination</span>
               </h4>
               <div className="p-3.5 bg-ivory-50 rounded-2xl border border-gray-100 text-charcoal space-y-1.5">
-                <p className="font-bold text-sm text-charcoal">{order.address.fullName || order.customerName}</p>
+                <p className="font-bold text-sm text-charcoal">{order.address?.fullName || order.customerName || "Customer"}</p>
                 <p className="text-charcoal-muted flex items-center gap-2">
                   <span>📞 {order.customerPhone}</span>
                   {order.address?.alternatePhone && <span>| Alt: {order.address.alternatePhone}</span>}
                 </p>
                 <p className="text-charcoal font-medium leading-relaxed">
-                  {order.address.fullAddressText || [
-                    order.address.houseNo ? `House/Flat: ${order.address.houseNo}` : null,
-                    order.address.street,
-                    order.address.locality,
-                    `Madhubani, Bihar - ${order.address.pinCode || '847211'}`
+                  {order.address?.fullAddressText || [
+                    order.address?.houseNo ? `House/Flat: ${order.address.houseNo}` : null,
+                    order.address?.street,
+                    order.address?.locality,
+                    `Madhubani, Bihar - ${order.address?.pinCode || '847211'}`
                   ].filter(Boolean).join(', ')}
                 </p>
                 {order.address.landmark && (
@@ -328,17 +328,17 @@ export const TrackOrderPage: React.FC = () => {
             <div className="space-y-2">
               <h4 className="font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
                 <Package className="w-3.5 h-3.5 text-forest" />
-                <span>Order Summary ({order.items.length} items)</span>
+                <span>Order Summary ({(order.items || []).length} items)</span>
               </h4>
               <div className="p-3 bg-ivory-50 rounded-xl border border-gray-100 space-y-2">
                 <div className="max-h-36 overflow-y-auto divide-y divide-gray-100 pr-1">
-                  {order.items.map((it, idx) => (
+                  {(order.items || []).map((it, idx) => (
                     <div key={idx} className="py-1.5 flex justify-between items-center text-xs">
                       <div className="truncate pr-2">
                         <span className="font-bold text-charcoal">{it.name}</span>
                         <span className="text-[10px] text-charcoal-muted block">{it.packSize} × {it.quantity}</span>
                       </div>
-                      <span className="font-bold text-forest whitespace-nowrap">₹{it.price * it.quantity}</span>
+                      <span className="font-bold text-forest whitespace-nowrap">₹{(Number(it.price) || 0) * (Number(it.quantity) || 1)}</span>
                     </div>
                   ))}
                 </div>

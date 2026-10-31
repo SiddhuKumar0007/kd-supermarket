@@ -126,6 +126,7 @@ export const ProductDetailPage: React.FC = () => {
             <img
               src={product.image}
               alt={product.name}
+              onError={(e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"; }}
               className="absolute inset-0 w-full h-full object-contain p-4"
             />
             {discount > 0 && (
@@ -296,7 +297,7 @@ export const ProductDetailPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-gray-100 text-xs">
             <div className="flex items-center gap-2 text-charcoal-muted">
               <Truck className="w-4 h-4 text-forest flex-shrink-0" />
-              <span>Free Delivery above ₹499</span>
+              <span>Free Delivery above ₹999</span>
             </div>
             <div className="flex items-center gap-2 text-charcoal-muted">
               <ShieldCheck className="w-4 h-4 text-forest flex-shrink-0" />

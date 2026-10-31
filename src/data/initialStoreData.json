@@ -1966,7 +1966,7 @@
     "storeTimings": "Open 7 Days a week: 7:30 AM – 9:30 PM",
     "minOrderValue": 199,
     "deliveryFee": 30,
-    "freeDeliveryThreshold": 499,
+    "freeDeliveryThreshold": 999,
     "deliveryAreas": [
       "Tirhut Colony",
       "State Bank More",
@@ -1978,7 +1978,7 @@
       "Collectorate Area",
       "Madhubani Town (All Localities within 847211)"
     ],
-    "announcementText": "🎉 Free Home Delivery on orders above ₹499 in Madhubani Town! Call/WhatsApp: +91 98113 40853",
+    "announcementText": "🎉 Free Home Delivery on orders above ₹999 in Madhubani Town! Call/WhatsApp: +91 98113 40853",
     "razorpayKeyId": "rzp_test_KDSupermarket847211",
     "isRazorpayTestMode": true,
     "codEnabled": true,

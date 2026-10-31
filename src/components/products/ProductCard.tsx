@@ -64,6 +64,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           src={product.image}
           alt={product.name}
           loading="lazy"
+          onError={(e: any) => { e.currentTarget.onerror = null; e.currentTarget.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80"; }}
           className="absolute inset-0 w-full h-full object-contain p-2 sm:p-3 group-hover:scale-105 transition-transform duration-300 ease-out"
         />
         {!inStock && (

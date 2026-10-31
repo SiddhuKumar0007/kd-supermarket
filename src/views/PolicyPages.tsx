@@ -40,8 +40,8 @@ export const PolicyPages: React.FC<PolicyProps> = ({ type }) => {
           <section className="space-y-2">
             <h3 className="font-bold text-sm text-forest">2. Delivery Charges & Free Delivery</h3>
             <p>
-              • <strong>Free Home Delivery:</strong> On all grocery orders totaling <strong>₹{settings.freeDeliveryThreshold || 499} and above</strong>.<br />
-              • <strong>Standard Delivery Fee:</strong> For orders below ₹{settings.freeDeliveryThreshold || 499}, a modest convenience delivery fee of <strong>₹{settings.deliveryFee || 30}</strong> applies.
+              • <strong>Free Home Delivery:</strong> On all grocery orders totaling <strong>₹{settings.freeDeliveryThreshold || 999} and above</strong>.<br />
+              • <strong>Standard Delivery Fee:</strong> For orders below ₹{settings.freeDeliveryThreshold || 999}, a modest convenience delivery fee of <strong>₹{settings.deliveryFee || 30}</strong> applies.
             </p>
           </section>
 
@@ -126,7 +126,7 @@ export const PolicyPages: React.FC<PolicyProps> = ({ type }) => {
             <div className="p-4 rounded-2xl bg-ivory-50 border border-gray-100 space-y-1">
               <h4 className="font-bold text-sm text-forest">What are the delivery charges in Madhubani?</h4>
               <p className="text-charcoal-muted">
-                Delivery is completely <strong>FREE on orders of ₹499 and above</strong>. For orders below ₹499, a flat delivery charge of ₹30 is applied.
+                Delivery is completely <strong>FREE on orders of ₹999 and above</strong>. For orders below ₹999, a flat delivery charge of ₹30 is applied.
               </p>
             </div>
 

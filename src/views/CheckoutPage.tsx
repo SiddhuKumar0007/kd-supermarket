@@ -70,23 +70,7 @@ export const CheckoutPage: React.FC = () => {
   const [couponCode, setCouponCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
 
-  if (cart.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="w-16 h-16 rounded-full bg-ivory-100 text-forest flex items-center justify-center mx-auto">
-          <Truck className="w-8 h-8" />
-        </div>
-        <h2 className="font-heading font-extrabold text-2xl text-charcoal">Your cart is empty</h2>
-        <p className="text-xs text-charcoal-muted">Add some groceries before heading to checkout.</p>
-        <button
-          onClick={() => setCurrentView('catalog')}
-          className="px-6 py-2.5 bg-forest hover:bg-forest-dark text-white rounded-xl text-xs font-bold transition-all shadow"
-        >
-          Browse Catalogue →
-        </button>
-      </div>
-    );
-  }
+  
 
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -248,6 +232,26 @@ export const CheckoutPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+
+
+
+  if (cart.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
+        <div className="w-16 h-16 rounded-full bg-ivory-100 text-forest flex items-center justify-center mx-auto">
+          <Truck className="w-8 h-8" />
+        </div>
+        <h2 className="font-heading font-extrabold text-2xl text-charcoal">Your cart is empty</h2>
+        <p className="text-xs text-charcoal-muted">Add some groceries before heading to checkout.</p>
+        <button
+          onClick={() => setCurrentView('catalog')}
+          className="px-6 py-2.5 bg-forest hover:bg-forest-dark text-white rounded-xl text-xs font-bold transition-all shadow"
+        >
+          Browse Catalogue →
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-8">
@@ -657,7 +661,7 @@ export const CheckoutPage: React.FC = () => {
                   <span>
                     {effectiveDeliveryFee === 0 ? (
                       <span className="text-fresh font-bold uppercase">
-                        {isFreeDeliveryUnlocked ? 'FREE (Coupon Applied 🚚)' : 'FREE (Over ₹499)'}
+                        {isFreeDeliveryUnlocked ? 'FREE (Coupon Applied 🚚)' : 'FREE (Over ₹999)'}
                       </span>
                     ) : (
                       ('₹' + effectiveDeliveryFee)

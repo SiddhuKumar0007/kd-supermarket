@@ -1124,11 +1124,25 @@ export const AdminDashboard: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="p-3">
-                      <span className="font-semibold text-charcoal">{ord.items.length} items</span>
-                      <p className="text-[10px] text-charcoal-muted truncate max-w-xs">
-                        {ord.items.map(i => `${i.name} (${i.quantity})`).join(', ')}
-                      </p>
+                    <td className="p-3 max-w-xs">
+                      <div className="space-y-1">
+                        <span className="font-bold text-forest text-xs block">
+                          🛍️ {(ord.items || []).length} items to pack:
+                        </span>
+                        <div className="space-y-1 max-h-28 overflow-y-auto pr-1">
+                          {(ord.items || []).map((it, idx) => (
+                            <div key={idx} className="text-[11px] flex items-center justify-between gap-1.5 bg-ivory-50 px-2 py-1 rounded-lg border border-gray-100">
+                              <div className="truncate flex-1">
+                                <span className="font-bold text-charcoal">{it.name}</span>
+                                <span className="text-[10px] text-charcoal-muted ml-1">({it.packSize || '1 Unit'})</span>
+                              </div>
+                              <span className="font-black text-forest flex-shrink-0 text-[10px] bg-white px-1.5 py-0.5 rounded border border-gray-200">
+                                ×{it.quantity} (₹{(Number(it.price) || 0) * (Number(it.quantity) || 1)})
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </td>
                     <td className="p-3">
                       <span className="font-black text-forest">₹{ord.total}</span>
@@ -1269,6 +1283,41 @@ export const AdminDashboard: React.FC = () => {
                         ({ord.paymentStatus})
                       </span>
                     </div>
+                  {/* Items to Pack Breakdown */}
+                  <div className="p-3 bg-white rounded-xl border border-gray-200 text-xs space-y-2">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
+                      <span className="font-bold text-forest uppercase tracking-wider text-[11px] flex items-center gap-1">
+                        <Package className="w-3.5 h-3.5" />
+                        <span>Items to Pack ({(ord.items || []).length})</span>
+                      </span>
+                      <span className="text-[10px] text-charcoal-muted font-bold">Qty & Rate</span>
+                    </div>
+                    <div className="space-y-1.5 divide-y divide-gray-50 max-h-48 overflow-y-auto pr-1">
+                      {(ord.items || []).map((it, idx) => (
+                        <div key={idx} className="pt-1.5 first:pt-0 flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-charcoal text-xs leading-snug">{it.name}</p>
+                            <p className="text-[10px] text-charcoal-muted">
+                              {it.packSize || '1 Unit'} × <strong className="text-forest text-[11px] font-black">{it.quantity}</strong>
+                            </p>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <span className="font-black text-forest text-xs">₹{(Number(it.price) || 0) * (Number(it.quantity) || 1)}</span>
+                            <span className="text-[9px] text-charcoal-muted block">₹{it.price}/unit</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="pt-2 border-t border-gray-100 flex justify-between items-center text-[10px] text-charcoal-muted font-medium">
+                      <span>Subtotal: ₹{ord.subtotal || ord.total} | Delivery: ₹{ord.deliveryFee || 0}</span>
+                      {ord.couponCode && (
+                        <span className="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                          Coupon {ord.couponCode}: -₹{ord.discountAmount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
 
                     <div className="flex-1 max-w-[140px] text-right">
                       <select

@@ -111,7 +111,11 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handleHash);
+    };
   }, []);
 
   // Settings
@@ -128,7 +132,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     storeTimings: "Open 7 Days a week: 7:30 AM – 9:30 PM",
     minOrderValue: 199,
     deliveryFee: 30,
-    freeDeliveryThreshold: 499,
+    freeDeliveryThreshold: 999,
     deliveryAreas: [
       "Tirhut Colony",
       "State Bank More",
@@ -139,7 +143,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       "Collectorate Area",
       "Madhubani Town (847211)"
     ],
-    announcementText: "🎉 Free Home Delivery on orders above ₹499 in Madhubani Town! Call/WhatsApp: +91 98113 40853",
+    announcementText: "🎉 Free Home Delivery on orders above ₹999 in Madhubani Town! Call/WhatsApp: +91 98113 40853",
     razorpayKeyId: "rzp_test_KDSupermarket847211",
     isRazorpayTestMode: true,
     codEnabled: true,
@@ -171,7 +175,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const freeDeliveryThreshold = settings.freeDeliveryThreshold || 499;
+  const freeDeliveryThreshold = settings.freeDeliveryThreshold || 999;
   const standardFee = settings.deliveryFee || 30;
   const deliveryFee = (subtotal === 0 || subtotal >= freeDeliveryThreshold) ? 0 : standardFee;
   const amountNeededForFreeDelivery = Math.max(0, freeDeliveryThreshold - subtotal);

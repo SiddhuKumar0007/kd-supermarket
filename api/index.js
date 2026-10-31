@@ -580,7 +580,7 @@ export default async function handler(req, res) {
         }
 
         // Server-side Delivery fee calculation
-        const freeThreshold = Number(currentSettings?.freeDeliveryThreshold) || 499;
+        const freeThreshold = Number(currentSettings?.freeDeliveryThreshold) || 999;
         const defaultFee = Number(currentSettings?.deliveryFee) || 30;
         let calculatedDeliveryFee = calculatedSubtotal >= freeThreshold ? 0 : defaultFee;
         if (isFreeDeliveryCoupon) {
@@ -711,30 +711,66 @@ export default async function handler(req, res) {
         return sendJson(res, 200, ord);
       }
 
-      // Return sanitized tracking view to protect customer PII against mass scraping
+      // Return tracking view with complete items and safe address details
       const sanitizedOrder = {
         id: ord.id,
         orderStatus: ord.orderStatus,
         paymentStatus: ord.paymentStatus,
         paymentMethod: ord.paymentMethod,
         createdAt: ord.createdAt,
-        statusHistory: ord.statusHistory,
-        items: (ord.items || []).map(i => ({ name: i.name, packSize: i.packSize, quantity: i.quantity })),
+        statusHistory: ord.statusHistory || [],
+        customerName: ord.customerName || 'Customer',
+        customerPhone: ord.customerPhone || '',
+        items: (ord.items || []).map(i => ({
+          id: i.id || i.productId,
+          productId: i.productId || i.id,
+          name: i.name,
+          packSize: i.packSize || '1 Unit',
+          quantity: Number(i.quantity) || 1,
+          price: Number(i.price) || 0,
+          image: i.image || ''
+        })),
+        subtotal: ord.subtotal || ord.total,
+        deliveryFee: ord.deliveryFee || 0,
+        discountAmount: ord.discountAmount || 0,
+        couponCode: ord.couponCode || null,
         total: ord.total,
-        deliverySlot: ord.deliverySlot,
-        deliveryArea: ord.address?.locality || ord.address?.city || 'Madhubani'
+        deliverySlot: ord.deliverySlot || 'Today: 4:00 PM – 8:00 PM',
+        instructions: ord.instructions || '',
+        address: {
+          fullName: ord.address?.fullName || ord.customerName || 'Customer',
+          phone: ord.address?.phone || ord.customerPhone || '',
+          alternatePhone: ord.address?.alternatePhone || '',
+          street: ord.address?.street || '',
+          locality: ord.address?.locality || 'Madhubani',
+          landmark: ord.address?.landmark || '',
+          city: ord.address?.city || 'Madhubani',
+          pinCode: ord.address?.pinCode || '847211',
+          fullAddressText: ord.address?.fullAddressText || (ord.address?.locality ? `${ord.address.locality}, Madhubani, Bihar - 847211` : 'Madhubani, Bihar - 847211')
+        }
       };
 
       return sendJson(res, 200, sanitizedOrder);
     }
 
-    // 9. Order Status Update (Admin Only)
+    // 9. Order Status Update (Admin Only, or Customer Cancelling their placed order)
     const orderStatusMatch = pathname.match(/^\/api\/orders\/([^/]+)\/status$/);
     if (orderStatusMatch && (method === 'PATCH' || method === 'PUT')) {
-      if (!requireAdmin(req, res)) return;
+      const authUser = getAuthUser(req);
+      const isAdmin = authUser && authUser.role === 'admin';
       const col = db.collection('orders');
       const id = orderStatusMatch[1];
       const body = await parseBody(req);
+
+      if (!isAdmin) {
+        if (body.status !== 'Cancelled') {
+          return sendJson(res, 401, { error: 'Unauthorized: Admin privileges required.' });
+        }
+        const existingOrd = await col.findOne({ id });
+        if (!existingOrd || (existingOrd.orderStatus !== 'Order Placed' && existingOrd.orderStatus !== 'Order Confirmed')) {
+          return sendJson(res, 400, { error: 'Order cannot be cancelled at this stage. Please contact store on WhatsApp.' });
+        }
+      }
       const updateData = {
         orderStatus: body.status,
         ...(body.paymentStatus ? { paymentStatus: body.paymentStatus } : {})
