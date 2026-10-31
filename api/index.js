@@ -514,9 +514,10 @@ export default async function handler(req, res) {
         // Server-side Price & Stock Calculation
         for (const item of body.items) {
           const qty = Math.max(1, Math.min(99, parseInt(item.quantity, 10) || 1));
-          const prod = await productsCol.findOne({ id: item.id });
+          const prodId = String(item.id || item.productId || "").trim();
+          const prod = await productsCol.findOne({ id: prodId });
           if (!prod) {
-            return sendJson(res, 400, { error: `Product "${item.name || item.id}" is no longer available in the store catalog.` });
+            return sendJson(res, 400, { error: `Product "${item.name || prodId}" is no longer available in the store catalog.` });
           }
 
           let itemPrice = Number(prod.price) || 0;

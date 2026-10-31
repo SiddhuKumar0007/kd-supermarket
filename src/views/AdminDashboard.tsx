@@ -397,8 +397,32 @@ export const AdminDashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Confirm order and stop alarm
-  const handleConfirmAndStopAlarm = async (orderId: string) => {
+  // Confirm order and stop alarm (Single or All Batch)
+  const handleConfirmAndStopAlarm = async (orderId?: string) => {
+    const idsToConfirm = orderId ? [orderId] : unconfirmedOrders.map(o => o.id);
+    if (idsToConfirm.length === 0) return;
+
+    // Immediately silence alarm and mark as acknowledged
+    setIsAlarmSilenced(true);
+    setAcknowledgedOrderIds(prev => [...new Set([...prev, ...idsToConfirm])]);
+
+    for (const id of idsToConfirm) {
+      try {
+        await api.updateOrderStatus(id, 'Order Confirmed', 'Order confirmed by store admin');
+      } catch (e) {}
+    }
+
+    setOrders(prev => prev.map(o => idsToConfirm.includes(o.id) ? { ...o, orderStatus: 'Order Confirmed' as any } : o));
+    showToast(
+      idsToConfirm.length > 1
+        ? `All ${idsToConfirm.length} Orders Confirmed! Alarm stopped.`
+        : `Order #${idsToConfirm[0]} confirmed! Alarm stopped.`,
+      'success'
+    );
+    return;
+  };
+
+  const unusedOldConfirm = async (orderId: string) => {
     setAcknowledgedOrderIds(prev => [...new Set([...prev, orderId])]);
     try {
       await api.updateOrderStatus(orderId, 'Order Confirmed', 'Order confirmed by store admin');
@@ -820,7 +844,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
-                onClick={() => handleConfirmAndStopAlarm(unconfirmedOrders[0].id)}
+                onClick={() => handleConfirmAndStopAlarm()}
                 className="flex-1 sm:flex-none px-4 py-2.5 bg-white text-red-700 hover:bg-ivory rounded-xl text-xs font-black shadow-lg transition-all flex items-center justify-center gap-1.5 active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -831,7 +855,7 @@ export const AdminDashboard: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setActiveTab('orders');
-                  setOrderStatusFilter('Order Placed');
+                  setOrderStatusFilter('all');
                   setOrderSearch(unconfirmedOrders[0].id);
                 }}
                 className="px-3.5 py-2.5 bg-black/30 hover:bg-black/50 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"

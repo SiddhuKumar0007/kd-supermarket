@@ -202,6 +202,7 @@ export const CheckoutPage: React.FC = () => {
           fullAddressText
         },
         items: cart.map(item => ({
+          id: item.productId,
           productId: item.productId,
           variantId: item.variantId,
           name: item.name,
