@@ -19,7 +19,10 @@ import {
   Volume2,
   VolumeX,
   Video,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/products/ProductCard';
@@ -31,65 +34,129 @@ export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Hero Carousel State
   const [activeSlide, setActiveSlide] = useState(0);
-  const [showVideo, setShowVideo] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        videoRef.current.play();
-        setIsPlaying(true);
-      }
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      const nextMuted = !videoRef.current.muted;
-      videoRef.current.muted = nextMuted;
-      setIsMuted(nextMuted);
-    }
-  };
+  // Touch swipe support
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const heroSlides = [
     {
-      image: "https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=1200&q=80",
-      badge: "🌿 100% Farm Fresh & Daily Quality",
+      id: 1,
+      image: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=80",
+      badge: "🌿 100% FARM FRESH & DAILY SPECIALS",
       title: "Fresh Groceries at Fair Store Rates",
-      subtitle: "Atta, pulses, edible oils, spices & fresh pantry items",
-      tag: "Fresh Produce & Staples",
-      promo: "Free Delivery Above ₹999"
+      highlight: "Save up to 20% on Atta, Rice & Dals",
+      subtitle: "Aashirvaad Atta, Fortune Mustard Oil, Tata Salt, Pulses & Spices delivered fast to your doorstep in Madhubani.",
+      tag: "Fresh Groceries",
+      promo: "Free Delivery Above ₹999",
+      coupon: "Code: KD10 (10% OFF)",
+      ctaText: "Shop Groceries",
+      ctaCategory: "Rice, Atta & Grains",
+      themeGradient: "from-black/90 via-[#044E32]/85 to-black/40"
     },
     {
-      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1200&q=80",
-      badge: "🌾 Regional Madhubani Special",
-      title: "Aromatic Katarni Chawal & Chakki Atta",
-      subtitle: "Directly sourced whole grains & Kachi Ghani mustard oil",
-      tag: "Regional Mithila Staples",
-      promo: "Special Store Discounts"
+      id: 2,
+      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=1600&q=80",
+      badge: "🌾 REGIONAL MADHUBANI SPECIAL",
+      title: "Aromatic Katarni Chawal & Chakki Fresh Atta",
+      highlight: "Direct Mill-Fresh Authentic Grains",
+      subtitle: "Authentic Mithila fragrant Katarni chawal, cold-pressed Kachi Ghani mustard oil & premium dry-fruits.",
+      tag: "Regional Staples",
+      promo: "⚡ Express 2-Hour Delivery",
+      coupon: "Code: KD50 (₹50 OFF)",
+      ctaText: "Order Mithila Staples",
+      ctaCategory: "Rice, Atta & Grains",
+      themeGradient: "from-black/90 via-[#78350F]/85 to-black/40"
     },
     {
-      image: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=80",
-      badge: "🛒 Comprehensive Supermarket Aisle",
+      id: 3,
+      image: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1600&q=80",
+      badge: "🛒 COMPREHENSIVE SUPERMARKET AISLE",
       title: "Snacks, Dairy, Beverages & Cleaning",
-      subtitle: "Amul dairy, Britannia biscuits, Maggi & Surf Excel",
-      tag: "Top Branded Packaged Foods",
-      promo: "WhatsApp Ordering Available"
+      highlight: "Amul, Britannia, Maggi & Surf Excel",
+      subtitle: "All your favourite brands under one roof at genuine local supermarket prices. 100% Cash On Delivery.",
+      tag: "Supermarket Aisles",
+      promo: "💵 Cash on Delivery (COD)",
+      coupon: "Store Rates Guaranteed",
+      ctaText: "Explore Supermarket",
+      ctaCategory: "Chips, Namkeen & Snacks",
+      themeGradient: "from-black/90 via-[#07504C]/85 to-black/40"
+    },
+    {
+      id: 4,
+      image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=1600&q=80",
+      badge: "🎁 SPECIAL DISCOUNT OFFERS",
+      title: "Big Savings on Monthly Rations & Kitchen Combos",
+      highlight: "Flat ₹50 OFF On Orders Above ₹500",
+      subtitle: "Special bundles on cooking oils, spices, tea & household cleaners. Order online or on WhatsApp!",
+      tag: "Discount Offers",
+      promo: "Free Delivery Above ₹999",
+      coupon: "Coupon: KD50",
+      ctaText: "View Special Offers",
+      ctaView: "offers",
+      themeGradient: "from-black/90 via-[#881337]/85 to-black/40"
+    },
+    {
+      id: 5,
+      image: "https://images.unsplash.com/photo-1556740758-90de374c12ad?auto=format&fit=crop&w=1600&q=80",
+      badge: "⚡ QUICK WHATSAPP ORDERING",
+      title: "Send Your Grocery List Directly on WhatsApp",
+      highlight: "Photo or Handwritten List Accepted",
+      subtitle: "No app typing required! Just WhatsApp your list to +91 98113 40853. We pack, verify and deliver instantly.",
+      tag: "WhatsApp Order",
+      promo: "State Bank More, Madhubani",
+      coupon: "Fastest Home Dispatch",
+      ctaText: "Order on WhatsApp",
+      ctaAction: "whatsapp",
+      themeGradient: "from-black/90 via-[#0A6847]/85 to-black/40"
     }
   ];
 
+  // Auto slide timer: moves every 3.5 seconds
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSlide(prev => (prev + 1) % 3);
-    }, 5500);
-    return () => clearInterval(timer);
-  }, []);
+    if (isPaused || isVideoModalOpen) return;
+    const interval = setInterval(() => {
+      setActiveSlide(prev => (prev + 1) % heroSlides.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isPaused, isVideoModalOpen, heroSlides.length]);
+
+  const prevSlide = () => {
+    setActiveSlide(prev => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  const nextSlide = () => {
+    setActiveSlide(prev => (prev + 1) % heroSlides.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const diff = touchStartX.current - touchEndX.current;
+      if (diff > 40) {
+        nextSlide();
+      } else if (diff < -40) {
+        prevSlide();
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+    setIsPaused(false);
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -154,267 +221,288 @@ export const HomePage: React.FC = () => {
         </div>
       )}
 
-      {/* 1. Hero Banner */}
-      <section className="relative bg-gradient-to-br from-forest-dark via-forest to-[#074D32] text-white overflow-hidden py-6 sm:py-14 md:py-20 shadow-md w-full max-w-full">
-        {/* Ambient radial glows */}
-        <div className="absolute top-0 right-1/4 w-72 md:w-96 h-72 md:h-96 bg-warmYellow/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-60 md:w-80 h-60 md:h-80 bg-fresh/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#F59E0B_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
-            <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] sm:text-xs font-bold text-warmYellow border border-white/20 shadow-xs">
-                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-warmYellow" />
-                <span>Madhubani's Premier Supermarket • State Bank More</span>
-              </div>
+      {/* 1. Dynamic Moving Banner Carousel */}
+      <section 
+        className="relative w-full max-w-full overflow-hidden shadow-lg bg-forest-dark group"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Navigation Arrows */}
+        <button
+          type="button"
+          onClick={prevSlide}
+          className="absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all shadow-lg active:scale-90 opacity-80 sm:opacity-0 group-hover:opacity-100"
+          aria-label="Previous Banner Slide"
+        >
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
 
-              <h1 className="font-heading font-black text-2xl sm:text-4xl lg:text-5xl tracking-tight leading-snug sm:leading-tight text-white drop-shadow-sm">
-                Your Everyday Essentials, <br className="hidden sm:inline" />
-                <span className="text-warmYellow drop-shadow">Delivered with Ease!</span>
-              </h1>
+        <button
+          type="button"
+          onClick={nextSlide}
+          className="absolute right-2 sm:right-5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 text-white backdrop-blur-md flex items-center justify-center border border-white/20 transition-all shadow-lg active:scale-90 opacity-80 sm:opacity-0 group-hover:opacity-100"
+          aria-label="Next Banner Slide"
+        >
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
 
-              <p className="text-xs sm:text-sm text-ivory-100 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                Shop fresh farm produce, stoneground atta, golden mustard oils, wholesome dals, tea, snacks, and household staples from <strong>KD SUPERMARKET</strong> with fast home delivery in Madhubani.
-              </p>
+        {/* Carousel Sliding Track */}
+        <div 
+          className="flex transition-transform duration-500 ease-out h-full"
+          style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+        >
+          {heroSlides.map((slide, idx) => (
+            <div 
+              key={slide.id} 
+              className="w-full flex-shrink-0 relative min-h-[380px] sm:min-h-[440px] md:min-h-[480px] flex items-center text-white overflow-hidden"
+            >
+              {/* Background Image */}
+              <img
+                src={slide.image}
+                alt={slide.title}
+                loading={idx === 0 ? "eager" : "lazy"}
+                className="absolute inset-0 w-full h-full object-cover transform scale-105 transition-transform duration-1000 ease-out"
+              />
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 pt-1">
-                <button
-                  onClick={() => setCurrentView('catalog')}
-                  className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-warmYellow hover:bg-warmYellow-dark text-charcoal font-black rounded-xl text-xs sm:text-sm transition-all shadow-sm flex items-center gap-1.5 group active:scale-95"
-                >
-                  <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  <span>Shop Now</span>
-                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
+              {/* Dark Gradient Overlay for Maximum Readability */}
+              <div className={`absolute inset-0 bg-gradient-to-r ${slide.themeGradient} backdrop-brightness-90`} />
+              
+              {/* Radial ambient glow */}
+              <div className="absolute top-0 right-1/4 w-80 h-80 bg-warmYellow/15 rounded-full blur-3xl pointer-events-none" />
 
-                <button
-                  onClick={() => {
-                    setShowVideo(true);
-                    setTimeout(() => {
-                      if (videoRef.current) {
-                        videoRef.current.currentTime = 0;
-                        videoRef.current.play().catch(() => {});
-                        setIsPlaying(true);
-                      }
-                    }, 50);
-                  }}
-                  className="px-4 py-2.5 sm:px-5 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-xs sm:text-sm transition-all border border-white/25 flex items-center gap-1.5 backdrop-blur-md active:scale-95 shadow-sm"
-                >
-                  <Play className="w-3.5 h-3.5 text-warmYellow fill-warmYellow" />
-                  <span>Watch Store Tour</span>
-                </button>
-
-                <button
-                  onClick={() => setCurrentView('offers')}
-                  className="px-4 py-2.5 sm:px-6 sm:py-3.5 bg-white/15 hover:bg-white/25 text-white font-bold rounded-xl text-xs sm:text-sm transition-colors border border-white/20 flex items-center gap-1.5 backdrop-blur-xs"
-                >
-                  <BadgePercent className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-warmYellow" />
-                  <span>Offers</span>
-                </button>
-
-                <a
-                  href={`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=Hello%20KD%20SUPERMARKET,%20I%20would%20like%20to%20order%20groceries.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2.5 sm:px-5 sm:py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-xl text-xs sm:text-sm transition-colors flex items-center gap-1.5 shadow-xs"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-white" />
-                  <span>WhatsApp</span>
-                </a>
-              </div>
-
-              {/* Scene / Slide Category Pills */}
-              <div className="pt-1 flex items-center justify-center lg:justify-start gap-1.5 text-xs overflow-x-auto no-scrollbar max-w-full pb-1 px-1">
-                <span className="text-ivory-100/70 text-[10px] sm:text-[11px] font-semibold mr-1 flex-shrink-0">Featured:</span>
-                {heroSlides.map((slide, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveSlide(idx)}
-                    className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full font-bold text-[10px] sm:text-xs transition-all flex-shrink-0 whitespace-nowrap ${
-                      activeSlide === idx
-                        ? 'bg-white text-forest shadow-xs'
-                        : 'bg-white/10 text-white/90 hover:bg-white/20'
-                    }`}
-                  >
-                    {slide.tag}
-                  </button>
-                ))}
-              </div>
-
-              {/* Verified Store Metrics */}
-              <div className="pt-3 flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-5 text-[11px] sm:text-xs text-ivory-100 border-t border-white/15">
-                <div className="flex items-center gap-1 font-semibold">
-                  <Star className="w-3.5 h-3.5 text-warmYellow fill-warmYellow" />
-                  <span className="font-bold text-white">4.8 / 5</span>
-                  <span className="text-white/80">(31 Reviews)</span>
-                </div>
-                <div className="flex items-center gap-1 font-semibold">
-                  <MapPin className="w-3.5 h-3.5 text-warmYellow" />
-                  <span>Madhubani 847211</span>
-                </div>
-                <div className="flex items-center gap-1 font-semibold">
-                  <Clock className="w-3.5 h-3.5 text-warmYellow" />
-                  <span>7:30 AM – 9:30 PM</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Hero Visual Card with Live Video / Front Image & Floating Badges */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-sm sm:max-w-md">
-                {/* Floating Top Badge */}
-                <div className="absolute top-2 right-2 sm:-top-3.5 sm:right-4 z-30 bg-white/95 backdrop-blur-md text-charcoal px-2.5 py-1 rounded-full shadow-md border border-gray-100 flex items-center gap-1.5 text-[10px] sm:text-xs font-extrabold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-fresh animate-ping" />
-                  <span className="text-forest">⚡ Express 2-Hour Delivery</span>
-                </div>
-
-                {/* Mode Switcher: Video vs Photos */}
-                <div className="absolute top-2 left-2 z-30 flex items-center gap-1 bg-black/60 backdrop-blur-md p-1 rounded-xl border border-white/20">
-                  <button
-                    onClick={() => {
-                      setShowVideo(true);
-                      setTimeout(() => {
-                        if (videoRef.current) {
-                          videoRef.current.play().catch(() => {});
-                          setIsPlaying(true);
-                        }
-                      }, 50);
-                    }}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all ${
-                      showVideo ? 'bg-warmYellow text-charcoal shadow-sm' : 'text-white/80 hover:text-white'
-                    }`}
-                  >
-                    <Video className="w-3 h-3" />
-                    <span>Store Video</span>
-                  </button>
-                  <button
-                    onClick={() => setShowVideo(false)}
-                    className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all ${
-                      !showVideo ? 'bg-white text-forest shadow-sm' : 'text-white/80 hover:text-white'
-                    }`}
-                  >
-                    <ImageIcon className="w-3 h-3" />
-                    <span>Photos</span>
-                  </button>
-                </div>
-
-                {/* Main Media Card */}
-                <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 sm:border-4 border-white/25 bg-black group aspect-[4/5] sm:aspect-[9/12] max-h-[440px] flex items-center justify-center">
-                  {showVideo ? (
-                    <div className="relative w-full h-full bg-black flex items-center justify-center">
-                      <video
-                        ref={videoRef}
-                        src="/videos/kd-store-intro.mp4"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
-                        className="w-full h-full object-cover"
-                      />
-
-                      {/* Video Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30 pointer-events-none" />
-
-                      {/* Video Controls Overlay */}
-                      <div className="absolute bottom-3 left-3 right-3 z-20 flex items-center justify-between text-white">
-                        <div className="min-w-0 flex-1 mr-2">
-                          <span className="inline-block px-2 py-0.5 rounded text-[9px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-0.5">
-                            KD SUPERMARKET • Madhubani
-                          </span>
-                          <p className="text-xs font-bold text-white drop-shadow truncate">
-                            State Bank More • Tirhut Colony
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <button
-                            type="button"
-                            onClick={togglePlay}
-                            className="w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-90"
-                            title={isPlaying ? "Pause Video" : "Play Video"}
-                          >
-                            {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={toggleMute}
-                            className="w-8 h-8 rounded-full bg-white/25 hover:bg-white/40 backdrop-blur-md flex items-center justify-center text-white transition-all active:scale-90"
-                            title={isMuted ? "Unmute Sound" : "Mute Sound"}
-                          >
-                            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-warmYellow" />}
-                          </button>
-                        </div>
-                      </div>
+              {/* Slide Content */}
+              <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 md:px-12 py-8 sm:py-12 w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                  <div className="lg:col-span-8 space-y-3 sm:space-y-4 text-center lg:text-left">
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-[10px] sm:text-xs font-bold text-warmYellow border border-white/25 shadow-xs">
+                      <Sparkles className="w-3.5 h-3.5 text-warmYellow animate-spin-slow" />
+                      <span>{slide.badge}</span>
                     </div>
-                  ) : (
-                    /* Image Slide Display */
-                    <div className="relative w-full h-full">
-                      <img
-                        key={heroSlides[activeSlide].image}
-                        src={heroSlides[activeSlide].image}
-                        alt={heroSlides[activeSlide].title}
-                        className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-105"
-                      />
-                      {/* Subtle Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-4 sm:p-6 text-white">
-                        <span className="inline-block px-2 py-0.5 rounded text-[9px] sm:text-[10px] font-black bg-warmYellow text-charcoal uppercase tracking-wider mb-1 w-fit">
-                          {heroSlides[activeSlide].badge}
-                        </span>
-                        <h3 className="font-heading font-black text-base sm:text-xl text-white drop-shadow">
-                          {heroSlides[activeSlide].title}
-                        </h3>
-                        <p className="text-[11px] sm:text-xs text-ivory-100 mt-0.5 max-w-sm drop-shadow line-clamp-1 sm:line-clamp-none">
-                          {heroSlides[activeSlide].subtitle}
-                        </p>
 
-                        {/* Slide Dots */}
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
-                          {heroSlides.map((_, i) => (
-                            <button
-                              key={i}
-                              onClick={() => setActiveSlide(i)}
-                              className={`h-1.5 rounded-full transition-all ${
-                                activeSlide === i ? 'w-6 sm:w-8 bg-warmYellow' : 'w-2 bg-white/40 hover:bg-white/70'
-                              }`}
-                              aria-label={`Go to slide ${i + 1}`}
-                            />
-                          ))}
-                          <span className="text-[9px] sm:text-[10px] text-white/70 ml-auto font-medium">
-                            {heroSlides[activeSlide].promo}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                    {/* Main Title */}
+                    <h1 className="font-heading font-black text-2xl sm:text-4xl lg:text-5xl tracking-tight leading-snug sm:leading-tight text-white drop-shadow-md">
+                      {slide.title}
+                    </h1>
 
-                {/* Bottom Badges on Tablet/Desktop */}
-                <div className="hidden sm:flex absolute -bottom-4 -left-2 z-20 bg-white text-charcoal p-2.5 rounded-xl shadow-md border border-gray-100 items-center gap-2">
-                  <div className="w-9 h-9 rounded-lg bg-forest text-white flex items-center justify-center font-black text-xs shadow">
-                    4.8★
-                  </div>
-                  <div className="text-xs">
-                    <p className="font-black text-charcoal flex items-center gap-1 text-[11px]">
-                      <span>Verified Supermarket</span>
-                      <ShieldCheck className="w-3 h-3 text-fresh" />
+                    {/* Highlight Offer Line */}
+                    <p className="text-xs sm:text-base font-extrabold text-warmYellow drop-shadow flex items-center justify-center lg:justify-start gap-1.5">
+                      <BadgePercent className="w-4 h-4 text-warmYellow flex-shrink-0" />
+                      <span>{slide.highlight}</span>
                     </p>
-                    <p className="text-[9px] text-charcoal-muted">Google Customer Reviews</p>
-                  </div>
-                </div>
 
-                <div className="hidden sm:flex absolute -bottom-4 -right-2 z-20 bg-warmYellow text-charcoal px-3 py-1.5 rounded-xl shadow-md border border-amber-300 items-center gap-1.5 text-xs font-black">
-                  <BadgePercent className="w-3.5 h-3.5 text-charcoal" />
-                  <span>Code: KD50 (₹50 Off)</span>
+                    {/* Subtitle Description */}
+                    <p className="text-xs sm:text-sm text-ivory-100/90 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed drop-shadow line-clamp-2 sm:line-clamp-none">
+                      {slide.subtitle}
+                    </p>
+
+                    {/* Action CTA Buttons */}
+                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (slide.ctaAction === 'whatsapp') {
+                            window.open(`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=Hello%20KD%20SUPERMARKET,%20I%20would%20like%20to%20order%20groceries.`, '_blank');
+                          } else if (slide.ctaView) {
+                            setCurrentView(slide.ctaView as any);
+                          } else if (slide.ctaCategory) {
+                            setSelectedCategory(slide.ctaCategory);
+                            setCurrentView('catalog');
+                          } else {
+                            setCurrentView('catalog');
+                          }
+                        }}
+                        className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-warmYellow hover:bg-warmYellow-dark text-charcoal font-black rounded-xl text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 group active:scale-95"
+                      >
+                        <ShoppingBag className="w-4 h-4 text-charcoal" />
+                        <span>{slide.ctaText}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </button>
+
+                      <a
+                        href={`https://wa.me/${settings.whatsappRaw || '919811340853'}?text=Hello%20KD%20SUPERMARKET,%20I%20would%20like%20to%20order%20groceries.`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-4 py-2.5 sm:px-6 sm:py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold rounded-xl text-xs sm:text-sm transition-all flex items-center gap-2 shadow-sm active:scale-95"
+                      >
+                        <MessageCircle className="w-4 h-4 fill-white" />
+                        <span>WhatsApp Order</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsVideoModalOpen(true);
+                          setTimeout(() => {
+                            if (videoRef.current) {
+                              videoRef.current.currentTime = 0;
+                              videoRef.current.play().catch(() => {});
+                            }
+                          }, 100);
+                        }}
+                        className="px-3.5 py-2.5 sm:px-5 sm:py-3.5 bg-white/20 hover:bg-white/30 text-white font-bold rounded-xl text-xs sm:text-sm transition-all border border-white/25 flex items-center gap-1.5 backdrop-blur-md active:scale-95 shadow-sm"
+                      >
+                        <Play className="w-3.5 h-3.5 text-warmYellow fill-warmYellow" />
+                        <span>Watch Store Tour</span>
+                      </button>
+                    </div>
+
+                    {/* Bottom Store Verification Metrics */}
+                    <div className="pt-3 hidden sm:flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-ivory-100/90 border-t border-white/15">
+                      <div className="flex items-center gap-1 font-semibold">
+                        <Star className="w-3.5 h-3.5 text-warmYellow fill-warmYellow" />
+                        <span className="font-bold text-white">4.8 / 5</span>
+                        <span className="text-white/70">(Google Reviews)</span>
+                      </div>
+                      <div className="flex items-center gap-1 font-semibold">
+                        <MapPin className="w-3.5 h-3.5 text-warmYellow" />
+                        <span>State Bank More, Madhubani</span>
+                      </div>
+                      <div className="flex items-center gap-1 font-semibold">
+                        <Clock className="w-3.5 h-3.5 text-warmYellow" />
+                        <span>7:30 AM – 9:30 PM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side Visual Promo Card */}
+                  <div className="lg:col-span-4 hidden lg:flex flex-col items-center justify-center">
+                    <div className="w-full max-w-xs bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl p-5 shadow-2xl text-center space-y-3">
+                      <div className="w-12 h-12 rounded-xl bg-warmYellow text-charcoal flex items-center justify-center mx-auto shadow-md">
+                        <BadgePercent className="w-7 h-7" />
+                      </div>
+                      <div>
+                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-white text-forest uppercase tracking-wider mb-1">
+                          {slide.coupon}
+                        </span>
+                        <h4 className="text-base font-extrabold text-white">{slide.promo}</h4>
+                        <p className="text-[11px] text-ivory-200 mt-1">Cash on Delivery & Instant Dispatch in Madhubani Town</p>
+                      </div>
+                      <div className="pt-2 border-t border-white/20 flex items-center justify-center gap-2 text-xs font-bold text-warmYellow">
+                        <Truck className="w-4 h-4" />
+                        <span>Doorstep Delivery Guaranteed</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* Carousel Bottom Control Strip */}
+        <div className="absolute bottom-3 left-0 right-0 z-20 flex flex-col items-center gap-2 px-4 pointer-events-none">
+          {/* Quick jump slide pills */}
+          <div className="hidden sm:flex items-center gap-1.5 pointer-events-auto bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/15">
+            {heroSlides.map((slide, idx) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => setActiveSlide(idx)}
+                className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] transition-all whitespace-nowrap ${
+                  activeSlide === idx
+                    ? 'bg-warmYellow text-charcoal shadow-sm'
+                    : 'text-white/80 hover:text-white'
+                }`}
+              >
+                {slide.tag}
+              </button>
+            ))}
+          </div>
+
+          {/* Dots Indicator */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            {heroSlides.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActiveSlide(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  activeSlide === i 
+                    ? 'w-7 sm:w-9 bg-warmYellow shadow-sm' 
+                    : 'w-2 sm:w-2.5 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
+
+      {/* Moving Announcement Ticker / Continuous Marquee */}
+      <div className="bg-forest-dark border-y border-forest-light/30 py-2.5 overflow-hidden text-white shadow-inner -mt-6 sm:-mt-12 md:-mt-16 relative z-10">
+        <div className="animate-marquee whitespace-nowrap flex items-center gap-8 text-[11px] sm:text-xs font-bold tracking-wide">
+          {/* Loop Set 1 */}
+          <span className="flex items-center gap-1.5 text-warmYellow"><Truck className="w-3.5 h-3.5" /> FREE Delivery on Orders Above ₹999</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-fresh-light" /> 100% Farm Fresh Produce & Staples</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5 text-warmYellow"><Clock className="w-3.5 h-3.5" /> ⚡ Express 2-Hour Delivery in Madhubani</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><BadgePercent className="w-3.5 h-3.5 text-warmYellow" /> Code: KD10 (10% OFF) & KD50 (₹50 OFF)</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-fresh-light" /> 100% Cash On Delivery (COD) Verified</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5 text-[#25D366]"><MessageCircle className="w-3.5 h-3.5 fill-[#25D366]" /> WhatsApp Order: +91 98113 40853</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-warmYellow" /> State Bank More, Madhubani (847211)</span>
+          <span className="text-white/40">•</span>
+
+          {/* Loop Set 2 (for seamless loop) */}
+          <span className="flex items-center gap-1.5 text-warmYellow"><Truck className="w-3.5 h-3.5" /> FREE Delivery on Orders Above ₹999</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-fresh-light" /> 100% Farm Fresh Produce & Staples</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5 text-warmYellow"><Clock className="w-3.5 h-3.5" /> ⚡ Express 2-Hour Delivery in Madhubani</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><BadgePercent className="w-3.5 h-3.5 text-warmYellow" /> Code: KD10 (10% OFF) & KD50 (₹50 OFF)</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-fresh-light" /> 100% Cash On Delivery (COD) Verified</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5 text-[#25D366]"><MessageCircle className="w-3.5 h-3.5 fill-[#25D366]" /> WhatsApp Order: +91 98113 40853</span>
+          <span className="text-white/40">•</span>
+          <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-warmYellow" /> State Bank More, Madhubani (847211)</span>
+          <span className="text-white/40">•</span>
+        </div>
+      </div>
+
+      {/* Store Tour Video Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+          <div className="relative bg-black rounded-2xl overflow-hidden max-w-3xl w-full border border-white/20 shadow-2xl">
+            <div className="flex items-center justify-between p-3 bg-forest text-white">
+              <div className="flex items-center gap-2">
+                <Video className="w-4 h-4 text-warmYellow" />
+                <span className="font-bold text-xs sm:text-sm">KD SUPERMARKET • Madhubani Store Tour</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVideoModalOpen(false);
+                  if (videoRef.current) videoRef.current.pause();
+                }}
+                className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-colors"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="relative aspect-video bg-black flex items-center justify-center">
+              <video
+                ref={videoRef}
+                src="/videos/kd-store-intro.mp4"
+                autoPlay
+                controls
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 2. Trust Highlights */}
       <section className="max-w-7xl mx-auto px-4">
