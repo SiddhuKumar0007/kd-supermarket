@@ -39,6 +39,7 @@ export const Footer: React.FC = () => {
   ];
 
   const categoriesColumn3 = [
+    'Dry Fruits',
     'Soaps, Shampoo & Hygiene',
     'Home Cleaning Products',
     'Detergents & Dishwashing',

@@ -60,6 +60,7 @@ const ALL_STORE_CATEGORIES = [
   "Chocolates, Sweets & Bakery",
   "Breakfast Cereals & Jams",
   "Pickles, Chutneys & Sauces",
+  "Dry Fruits",
   "Dry Fruits & Seeds",
   "Pooja Needs & Incense Sticks",
   "Bath, Body & Personal Hygiene",

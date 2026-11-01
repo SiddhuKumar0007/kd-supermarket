@@ -540,7 +540,7 @@ export const HomePage: React.FC = () => {
             onClick={() => setCurrentView('catalog')}
             className="text-[11px] sm:text-xs font-bold text-forest hover:text-forest-dark flex items-center gap-1 group self-start md:self-auto"
           >
-            <span>View All 20 Categories</span>
+            <span>View All {categories.length || 21} Categories</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
