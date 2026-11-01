@@ -1784,7 +1784,7 @@ export const AdminDashboard: React.FC = () => {
               className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-charcoal focus:outline-none focus:border-forest"
             >
               <option value="all">All Categories</option>
-              {(categories && categories.length > 0 ? categories.map(c => c.name) : ALL_STORE_CATEGORIES).map((catName) => (
+              {(categories && categories.length > 0 ? [...categories].map(c => c.name).sort((a, b) => a.localeCompare(b)) : [...ALL_STORE_CATEGORIES].sort((a, b) => a.localeCompare(b))).map((catName) => (
                 <option key={catName} value={catName}>{catName}</option>
               ))}
             </select>
@@ -2609,7 +2609,7 @@ export const AdminDashboard: React.FC = () => {
                   className="w-full px-3 py-2 border rounded-xl bg-white text-charcoal font-medium focus:border-forest focus:outline-none"
                   required
                 >
-                  {(categories && categories.length > 0 ? categories.map(c => c.name) : ALL_STORE_CATEGORIES).map((catName) => (
+                  {(categories && categories.length > 0 ? [...categories].map(c => c.name).sort((a, b) => a.localeCompare(b)) : [...ALL_STORE_CATEGORIES].sort((a, b) => a.localeCompare(b))).map((catName) => (
                     <option key={catName} value={catName}>{catName}</option>
                   ))}
                 </select>
