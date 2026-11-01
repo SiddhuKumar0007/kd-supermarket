@@ -105,7 +105,7 @@ export const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 bg-white shadow-soft transition-all w-full max-w-full overflow-hidden">
+    <header className="sticky top-0 z-50 bg-white shadow-soft transition-all w-full max-w-full">
       {/* Top Announcement Bar */}
       <div className="bg-forest text-white text-[11px] sm:text-xs py-1.5 px-3 sm:px-4 border-b border-forest-light overflow-hidden">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
@@ -354,11 +354,11 @@ export const Header: React.FC = () => {
 
               {/* User Dropdown Menu */}
               {userDropdownOpen && user && (
-                <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white rounded-xl shadow-card border border-gray-100 py-2 z-50 animate-in fade-in duration-150">
-                  <div className="px-3.5 py-2 border-b border-gray-100">
-                    <p className="text-xs font-bold text-charcoal truncate">{user.name}</p>
+                <div className="absolute right-0 mt-2 w-56 sm:w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-[100] ring-1 ring-black/10 animate-in fade-in duration-150">
+                  <div className="px-3.5 py-2.5 border-b border-gray-100 bg-sand/30">
+                    <p className="text-xs font-black text-forest truncate">{user.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <p className="text-[10px] text-charcoal-muted truncate max-w-[140px]">{user.email}</p>
+                      <p className="text-[10px] text-charcoal-muted truncate max-w-[150px]">{user.email}</p>
                       {user.provider === 'google' && (
                         <span className="px-1 py-0.2 rounded text-[8px] font-bold bg-blue-50 text-blue-600 border border-blue-200">
                           Google
@@ -366,65 +366,74 @@ export const Header: React.FC = () => {
                       )}
                     </div>
                     {isStoreAdmin(user) && (
-                      <span className="inline-block mt-1 px-1.5 py-0.5 rounded bg-forest/10 text-forest text-[9px] font-bold">
-                        Store Administrator
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-forest text-white text-[9px] font-black">
+                        ⚡ Store Administrator
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => {
-                      setCurrentView('account', 'profile');
-                      setUserDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
-                  >
-                    <UserIcon className="w-3.5 h-3.5 text-forest" />
-                    My Profile & Addresses
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurrentView('account', 'orders');
-                      setUserDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
-                  >
-                    <Package className="w-3.5 h-3.5 text-forest" />
-                    My Orders
-                  </button>
-                  <button
-                    onClick={() => {
-                      setCurrentView('track-order');
-                      setUserDropdownOpen(false);
-                    }}
-                    className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2"
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-forest" />
-                    Track My Order
-                  </button>
 
-                  {isStoreAdmin(user) && (
+                  <div className="py-1">
                     <button
+                      type="button"
                       onClick={() => {
-                        setCurrentView('admin');
+                        setCurrentView('account', 'profile');
                         setUserDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3.5 py-2 text-xs text-forest font-bold bg-forest/5 hover:bg-forest/10 flex items-center gap-2"
+                      className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2 font-medium"
                     >
-                      <ShieldCheck className="w-3.5 h-3.5 text-forest" />
-                      Admin Control Panel
+                      <UserIcon className="w-3.5 h-3.5 text-forest" />
+                      <span>My Profile & Addresses</span>
                     </button>
-                  )}
-
-                  <div className="border-t border-gray-100 mt-1 pt-1">
                     <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentView('account', 'orders');
+                        setUserDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2 font-medium"
+                    >
+                      <Package className="w-3.5 h-3.5 text-forest" />
+                      <span>My Orders</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentView('track-order');
+                        setUserDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-3.5 py-2 text-xs text-charcoal hover:bg-ivory flex items-center gap-2 font-medium"
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-forest" />
+                      <span>Track My Order</span>
+                    </button>
+
+                    {isStoreAdmin(user) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCurrentView('admin');
+                          setUserDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-3.5 py-2 text-xs text-forest font-bold bg-forest/5 hover:bg-forest/10 flex items-center gap-2"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-forest" />
+                        <span>Admin Control Panel</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Log Out Button */}
+                  <div className="border-t border-gray-100 mt-1 pt-1.5 px-2">
+                    <button
+                      type="button"
                       onClick={() => {
                         logout();
                         setUserDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3.5 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 text-xs font-black text-red-600 hover:bg-red-50 rounded-xl flex items-center gap-2 transition-colors cursor-pointer"
                     >
-                      <LogOut className="w-3.5 h-3.5" />
-                      Log Out
+                      <LogOut className="w-4 h-4 text-red-600" />
+                      <span>Log Out (Sign Out)</span>
                     </button>
                   </div>
                 </div>
@@ -585,6 +594,21 @@ export const Header: React.FC = () => {
                 >
                   <ShieldCheck className="w-4 h-4" />
                   Store Admin Dashboard
+                </button>
+              </div>
+            )}
+
+            {user && (
+              <div className="pt-2 border-t border-gray-100">
+                <button
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 px-3 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4 text-red-600" />
+                  <span>Log Out ({user.name})</span>
                 </button>
               </div>
             )}
