@@ -1219,9 +1219,19 @@ export const AdminDashboard: React.FC = () => {
                   placeholder="Search by Order ID or phone..."
                   value={orderSearch}
                   onChange={(e) => setOrderSearch(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-forest"
+                  className="pl-8 pr-7 py-1.5 bg-ivory-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:border-forest"
                 />
                 <Search className="w-3.5 h-3.5 text-charcoal-light absolute left-2.5 top-2.5" />
+                {orderSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setOrderSearch('')}
+                    className="absolute right-2 top-2 text-charcoal-muted hover:text-charcoal p-0.5 rounded-full hover:bg-gray-200"
+                    title="Clear search to show all orders"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
               </div>
 
               {/* Status Filter */}
@@ -1387,6 +1397,18 @@ export const AdminDashboard: React.FC = () => {
                 )}
                 {orderTimeFilter === 'custom_month' && (
                   <>Showing <strong>{availableMonths.find(m => m.monthKey === selectedMonthKey)?.monthLabel || selectedMonthKey} ({filteredOrders.length} Orders)</strong></>
+                )}
+                {orderSearch && (
+                  <span className="ml-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 rounded-md font-bold text-[10px]">
+                    Filtered by: "{orderSearch}"
+                    <button
+                      type="button"
+                      onClick={() => setOrderSearch('')}
+                      className="ml-1 text-red-600 hover:text-red-800 underline font-black"
+                    >
+                      Show All Orders
+                    </button>
+                  </span>
                 )}
               </span>
             </div>
